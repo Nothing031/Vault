@@ -18,7 +18,6 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_OpenVaultButton_clicked();
 
 private:
     Ui::MainWindow *ui;
