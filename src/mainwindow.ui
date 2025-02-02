@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>640</width>
+    <width>695</width>
     <height>420</height>
    </rect>
   </property>
@@ -21,13 +21,20 @@
   </property>
   <property name="styleSheet">
    <string notr="true">QWidget{
-	
 	font: 100 11pt &quot;Noto Sans&quot;;
 	color: rgb(255, 255, 255);
 	background-color: rgb(30, 30, 30);
 }
 
+/* ToolTip */
+QToolTip {
+	color: rgb(255, 255, 255); 
+	background: rgb(55, 55, 55);
+	border: 1px solid rgb(70, 70, 70); 
+	border-radius: 5px;
+}
 
+/* ProgressBar */
 QProgressBar{
  	border: 1px solid rgb(55, 55, 55);
 	border-radius: 5px;
@@ -40,30 +47,34 @@ QProgressBar::chunk{
  	background-color: rgb(44, 222, 133);
 }
 
+/* Label */
 QLabel{
 border: 0px;
 /*padding-left: 0px;
 padding-right: 1px;*/
 }
 
+/* TextEdit */
 QTextEdit{
 border: 1px solid rgb(55, 55, 55);
 border-radius: 5px;
-}
 
+}
+/* LineEdit */
 QLineEdit{
 	border: 1px solid rgb(55, 55, 55);
 	border-radius: 5px;
 }
 
+/* ListView */
 QListView{
 	border: 1px solid rgb(55, 55, 55);
 	border-radius: 5px;
-	font: 9pt;
+	font: 11pt;
 	gridline-color: rgb(0, 0, 0);
 }
 
-
+/* ComboBox */
 QComboBox{
 	background-color: rgb(40, 40, 40);
 	border: 1px solid rgb(55, 55, 55);
@@ -75,12 +86,15 @@ QComboBox::drop-down {
     border-left: 1px solid rgb(55, 55, 55);
     border-top-right-radius: 5px; 
     border-bottom-right-radius: 5px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
 }
 QComboBox::down-arrow {
     image: url(:/icons/arrow_down.png);
 }
 
-
+/* PushButton */
 QPushButton{
 	border: 1px solid rgb(55, 55, 55);
 	border-radius: 5px;
@@ -90,7 +104,7 @@ QPushButton:pressed{
 	background-color: rgb(30, 30, 30);
 }
 
-
+/* CheckBox */
 QCheckBox{
 	border: 1px solid rgb(55, 55, 55);
 	border-radius: 5px;
@@ -229,7 +243,7 @@ QCheckBox::indicator:checked{
     <item row="0" column="2">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="currentIndex">
-       <number>0</number>
+       <number>2</number>
       </property>
       <widget class="QWidget" name="page_crypto">
        <layout class="QGridLayout" name="gridLayout_2">
@@ -251,6 +265,9 @@ QCheckBox::indicator:checked{
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <widget class="QLabel" name="vault_edit_label">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -270,12 +287,15 @@ QCheckBox::indicator:checked{
                </size>
               </property>
               <property name="text">
-               <string>Vault Name</string>
+               <string>NAME (WIP)</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLineEdit" name="vault_edit_lineEdit">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -292,6 +312,9 @@ QCheckBox::indicator:checked{
             </item>
             <item>
              <widget class="QPushButton" name="vault_edit_save_button">
+              <property name="enabled">
+               <bool>false</bool>
+              </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -496,12 +519,32 @@ QCheckBox::indicator:checked{
               <height>100</height>
              </size>
             </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="autoScrollMargin">
+             <number>16</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Accounts\somethinglikefish@gmail.com</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Accounts\idkwhatthisisbutmaybetheaccount@gmail.com</string>
+             </property>
+            </item>
            </widget>
           </item>
          </layout>
         </item>
        </layout>
       </widget>
+      <widget class="QWidget" name="page"/>
       <widget class="QWidget" name="page_newVault">
        <layout class="QGridLayout" name="gridLayout_5">
         <property name="leftMargin">
@@ -522,13 +565,35 @@ QCheckBox::indicator:checked{
            <layout class="QHBoxLayout" name="horizontalLayout_8">
             <item>
              <widget class="QLabel" name="vault_new_password_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>95</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>95</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Password</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="vault_new_password_lineEdit"/>
+             <widget class="QLineEdit" name="vault_new_password_lineEdit">
+              <property name="text">
+               <string/>
+              </property>
+             </widget>
             </item>
             <item>
              <widget class="QPushButton" name="vault_new_password_visible_button">
@@ -550,6 +615,11 @@ QCheckBox::indicator:checked{
                 <height>24</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton::pressed{
+	background-color: rgb(40, 40, 40);
+}</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -557,6 +627,12 @@ QCheckBox::indicator:checked{
                <iconset resource="../asset/resource.qrc">
                 <normaloff>:/icons/visibility_off.png</normaloff>
                 <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
@@ -579,15 +655,51 @@ QCheckBox::indicator:checked{
            <layout class="QHBoxLayout" name="horizontalLayout_3">
             <item>
              <widget class="QLabel" name="vault_new_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>100</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>100</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
-               <string>Path</string>
+               <string>Directory Path</string>
               </property>
              </widget>
             </item>
             <item>
              <widget class="QLabel" name="vault_new_path_label">
+              <property name="mouseTracking">
+               <bool>true</bool>
+              </property>
+              <property name="toolTipDuration">
+               <number>10000</number>
+              </property>
               <property name="text">
-               <string>C:Users\Nothing\sadf</string>
+               <string/>
+              </property>
+              <property name="textFormat">
+               <enum>Qt::TextFormat::PlainText</enum>
+              </property>
+              <property name="scaledContents">
+               <bool>false</bool>
+              </property>
+              <property name="wordWrap">
+               <bool>false</bool>
+              </property>
+              <property name="textInteractionFlags">
+               <set>Qt::TextInteractionFlag::TextSelectableByMouse</set>
               </property>
              </widget>
             </item>
@@ -626,8 +738,26 @@ QCheckBox::indicator:checked{
            <layout class="QHBoxLayout" name="horizontalLayout_4">
             <item>
              <widget class="QLabel" name="vault_new_name_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>95</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>95</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
-               <string>Name</string>
+               <string>Vault Name</string>
               </property>
              </widget>
             </item>
@@ -644,7 +774,7 @@ QCheckBox::indicator:checked{
               </property>
               <property name="sizeHint" stdset="0">
                <size>
-                <width>24</width>
+                <width>30</width>
                 <height>20</height>
                </size>
               </property>
@@ -656,6 +786,24 @@ QCheckBox::indicator:checked{
            <layout class="QHBoxLayout" name="horizontalLayout_9">
             <item>
              <widget class="QLabel" name="vault_new_password_confirm_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>95</width>
+                <height>0</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>95</width>
+                <height>16777215</height>
+               </size>
+              </property>
               <property name="text">
                <string>Confirm pw</string>
               </property>
@@ -684,6 +832,11 @@ QCheckBox::indicator:checked{
                 <height>24</height>
                </size>
               </property>
+              <property name="styleSheet">
+               <string notr="true">QPushButton::pressed{
+	background-color: rgb(40, 40, 40);
+}</string>
+              </property>
               <property name="text">
                <string/>
               </property>
@@ -691,6 +844,12 @@ QCheckBox::indicator:checked{
                <iconset resource="../asset/resource.qrc">
                 <normaloff>:/icons/visibility_off.png</normaloff>
                 <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+              </property>
+              <property name="checkable">
+               <bool>true</bool>
+              </property>
+              <property name="checked">
+               <bool>false</bool>
               </property>
              </widget>
             </item>
