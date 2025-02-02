@@ -31,6 +31,22 @@ public:
         return instance;
     }
 
+    void load(){
+        // load json
+
+        // json to struct
+
+    }
+
+    void save(){
+        // struct to json
+
+        // save json
+
+    }
+
+
+
     const vector<VAULT_STRUCT>& getVaults(){
         return vaults;
     }

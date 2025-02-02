@@ -14,9 +14,9 @@ SOURCES += \
 
 HEADERS += \
     src/json.hpp \
-    src/jsonmanager.h \
     src/mainwindow.h \
-    src/utils.hpp
+    src/utils.hpp \
+    src/vault.h
 
 FORMS += \
     src/mainwindow.ui
