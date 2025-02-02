@@ -2,6 +2,7 @@
 #define MAINWINDOW_H
 
 #include <QMainWindow>
+#include "jsonmanager.h"
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -19,7 +20,15 @@ public:
 
 private slots:
 
+
 private:
     Ui::MainWindow *ui;
+
+    VAULT_STRUCT current_vault;
+    vector<VAULT_STRUCT> current_vaults;
+
+
+
+
 };
 #endif // MAINWINDOW_H

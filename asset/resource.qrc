@@ -9,5 +9,7 @@
         <file>visibility_off.png</file>
         <file>visibility_on.png</file>
         <file>save.png</file>
+        <file>close.png</file>
+        <file>folder_open.png</file>
     </qresource>
 </RCC>

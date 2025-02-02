@@ -6,9 +6,15 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>641</width>
-    <height>422</height>
+    <width>640</width>
+    <height>420</height>
    </rect>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>640</width>
+    <height>420</height>
+   </size>
   </property>
   <property name="windowTitle">
    <string>MainWindow</string>
@@ -109,7 +115,7 @@ QCheckBox::indicator:checked{
     <item row="1" column="0" colspan="3">
      <layout class="QGridLayout" name="layout_output">
       <item row="0" column="0">
-       <widget class="QTextEdit" name="textEdit">
+       <widget class="QTextEdit" name="outputTerminal_textEdit">
         <property name="sizePolicy">
          <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
           <horstretch>0</horstretch>
@@ -131,7 +137,7 @@ QCheckBox::indicator:checked{
       <item row="0" column="0">
        <layout class="QHBoxLayout" name="horizontalLayout">
         <item>
-         <widget class="QLabel" name="label">
+         <widget class="QLabel" name="vault_select_label">
           <property name="sizePolicy">
            <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
             <horstretch>0</horstretch>
@@ -156,12 +162,12 @@ QCheckBox::indicator:checked{
          </widget>
         </item>
         <item>
-         <widget class="QComboBox" name="comboBox"/>
+         <widget class="QComboBox" name="vault_select_comboBox"/>
         </item>
        </layout>
       </item>
       <item row="1" column="0">
-       <widget class="QPushButton" name="pushButton">
+       <widget class="QPushButton" name="vault_createNew_button">
         <property name="minimumSize">
          <size>
           <width>0</width>
@@ -180,10 +186,10 @@ QCheckBox::indicator:checked{
        </widget>
       </item>
       <item row="2" column="0">
-       <widget class="QPushButton" name="pushButton_2">
+       <widget class="QPushButton" name="vault_createExisting_button">
         <property name="minimumSize">
          <size>
-          <width>250</width>
+          <width>200</width>
           <height>24</height>
          </size>
         </property>
@@ -225,7 +231,7 @@ QCheckBox::indicator:checked{
       <property name="currentIndex">
        <number>0</number>
       </property>
-      <widget class="QWidget" name="page">
+      <widget class="QWidget" name="page_crypto">
        <layout class="QGridLayout" name="gridLayout_2">
         <property name="leftMargin">
          <number>0</number>
@@ -244,7 +250,7 @@ QCheckBox::indicator:checked{
           <item row="0" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
-             <widget class="QLabel" name="label_2">
+             <widget class="QLabel" name="vault_edit_label">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>0</horstretch>
@@ -253,13 +259,13 @@ QCheckBox::indicator:checked{
               </property>
               <property name="minimumSize">
                <size>
-                <width>80</width>
+                <width>90</width>
                 <height>24</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>80</width>
+                <width>90</width>
                 <height>24</height>
                </size>
               </property>
@@ -269,7 +275,7 @@ QCheckBox::indicator:checked{
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit">
+             <widget class="QLineEdit" name="vault_edit_lineEdit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -285,21 +291,31 @@ QCheckBox::indicator:checked{
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_3">
+             <widget class="QPushButton" name="vault_edit_save_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
+                <width>24</width>
                 <height>24</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
+                <width>24</width>
                 <height>24</height>
                </size>
               </property>
               <property name="text">
-               <string>PushButton</string>
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/save.png</normaloff>:/icons/save.png</iconset>
               </property>
              </widget>
             </item>
@@ -308,7 +324,7 @@ QCheckBox::indicator:checked{
           <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
-             <widget class="QLabel" name="label_3">
+             <widget class="QLabel" name="password_edit_label">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
                 <horstretch>80</horstretch>
@@ -317,13 +333,13 @@ QCheckBox::indicator:checked{
               </property>
               <property name="minimumSize">
                <size>
-                <width>80</width>
+                <width>90</width>
                 <height>24</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
+                <width>90</width>
                 <height>24</height>
                </size>
               </property>
@@ -333,7 +349,7 @@ QCheckBox::indicator:checked{
              </widget>
             </item>
             <item>
-             <widget class="QLineEdit" name="lineEdit_2">
+             <widget class="QLineEdit" name="password_edit_lineedit">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -349,21 +365,32 @@ QCheckBox::indicator:checked{
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_4">
+             <widget class="QPushButton" name="password_visible_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
+                <width>24</width>
                 <height>24</height>
                </size>
               </property>
               <property name="maximumSize">
                <size>
-                <width>16777215</width>
+                <width>24</width>
                 <height>24</height>
                </size>
               </property>
               <property name="text">
-               <string>PushButton</string>
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/visibility_off.png</normaloff>
+                <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
               </property>
              </widget>
             </item>
@@ -372,7 +399,7 @@ QCheckBox::indicator:checked{
           <item row="3" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_7">
             <item>
-             <widget class="QPushButton" name="pushButton_5">
+             <widget class="QPushButton" name="crypto_encrypt_button">
               <property name="sizePolicy">
                <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
                 <horstretch>0</horstretch>
@@ -388,10 +415,14 @@ QCheckBox::indicator:checked{
               <property name="text">
                <string>Encrypt</string>
               </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/lock.png</normaloff>:/icons/lock.png</iconset>
+              </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_6">
+             <widget class="QPushButton" name="crypto_decrypt_button">
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -407,32 +438,24 @@ QCheckBox::indicator:checked{
               <property name="text">
                <string>Decrypt</string>
               </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/unlock.png</normaloff>:/icons/unlock.png</iconset>
+              </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="pushButton_7">
+             <widget class="QPushButton" name="crypto_suspend_button">
               <property name="text">
                <string>Suspend</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
               </property>
              </widget>
             </item>
            </layout>
-          </item>
-          <item row="4" column="0">
-           <widget class="QListWidget" name="listWidget">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>250</width>
-              <height>100</height>
-             </size>
-            </property>
-           </widget>
           </item>
           <item row="5" column="0">
            <widget class="QProgressBar" name="progressBar">
@@ -459,11 +482,27 @@ QCheckBox::indicator:checked{
             </property>
            </widget>
           </item>
+          <item row="4" column="0">
+           <widget class="QListWidget" name="fileViewer_list">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>100</height>
+             </size>
+            </property>
+           </widget>
+          </item>
          </layout>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page_2">
+      <widget class="QWidget" name="page_newVault">
        <layout class="QGridLayout" name="gridLayout_5">
         <property name="leftMargin">
          <number>0</number>
@@ -478,7 +517,193 @@ QCheckBox::indicator:checked{
          <number>0</number>
         </property>
         <item row="0" column="0">
-         <layout class="QGridLayout" name="gridLayout_4"/>
+         <layout class="QGridLayout" name="gridLayout_4">
+          <item row="6" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_8">
+            <item>
+             <widget class="QLabel" name="vault_new_password_label">
+              <property name="text">
+               <string>Password</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="vault_new_password_lineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="vault_new_password_visible_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/visibility_off.png</normaloff>
+                <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="9" column="0">
+           <spacer name="verticalSpacer">
+            <property name="orientation">
+             <enum>Qt::Orientation::Vertical</enum>
+            </property>
+            <property name="sizeHint" stdset="0">
+             <size>
+              <width>20</width>
+              <height>40</height>
+             </size>
+            </property>
+           </spacer>
+          </item>
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_3">
+            <item>
+             <widget class="QLabel" name="vault_new_label">
+              <property name="text">
+               <string>Path</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLabel" name="vault_new_path_label">
+              <property name="text">
+               <string>C:Users\Nothing\sadf</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="vault_new_openFolder_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/folder_open.png</normaloff>:/icons/folder_open.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="2" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_4">
+            <item>
+             <widget class="QLabel" name="vault_new_name_label">
+              <property name="text">
+               <string>Name</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="vault_new_name_lineEdit"/>
+            </item>
+            <item>
+             <spacer name="horizontalSpacer">
+              <property name="orientation">
+               <enum>Qt::Orientation::Horizontal</enum>
+              </property>
+              <property name="sizeType">
+               <enum>QSizePolicy::Policy::Fixed</enum>
+              </property>
+              <property name="sizeHint" stdset="0">
+               <size>
+                <width>24</width>
+                <height>20</height>
+               </size>
+              </property>
+             </spacer>
+            </item>
+           </layout>
+          </item>
+          <item row="7" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_9">
+            <item>
+             <widget class="QLabel" name="vault_new_password_confirm_label">
+              <property name="text">
+               <string>Confirm pw</string>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QLineEdit" name="vault_new_password_confirm_lineEdit"/>
+            </item>
+            <item>
+             <widget class="QPushButton" name="vault_new_password_confirm_visible_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>24</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string/>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/visibility_off.png</normaloff>
+                <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="8" column="0">
+           <widget class="QPushButton" name="vault_new_createVault_button">
+            <property name="text">
+             <string>Create Vault</string>
+            </property>
+           </widget>
+          </item>
+         </layout>
         </item>
        </layout>
       </widget>
@@ -487,6 +712,8 @@ QCheckBox::indicator:checked{
    </layout>
   </widget>
  </widget>
- <resources/>
+ <resources>
+  <include location="../asset/resource.qrc"/>
+ </resources>
  <connections/>
 </ui>

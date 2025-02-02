@@ -13,7 +13,10 @@ SOURCES += \
     src/mainwindow.cpp
 
 HEADERS += \
-    src/mainwindow.h
+    src/json.hpp \
+    src/jsonmanager.h \
+    src/mainwindow.h \
+    src/utils.hpp
 
 FORMS += \
     src/mainwindow.ui
