@@ -207,6 +207,7 @@ void MainWindow::on_vault_new_password_lineEdit_textEdited(const QString &arg1)
                 ui->vault_new_password_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
             }
         }
+
         ui->vault_new_password_lineEdit->setText(QString("*").repeated(arg1.size()));
     }
     // check
