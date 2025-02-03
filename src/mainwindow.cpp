@@ -80,6 +80,14 @@ void MainWindow::on_vault_createNew_button_clicked()
     ui->vault_new_name_lineEdit->setText("");
     ui->vault_new_password_lineEdit->setText("");
     ui->vault_new_password_confirm_lineEdit->setText("");
+    // reset button
+    ui->vault_new_password_visible_button->setChecked(false);
+    ui->vault_new_password_confirm_visible_button->setChecked(false);
+    // reset property
+    ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
+
 }
 void MainWindow::on_vault_createExisting_button_clicked()
 {
@@ -109,9 +117,61 @@ void MainWindow::on_vault_createExisting_button_clicked()
     ui->vault_new_name_lineEdit->setText("");
     ui->vault_new_password_lineEdit->setText("");
     ui->vault_new_password_confirm_lineEdit->setText("");
+    // reset button
+    ui->vault_new_password_visible_button->setChecked(false);
+    ui->vault_new_password_confirm_visible_button->setChecked(false);
+    // reset property
+    ui->vault_new_name_label->setProperty("BOOL", QVariant(true));
+    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
 }
 
 // page new vault
+void MainWindow::setCreateButton(){
+    bool bool1 = ui->vault_new_name_label->property("BOOL").toBool();
+    bool bool2 = ui->vault_new_password_label->property("BOOL").toBool();
+    bool bool3 = ui->vault_new_password_confirm_label->property("BOOL").toBool();
+    // !ui->vault_new_createVault_button->isEnabled()
+    if (bool1 && bool2 && bool3){
+        ui->vault_new_createVault_button->setStyleSheet("QWidget{color: rgb(255, 255, 255);}");
+        ui->vault_new_createVault_button->setEnabled(true);
+    }else if (ui->vault_new_createVault_button->isEnabled()){
+        ui->vault_new_createVault_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
+        ui->vault_new_createVault_button->setEnabled(false);
+    }
+}
+void MainWindow::setPasswordLabel(){
+    bool labelBool = ui->vault_new_password_label->property("BOOL").toBool();
+    bool pw_condition_confirmed;
+    int textSize = ui->vault_new_password_lineEdit->text().size();
+    if(textSize < 4) pw_condition_confirmed = false;
+    else pw_condition_confirmed = true;
+    if (pw_condition_confirmed && !labelBool){
+        ui->vault_new_password_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
+        ui->vault_new_password_label->setProperty("BOOL", QVariant(true));
+    }
+    else if (!pw_condition_confirmed && labelBool){
+        ui->vault_new_password_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
+        ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
+    }
+}
+void MainWindow::setPasswordConfirmLabel(){
+    bool labelBool = ui->vault_new_password_confirm_label->property("BOOL").toBool();
+    QString password = ui->vault_new_password_lineEdit->text();
+    QString password_confirm = ui->vault_new_password_confirm_lineEdit->text();
+    if (password.size() >= 4 && password == password_confirm && !labelBool){
+        if (!labelBool){
+            ui->vault_new_password_confirm_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
+            ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(true));
+        }
+    }else{
+        if (labelBool){
+            ui->vault_new_password_confirm_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
+            ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
+        }
+    }
+}
+
 void MainWindow::on_vault_new_openFolder_button_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
@@ -127,35 +187,25 @@ void MainWindow::on_vault_new_openFolder_button_clicked()
         // set stylesheet
         ui->vault_new_name_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
         ui->vault_new_name_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
-        ui->vault_new_password_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
-        ui->vault_new_password_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
-        ui->vault_new_password_confirm_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
-        ui->vault_new_password_confirm_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
         // enable
         ui->vault_new_name_lineEdit->setEnabled(true);
-        ui->vault_new_password_lineEdit->setEnabled(true);
-        ui->vault_new_password_confirm_lineEdit->setEnabled(true);
-        ui->vault_new_password_visible_button->setEnabled(true);
-        ui->vault_new_password_confirm_visible_button->setEnabled(true);
     }else{
         // tooltip
         ui->vault_new_path_label->setToolTip(dir);
         // set text
         ui->vault_new_path_label->setText(dir);
         ui->vault_new_name_lineEdit->setText(QString::fromStdWString(fs::path(dir.toStdWString()).filename().wstring()));
-        // set stylesheet
-        ui->vault_new_password_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
-        ui->vault_new_password_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
-        ui->vault_new_password_confirm_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
-        ui->vault_new_password_confirm_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
-        // enable
-        ui->vault_new_password_lineEdit->setEnabled(true);
-        ui->vault_new_password_confirm_lineEdit->setEnabled(true);
-        ui->vault_new_password_visible_button->setEnabled(true);
-        ui->vault_new_password_confirm_visible_button->setEnabled(true);
     }
-}
+    ui->vault_new_password_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
+    ui->vault_new_password_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
+    ui->vault_new_password_confirm_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
+    ui->vault_new_password_confirm_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
 
+    ui->vault_new_password_lineEdit->setEnabled(true);
+    ui->vault_new_password_confirm_lineEdit->setEnabled(true);
+    ui->vault_new_password_visible_button->setEnabled(true);
+    ui->vault_new_password_confirm_visible_button->setEnabled(true);
+}
 
 void MainWindow::on_vault_new_name_lineEdit_textEdited(const QString &arg1)
 {
@@ -167,138 +217,63 @@ void MainWindow::on_vault_new_name_lineEdit_textEdited(const QString &arg1)
     ui->vault_new_path_label->setText(elidedStr);
     // set tooltip
     ui->vault_new_path_label->setToolTip(str);
+
     // check
+    bool nameBool = ui->vault_new_name_label->property("BOOL").toBool();
     bool condition_confirmed;
     if(arg1.size() < 1) condition_confirmed = false;
     else condition_confirmed = true && !fs::exists(str.toStdWString());
 
-    if (condition_confirmed){
-        QString newStyleSheet = "QWidget{color: rgb(100, 255, 100);}";
-        if (ui->vault_new_name_label->styleSheet() != newStyleSheet)
-            ui->vault_new_name_label->setStyleSheet(newStyleSheet);
-    }else{
-        QString newStyleSheet = "QWidget{color: rgb(255, 100, 100);}";
-        if (ui->vault_new_name_label->styleSheet() != newStyleSheet)
-            ui->vault_new_name_label->setStyleSheet(newStyleSheet);
+    if (condition_confirmed && !nameBool){
+        ui->vault_new_name_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
+        ui->vault_new_name_label->setProperty("BOOL", QVariant(true));
+    }else if (!condition_confirmed && nameBool){
+        ui->vault_new_name_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
+        ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
+
     }
+
+    setCreateButton();
 }
+
 void MainWindow::on_vault_new_password_lineEdit_textEdited(const QString &arg1)
 {
-    // pasword
-    if (ui->vault_new_password_visible_button->isChecked()){
-        // show
-        ui->vault_new_password_lineEdit->setText(arg1);
-        ui->vault_new_password_lineEdit->setProperty("PASSWORD", QVariant(arg1));
-    }else{
-        // hide
-        QString password = ui->vault_new_password_lineEdit->property("PASSWORD").toString();
-        if (arg1.size() > password.size()){
-            // added
-            QString newPassword = arg1;
-            newPassword.replace(0, password.size(), password);
-            ui->vault_new_password_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
-        }else{
-            // delete or replace
-            if (arg1.at(arg1.size() - 1) != password.at(arg1.size() -1)){ // replace
-                QString newPassword = password.left(arg1.size() -1) + arg1.at(arg1.size() -1);
-                ui->vault_new_password_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
-            }else{ // deleted
-                QString newPassword = password.left(arg1.size());
-                ui->vault_new_password_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
-            }
-        }
-
-        ui->vault_new_password_lineEdit->setText(QString("*").repeated(arg1.size()));
-    }
-    // check
-    bool pw_condition_confirmed;
-    if(arg1.size() < 4) pw_condition_confirmed = false;
-    else pw_condition_confirmed = true;
-    if (pw_condition_confirmed){
-        QString newStyleSheet = "QWidget{color: rgb(100, 255, 100);}";
-        if (newStyleSheet != ui->vault_new_password_label->styleSheet())
-            ui->vault_new_password_label->setStyleSheet(newStyleSheet);
-    }
-    else{
-        QString newStyleSheet = "QWidget{color: rgb(255, 100, 100);}";
-        if (newStyleSheet != ui->vault_new_password_label->styleSheet())
-            ui->vault_new_password_label->setStyleSheet(newStyleSheet);
-    }
-    // check password_confirm
-    QString password = ui->vault_new_password_lineEdit->property("PASSWORD").toString();
-    QString password_confirm = ui->vault_new_password_confirm_lineEdit->property("PASSWORD").toString();
-    if (password.size() >= 4 && password == password_confirm){
-        QString newStyleSheet = "QWidget{color: rgb(100, 255, 100);}";
-        if (newStyleSheet != ui->vault_new_password_confirm_label->styleSheet())
-            ui->vault_new_password_confirm_label->setStyleSheet(newStyleSheet);
-    }else{
-        QString newStyleSheet = "QWidget{color: rgb(255, 100, 100);}";
-        if (newStyleSheet != ui->vault_new_password_confirm_label->styleSheet())
-            ui->vault_new_password_confirm_label->setStyleSheet(newStyleSheet);
-    }
+    setPasswordLabel();
+    setPasswordConfirmLabel();
+    setCreateButton();
 }
 void MainWindow::on_vault_new_password_confirm_lineEdit_textEdited(const QString &arg1)
 {
-    // password
-    if (ui->vault_new_password_visible_button->isChecked()){
-        // show
-        ui->vault_new_password_confirm_lineEdit->setText(arg1);
-        ui->vault_new_password_confirm_lineEdit->setProperty("PASSWORD", QVariant(arg1));
-    }else{
-        // hide
-        QString password = ui->vault_new_password_confirm_lineEdit->property("PASSWORD").toString();
-        if (arg1.size() > password.size()){
-            // added
-            QString newPassword = arg1;
-            newPassword.replace(0, password.size(), password);
-            ui->vault_new_password_confirm_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
-        }else{
-            // deleted
-            QString newPassword = password.left(arg1.size());
-            ui->vault_new_password_confirm_lineEdit->setProperty("PASSWORD", QVariant(newPassword));
-        }
-        ui->vault_new_password_confirm_lineEdit->setText(QString("*").repeated(arg1.size()));
-    }
-    // checkdiff
-    QString password = ui->vault_new_password_lineEdit->property("PASSWORD").toString();
-    QString password_confirm = ui->vault_new_password_confirm_lineEdit->property("PASSWORD").toString();
-    if (password.size() >= 4 && password == password_confirm){
-        QString newStyleSheet = "QWidget{color: rgb(100, 255, 100);}";
-        if (newStyleSheet != ui->vault_new_password_confirm_label->styleSheet())
-            ui->vault_new_password_confirm_label->setStyleSheet(newStyleSheet);
-    }else{
-        QString newStyleSheet = "QWidget{color: rgb(255, 100, 100);}";
-        if (newStyleSheet != ui->vault_new_password_confirm_label->styleSheet())
-            ui->vault_new_password_confirm_label->setStyleSheet(newStyleSheet);
-    }
+    setPasswordConfirmLabel();
+    setCreateButton();
 }
 
 void MainWindow::on_vault_new_password_visible_button_toggled(bool checked)
 {
-    // checked = show
-    // unchecked = hide
-    //ui->vault_new_password_confirm_visible_button->setChecked(checked);
-    if (checked){
-        // show
-        QString password = ui->vault_new_password_lineEdit->property("PASSWORD").toString();
-        ui->vault_new_password_lineEdit->setText(password);
-    }else{
-        // hide
-        QString text = ui->vault_new_password_lineEdit->property("PASSWORD").toString();
-        ui->vault_new_password_lineEdit->setText(QString("*").repeated(text.size()));
-    }
+    // show
+    if (checked)
+        ui->vault_new_password_lineEdit->setEchoMode(QLineEdit::Normal);
+    // hide
+    else
+        ui->vault_new_password_lineEdit->setEchoMode(QLineEdit::Password);
+
 }
 void MainWindow::on_vault_new_password_confirm_visible_button_toggled(bool checked)
 {
-    //ui->vault_new_password_visible_button->setChecked(checked);
-    if (checked){
-        // show
-        QString password = ui->vault_new_password_confirm_lineEdit->property("PASSWORD").toString();
-        ui->vault_new_password_confirm_lineEdit->setText(password);
-    }else{
-        // hide
-        QString text = ui->vault_new_password_confirm_lineEdit->property("PASSWORD").toString();
-        ui->vault_new_password_confirm_lineEdit->setText(QString("*").repeated(text.size()));
-    }
+    // show
+    if (checked)
+        ui->vault_new_password_confirm_lineEdit->setEchoMode(QLineEdit::Normal);
+    // hide
+    else
+        ui->vault_new_password_confirm_lineEdit->setEchoMode(QLineEdit::Password);
+}
+
+
+
+
+
+void MainWindow::on_vault_new_createVault_button_clicked()
+{
+    qDebug() << "trying to create vault";
 }
 

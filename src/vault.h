@@ -20,6 +20,7 @@ namespace fs = std::filesystem;
 
 typedef struct __VAULT_STRUCT__{
     wstring directory;
+    string password;
 } VAULT_STRUCT;
 
 
@@ -68,6 +69,7 @@ public:
             VAULT_STRUCT vaultStruct;
             for (const auto& vault : jData.at("vaults")){
                 vaultStruct.directory = Utils::string_to_wstring(vault.at("directory"));
+                vaultStruct.password = vault.at("password");
                 vaultStructVec.push_back(vaultStruct);
             }
             vaults = vaultStructVec;
@@ -100,6 +102,7 @@ public:
             json vaultJson;
             for (const auto& vault : vaults){
                 vaultJson["directory"] = Utils::wstring_to_string(vault.directory);
+                vaultJson["password"] = vault.password;
                 jData["vaults"].push_back(vaultJson);
             }
         }

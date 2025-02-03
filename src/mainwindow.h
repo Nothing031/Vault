@@ -40,8 +40,10 @@ private slots:
 
     void on_vault_new_password_confirm_visible_button_toggled(bool checked);
 
-private:
+    void on_vault_new_createVault_button_clicked();
 
+private:
+    void setCreateButton();
 
     Ui::MainWindow *ui;
 
@@ -54,5 +56,8 @@ private:
     vector<wstring> current_directory_decrypted_files;
 
 
+
+    void setPasswordLabel();
+    void setPasswordConfirmLabel();
 };
 #endif // MAINWINDOW_H
