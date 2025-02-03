@@ -8,6 +8,8 @@
 #include <QToolTip>
 #include <QPoint>
 
+#include "crypto.hpp"
+
 #define NEW_VAULT_MODE_CREATE "NEW_VAULT_MODE_CREATE"
 
 using namespace fs;
@@ -237,9 +239,7 @@ void MainWindow::on_vault_new_name_lineEdit_textEdited(const QString &arg1)
     }else if (!condition_confirmed && nameBool){
         ui->vault_new_name_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
         ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
-
     }
-
     setCreateButton();
 }
 
@@ -275,19 +275,27 @@ void MainWindow::on_vault_new_password_confirm_visible_button_toggled(bool check
         ui->vault_new_password_confirm_lineEdit->setEchoMode(QLineEdit::Password);
 }
 
-
-
-
-
 void MainWindow::on_vault_new_createVault_button_clicked()
 {
     VAULT_STRUCT vault;
-    vault.directory = ui->vault_new_path_label->text().toStdWString();
+    QString qDirectory = ui->vault_new_path_label->text();
+    QString qVaultName = QString::fromStdWString(fs::path(qDirectory.toStdWString()).filename().wstring());
+    QString qPassword = ui->vault_new_password_lineEdit->text();
 
-    // hash
+    vault.directory = qDirectory.toStdWString();
+    vault.password = crypto::sha256(qPassword.toStdString());
 
+    VAULTS vaults = VAULTS::GetInstance();
+    vaults.addOrReplaceVault(vault);
+    vaults.save();
 
+    qDebug() << "vault created and saved : ";
+    qDebug() << "    Directory: " << vault.directory;
+    qDebug() << "    Password: " << vault.password;
 
-
+    // add to combobox
+    ui->vault_select_comboBox->addItem(qVaultName, QVariant(qDirectory));
+    int comboBoxCount = ui->vault_select_comboBox->count();
+    ui->vault_select_comboBox->setCurrentIndex(comboBoxCount - 1);
 }
 

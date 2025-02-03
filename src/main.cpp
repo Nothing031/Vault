@@ -11,7 +11,8 @@
 #include <Windows.h>
 #include <iostream>
 
-#include openssl
+#include <openssl/aes.h>
+#include <openssl/sha.h>
 
 int main(int argc, char *argv[])
 {

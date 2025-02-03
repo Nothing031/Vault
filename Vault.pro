@@ -22,7 +22,11 @@ HEADERS += \
 FORMS += \
     src/mainwindow.ui
 
+win32:CONFIG(release, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MT/ -llibcrypto -llibssl
+else:win32:CONFIG(debug, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MTd/ -llibcrypto -llibssl
 
+INCLUDEPATH += C:/openssl/include
+DEPENDPATH += C:/openssl/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin
