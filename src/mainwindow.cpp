@@ -13,19 +13,19 @@
 using namespace fs;
 namespace fs = std::filesystem;
 
-MainWindow::MainWindow(QWidget *parent)
-    : QMainWindow(parent)
-    , ui(new Ui::MainWindow)
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
 
     // load data
     VAULTS::GetInstance().load();
-    vector<VAULT_STRUCT> vaults = VAULTS::GetInstance().getVaults();
+    current_vaults = VAULTS::GetInstance().getVaults();
+    // load to combobox;
     ui->vault_select_comboBox->addItem("select vault");
-    for (const auto& vault : vaults){
+    for (const auto& vault : current_vaults){
+        QString directory = QString::fromStdWString(vault.directory);
         QString vaultName = QString::fromStdWString(fs::path(vault.directory).filename().wstring());
-        ui->vault_select_comboBox->addItem(vaultName);
+        ui->vault_select_comboBox->addItem(vaultName, QVariant(directory));
     }
 
     // set validator
@@ -44,11 +44,18 @@ MainWindow::~MainWindow()
 // left
 void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
 {
-    // goto crypto page
+
     if (index == 0){
+        // default page
         ui->stackedWidget->setCurrentIndex(1);
     }else{
+         // goto crypto page
         ui->stackedWidget->setCurrentIndex(0);
+         // load data to crypto_page
+        QString qDir = ui->vault_select_comboBox->itemData(index).toString();
+        QString qName = ui->vault_select_comboBox->currentText();
+
+
     }
 }
 
@@ -274,6 +281,13 @@ void MainWindow::on_vault_new_password_confirm_visible_button_toggled(bool check
 
 void MainWindow::on_vault_new_createVault_button_clicked()
 {
-    qDebug() << "trying to create vault";
+    VAULT_STRUCT vault;
+    vault.directory = ui->vault_new_path_label->text().toStdWString();
+
+    // hash
+
+
+
+
 }
 

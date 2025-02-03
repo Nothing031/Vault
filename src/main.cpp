@@ -11,15 +11,13 @@
 #include <Windows.h>
 #include <iostream>
 
-#include "vault.h"
+#include openssl
 
 int main(int argc, char *argv[])
 {
     // load json
     QApplication a(argc, argv);
     MainWindow w;
-
     w.show();
-
     return a.exec();
 }

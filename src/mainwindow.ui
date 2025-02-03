@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>828</width>
-    <height>553</height>
+    <width>640</width>
+    <height>420</height>
    </rect>
   </property>
   <property name="minimumSize">
@@ -261,7 +261,93 @@ QCheckBox::indicator:checked{
         </property>
         <item row="3" column="0">
          <layout class="QGridLayout" name="gridLayout_3">
-          <item row="0" column="0">
+          <item row="6" column="0">
+           <widget class="QProgressBar" name="progressBar">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>0</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="maximumSize">
+             <size>
+              <width>16777215</width>
+              <height>24</height>
+             </size>
+            </property>
+            <property name="value">
+             <number>24</number>
+            </property>
+           </widget>
+          </item>
+          <item row="4" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_7">
+            <item>
+             <widget class="QPushButton" name="crypto_encrypt_button">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>24</verstretch>
+               </sizepolicy>
+              </property>
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Encrypt</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/lock.png</normaloff>:/icons/lock.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="crypto_decrypt_button">
+              <property name="minimumSize">
+               <size>
+                <width>0</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>16777215</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="text">
+               <string>Decrypt</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/unlock.png</normaloff>:/icons/unlock.png</iconset>
+              </property>
+             </widget>
+            </item>
+            <item>
+             <widget class="QPushButton" name="crypto_suspend_button">
+              <property name="text">
+               <string>Suspend</string>
+              </property>
+              <property name="icon">
+               <iconset resource="../asset/resource.qrc">
+                <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
+              </property>
+             </widget>
+            </item>
+           </layout>
+          </item>
+          <item row="1" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_5">
             <item>
              <widget class="QLabel" name="vault_edit_label">
@@ -344,7 +430,42 @@ QCheckBox::indicator:checked{
             </item>
            </layout>
           </item>
-          <item row="1" column="0">
+          <item row="5" column="0">
+           <widget class="QListWidget" name="fileViewer_list">
+            <property name="sizePolicy">
+             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
+              <horstretch>0</horstretch>
+              <verstretch>0</verstretch>
+             </sizepolicy>
+            </property>
+            <property name="minimumSize">
+             <size>
+              <width>400</width>
+              <height>100</height>
+             </size>
+            </property>
+            <property name="verticalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="horizontalScrollBarPolicy">
+             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+            </property>
+            <property name="autoScrollMargin">
+             <number>16</number>
+            </property>
+            <item>
+             <property name="text">
+              <string>Accounts\somethinglikefish@gmail.com</string>
+             </property>
+            </item>
+            <item>
+             <property name="text">
+              <string>Accounts\idkwhatthisisbutmaybetheaccount@gmail.com</string>
+             </property>
+            </item>
+           </widget>
+          </item>
+          <item row="2" column="0">
            <layout class="QHBoxLayout" name="horizontalLayout_6">
             <item>
              <widget class="QLabel" name="password_edit_label">
@@ -419,33 +540,41 @@ QCheckBox::indicator:checked{
             </item>
            </layout>
           </item>
-          <item row="3" column="0">
-           <layout class="QHBoxLayout" name="horizontalLayout_7">
+          <item row="0" column="0">
+           <layout class="QHBoxLayout" name="horizontalLayout_2">
             <item>
-             <widget class="QPushButton" name="crypto_encrypt_button">
+             <widget class="QLabel" name="vault_directory_label">
               <property name="sizePolicy">
-               <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+               <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
                 <horstretch>0</horstretch>
-                <verstretch>24</verstretch>
+                <verstretch>0</verstretch>
                </sizepolicy>
               </property>
               <property name="minimumSize">
                <size>
-                <width>0</width>
+                <width>95</width>
+                <height>24</height>
+               </size>
+              </property>
+              <property name="maximumSize">
+               <size>
+                <width>95</width>
                 <height>24</height>
                </size>
               </property>
               <property name="text">
-               <string>Encrypt</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../asset/resource.qrc">
-                <normaloff>:/icons/lock.png</normaloff>:/icons/lock.png</iconset>
+               <string>Directory</string>
               </property>
              </widget>
             </item>
             <item>
-             <widget class="QPushButton" name="crypto_decrypt_button">
+             <widget class="QLabel" name="vault_directory_path_label">
+              <property name="sizePolicy">
+               <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+                <horstretch>0</horstretch>
+                <verstretch>0</verstretch>
+               </sizepolicy>
+              </property>
               <property name="minimumSize">
                <size>
                 <width>0</width>
@@ -459,92 +588,54 @@ QCheckBox::indicator:checked{
                </size>
               </property>
               <property name="text">
-               <string>Decrypt</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../asset/resource.qrc">
-                <normaloff>:/icons/unlock.png</normaloff>:/icons/unlock.png</iconset>
-              </property>
-             </widget>
-            </item>
-            <item>
-             <widget class="QPushButton" name="crypto_suspend_button">
-              <property name="text">
-               <string>Suspend</string>
-              </property>
-              <property name="icon">
-               <iconset resource="../asset/resource.qrc">
-                <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
+               <string/>
               </property>
              </widget>
             </item>
            </layout>
           </item>
-          <item row="5" column="0">
-           <widget class="QProgressBar" name="progressBar">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>0</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="maximumSize">
-             <size>
-              <width>16777215</width>
-              <height>24</height>
-             </size>
-            </property>
-            <property name="value">
-             <number>24</number>
-            </property>
-           </widget>
-          </item>
-          <item row="4" column="0">
-           <widget class="QListWidget" name="fileViewer_list">
-            <property name="sizePolicy">
-             <sizepolicy hsizetype="MinimumExpanding" vsizetype="MinimumExpanding">
-              <horstretch>0</horstretch>
-              <verstretch>0</verstretch>
-             </sizepolicy>
-            </property>
-            <property name="minimumSize">
-             <size>
-              <width>400</width>
-              <height>100</height>
-             </size>
-            </property>
-            <property name="verticalScrollBarPolicy">
-             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="horizontalScrollBarPolicy">
-             <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
-            </property>
-            <property name="autoScrollMargin">
-             <number>16</number>
-            </property>
-            <item>
-             <property name="text">
-              <string>Accounts\somethinglikefish@gmail.com</string>
-             </property>
-            </item>
-            <item>
-             <property name="text">
-              <string>Accounts\idkwhatthisisbutmaybetheaccount@gmail.com</string>
-             </property>
-            </item>
-           </widget>
-          </item>
          </layout>
         </item>
        </layout>
       </widget>
-      <widget class="QWidget" name="page"/>
+      <widget class="QWidget" name="page">
+       <layout class="QGridLayout" name="gridLayout_6">
+        <item row="0" column="0">
+         <widget class="QLabel" name="label">
+          <property name="styleSheet">
+           <string notr="true">font: 30pt;</string>
+          </property>
+          <property name="text">
+           <string>Hello,</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignBottom|Qt::AlignmentFlag::AlignHCenter</set>
+          </property>
+         </widget>
+        </item>
+        <item row="1" column="0">
+         <widget class="QLabel" name="label_2">
+          <property name="font">
+           <font>
+            <family>Noto Sans</family>
+            <pointsize>30</pointsize>
+            <italic>false</italic>
+            <bold>false</bold>
+           </font>
+          </property>
+          <property name="styleSheet">
+           <string notr="true">font: 30pt;</string>
+          </property>
+          <property name="text">
+           <string>World!</string>
+          </property>
+          <property name="alignment">
+           <set>Qt::AlignmentFlag::AlignHCenter|Qt::AlignmentFlag::AlignTop</set>
+          </property>
+         </widget>
+        </item>
+       </layout>
+      </widget>
       <widget class="QWidget" name="page_newVault">
        <layout class="QGridLayout" name="gridLayout_5">
         <property name="leftMargin">

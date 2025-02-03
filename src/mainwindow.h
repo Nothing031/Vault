@@ -7,8 +7,8 @@
 #include <vector>
 #include <string>
 
-using namespace std;
 
+using namespace std;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
