@@ -7,6 +7,10 @@
 #include <string>
 #include <QToolTip>
 #include <QPoint>
+#include <QDesktopServices>
+#include <QUrl>
+#include <QListWidget>
+#include <QListWidgetItem>
 
 #include "crypto.hpp"
 
@@ -20,8 +24,8 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->setupUi(this);
 
     // load data
-    VAULTS::GetInstance().load();
-    current_vaults = VAULTS::GetInstance().getVaults();
+    VAULTS::load();
+    current_vaults = VAULTS::getVaults();
     // load to combobox;
     ui->vault_select_comboBox->addItem("select vault");
     for (const auto& vault : current_vaults){
@@ -36,6 +40,10 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
 
     ui->vault_new_password_lineEdit->setValidator(validator);
     ui->vault_new_password_confirm_lineEdit->setValidator(validator);
+
+
+    // set page
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 MainWindow::~MainWindow()
@@ -47,92 +55,25 @@ MainWindow::~MainWindow()
 void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
 {
 
-    if (index == 0){
-        // default page
-        ui->stackedWidget->setCurrentIndex(1);
-    }else{
-         // goto crypto page
-        ui->stackedWidget->setCurrentIndex(0);
-         // load data to crypto_page
-        QString qDir = ui->vault_select_comboBox->itemData(index).toString();
-        QString qName = ui->vault_select_comboBox->currentText();
 
-
-    }
 }
 
 void MainWindow::on_vault_createNew_button_clicked()
 {
+    initNewVaultPage();
     // set property
     ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(true));
     // goto new vault page
     ui->stackedWidget->setCurrentIndex(2);
-    // set stylesheet
-    ui->vault_new_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
-    ui->vault_new_path_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
-    ui->vault_new_name_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_name_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_confirm_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_confirm_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_createVault_button->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    // disable
-    ui->vault_new_name_lineEdit->setEnabled(false);
-    ui->vault_new_password_lineEdit->setEnabled(false);
-    ui->vault_new_password_confirm_lineEdit->setEnabled(false);
-    ui->vault_new_password_visible_button->setEnabled(false);
-    ui->vault_new_password_confirm_visible_button->setEnabled(false);
-    ui->vault_new_createVault_button->setEnabled(false);
-    // reset text
-    ui->vault_new_path_label->setText("");
-    ui->vault_new_name_lineEdit->setText("");
-    ui->vault_new_password_lineEdit->setText("");
-    ui->vault_new_password_confirm_lineEdit->setText("");
-    // reset button
-    ui->vault_new_password_visible_button->setChecked(false);
-    ui->vault_new_password_confirm_visible_button->setChecked(false);
-    // reset property
-    ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
-    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
-    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
-
 }
 void MainWindow::on_vault_createExisting_button_clicked()
 {
+    initNewVaultPage();
     // set property
     ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(false));
     // goto new vault page
     ui->stackedWidget->setCurrentIndex(2);
-    // set stylesheet
-    ui->vault_new_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
-    ui->vault_new_path_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
-    ui->vault_new_name_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_name_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_confirm_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_confirm_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_createVault_button->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    // disable
-    ui->vault_new_name_lineEdit->setEnabled(false);
-    ui->vault_new_password_lineEdit->setEnabled(false);
-    ui->vault_new_password_confirm_lineEdit->setEnabled(false);
-    ui->vault_new_password_visible_button->setEnabled(false);
-    ui->vault_new_password_confirm_visible_button->setEnabled(false);
-    ui->vault_new_createVault_button->setEnabled(false);
-    // reset text
-    ui->vault_new_path_label->setText("");
-    ui->vault_new_name_lineEdit->setText("");
-    ui->vault_new_password_lineEdit->setText("");
-    ui->vault_new_password_confirm_lineEdit->setText("");
-    // reset button
-    ui->vault_new_password_visible_button->setChecked(false);
-    ui->vault_new_password_confirm_visible_button->setChecked(false);
-    // reset property
-    ui->vault_new_name_label->setProperty("BOOL", QVariant(true));
-    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
-    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
+
 }
 
 // page new vault
@@ -179,6 +120,38 @@ void MainWindow::setPasswordConfirmLabel(){
             ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
         }
     }
+}
+void MainWindow::initNewVaultPage(){
+    // set stylesheet
+    ui->vault_new_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
+    ui->vault_new_path_label->setStyleSheet("QWidget{ color: rgb(255, 255, 255);}");
+    ui->vault_new_name_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_name_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_password_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_password_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_password_confirm_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_password_confirm_lineEdit->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    ui->vault_new_createVault_button->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    // disable
+    ui->vault_new_name_lineEdit->setEnabled(false);
+    ui->vault_new_password_lineEdit->setEnabled(false);
+    ui->vault_new_password_confirm_lineEdit->setEnabled(false);
+    ui->vault_new_password_visible_button->setEnabled(false);
+    ui->vault_new_password_confirm_visible_button->setEnabled(false);
+    ui->vault_new_createVault_button->setEnabled(false);
+    // reset text
+    ui->vault_new_path_label->setText("");
+    ui->vault_new_name_lineEdit->setText("");
+    ui->vault_new_password_lineEdit->setText("");
+    ui->vault_new_password_confirm_lineEdit->setText("");
+    // reset button
+    ui->vault_new_password_visible_button->setChecked(false);
+    ui->vault_new_password_confirm_visible_button->setChecked(false);
+    // reset property
+    ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(false));
+    ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
 }
 
 void MainWindow::on_vault_new_openFolder_button_clicked()
@@ -285,9 +258,8 @@ void MainWindow::on_vault_new_createVault_button_clicked()
     vault.directory = qDirectory.toStdWString();
     vault.password = crypto::sha256(qPassword.toStdString());
 
-    VAULTS vaults = VAULTS::GetInstance();
-    vaults.addOrReplaceVault(vault);
-    vaults.save();
+    VAULTS::addOrReplaceVault(vault);
+    VAULTS::save();
 
     qDebug() << "vault created and saved : ";
     qDebug() << "    Directory: " << vault.directory;
@@ -297,5 +269,119 @@ void MainWindow::on_vault_new_createVault_button_clicked()
     ui->vault_select_comboBox->addItem(qVaultName, QVariant(qDirectory));
     int comboBoxCount = ui->vault_select_comboBox->count();
     ui->vault_select_comboBox->setCurrentIndex(comboBoxCount - 1);
+}
+
+
+
+
+///// crypto page
+void MainWindow::InitCryptoPage(){
+    // set stylesheet
+    ui->crypto_decrypt_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
+    ui->crypto_encrypt_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
+    ui->crypto_suspend_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
+
+    // disable
+    ui->crypto_decrypt_button->setEnabled(false);
+    ui->crypto_encrypt_button->setEnabled(false);
+    ui->crypto_suspend_button->setEnabled(false);
+
+    // clear data
+    ui->fileViewer_list->clear();
+}
+
+void MainWindow::on_password_edit_lineedit_editingFinished()
+{
+    QString qPassword = ui->password_edit_lineedit->text();
+    string hashedPassword = crypto::sha256(qPassword.toStdString());
+    if (hashedPassword == current_vault.password){
+        ui->outputTerminal_textEdit->append("Vault unlocked!");
+        // disable
+        ui->password_edit_lineedit->setEnabled(false);
+
+        // unlock
+
+
+    }else{
+        ui->outputTerminal_textEdit->append("Wrong password!");
+    }
+}
+
+void MainWindow::on_password_visible_button_toggled(bool checked)
+{
+    // show
+    if (checked)
+        ui->password_edit_lineedit->setEchoMode(QLineEdit::Normal);
+    // hide
+    else
+        ui->password_edit_lineedit->setEchoMode(QLineEdit::Password);
+}
+
+
+
+
+
+void MainWindow::on_vault_select_comboBox_activated(int index)
+{
+    InitCryptoPage();
+    if (index == 0){
+        // default page
+        ui->stackedWidget->setCurrentIndex(1);
+    }else{
+        // goto crypto page
+        ui->stackedWidget->setCurrentIndex(0);
+        // load vault
+        QString qDir = ui->vault_select_comboBox->itemData(index).toString();
+        QString qName = ui->vault_select_comboBox->itemText(index);
+        vector<VAULT_STRUCT> vaults = VAULTS::getVaults();
+        bool found = false;
+        for (const auto& vault : vaults){
+            if (vault.directory == qDir.toStdWString()){
+                current_vault = vault;
+                found = true;
+                break;
+            }
+        }
+        if (!found){
+            ui->stackedWidget->setCurrentIndex(1);
+            ui->outputTerminal_textEdit->append("error cannot find vault");
+        }
+
+        // set ui
+        ui->vault_directory_path_label->setText(qDir);
+        ui->vault_edit_lineEdit->setText(qName);
+
+        // load data
+        fs::path directory(current_vault.directory);
+        for (const auto& file : fs::recursive_directory_iterator(directory)){
+            if (file.is_regular_file()){
+                current_directory_files.push_back(file.path());
+            }
+        }
+
+
+        // sort
+        QListWidgetItem *item;
+        for (const auto& file : current_directory_files){
+            if (file.extension() == ".enc"){
+                current_directory_encrypted_files.push_back(file);
+                item = new QListWidgetItem(QString::fromStdWString(fs::relative(file, directory).wstring()));
+                item->setForeground(QBrush(QColor(100, 255, 100)));
+                ui->fileViewer_list->addItem(item);
+            }else{
+                current_directory_decrypted_files.push_back(file);
+                item = new QListWidgetItem(QString::fromStdWString(fs::relative(file, directory).wstring()));
+                item->setForeground(QBrush(QColor(255, 100, 100)));
+                ui->fileViewer_list->addItem(item);
+            }
+        }
+    }
+}
+
+
+void MainWindow::on_vault_openFolder_button_clicked()
+{
+    QUrl url = QUrl::fromLocalFile(QString::fromStdWString(current_vault.directory));
+    QDesktopServices::openUrl(url);
 }
 

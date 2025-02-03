@@ -42,8 +42,16 @@ private slots:
 
     void on_vault_new_createVault_button_clicked();
 
+    void on_password_edit_lineedit_editingFinished();
+
+    void on_password_visible_button_toggled(bool checked);
+
+    void on_vault_select_comboBox_activated(int index);
+
+    void on_vault_openFolder_button_clicked();
+
 private:
-    void setCreateButton();
+
 
     Ui::MainWindow *ui;
 
@@ -51,13 +59,15 @@ private:
     vector<VAULT_STRUCT> current_vaults;
 
     mutex vecMutex;
-    vector<wstring> current_directory_files;
-    vector<wstring> current_directory_encrypted_files;
-    vector<wstring> current_directory_decrypted_files;
+    vector<fs::path> current_directory_files;
+    vector<fs::path> current_directory_encrypted_files;
+    vector<fs::path> current_directory_decrypted_files;
 
 
-
+    void setCreateButton();
     void setPasswordLabel();
     void setPasswordConfirmLabel();
+    void initNewVaultPage();
+    void InitCryptoPage();
 };
 #endif // MAINWINDOW_H

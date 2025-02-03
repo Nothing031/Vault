@@ -21,22 +21,16 @@ typedef struct __VAULT_STRUCT__{
     string password;
 } VAULT_STRUCT;
 
-
 typedef struct __MAINHUB_STRUCT__{
     vector<VAULT_STRUCT> vaults;
 } MAINHUB;
 
 class VAULTS{
 private:
-    MAINHUB hub;
+    static MAINHUB hub;
 
 public:
-    static VAULTS& GetInstance(){
-        static VAULTS instance;
-        return instance;
-    }
-
-    bool json_to_struct(const json& data, MAINHUB& out){
+    static bool json_to_struct(const json& data, MAINHUB& out){
         try{
             out = {};
             // read from json
@@ -53,7 +47,7 @@ public:
             return false;
         }
     }
-    bool struct_to_json(const MAINHUB& hub, json& out){
+    static bool struct_to_json(const MAINHUB& hub, json& out){
         try{
             out = {};
             // read from hub
@@ -71,7 +65,7 @@ public:
         }
     }
 
-    void load(){
+    static void load(){
         // read json
         fs::path jsonPath = fs::current_path().append("data.json");
         fs::path backupDirPath = fs::current_path().append("backup");
@@ -133,7 +127,7 @@ public:
         }
     }
 
-    void save(){
+    static void save(){
         fs::path jsonPath = fs::current_path().append("data.json");
         json jData;
         // struct to json
@@ -144,12 +138,11 @@ public:
         of.close();
     }
 
-
-    inline const vector<VAULT_STRUCT>& getVaults(){
+    static inline const vector<VAULT_STRUCT>& getVaults(){
         return hub.vaults;
     }
 
-    void addOrReplaceVault(const VAULT_STRUCT& vault){
+    static void addOrReplaceVault(const VAULT_STRUCT& vault){
         for (auto& hVault : hub.vaults){
             if (hVault.directory == vault.directory){
                 hVault = vault;
@@ -159,8 +152,6 @@ public:
         // if not found
         hub.vaults.push_back(vault);
     }
-
-
 };
 
 
