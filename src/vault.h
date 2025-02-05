@@ -3,7 +3,6 @@
 #include <filesystem>
 #include <fstream>
 #include <string>
-#include <condition_variable>
 #include <vector>
 #include <QMessageBox>
 
@@ -16,6 +15,13 @@
 using namespace std;
 using namespace nlohmann;
 namespace fs = std::filesystem;
+
+typedef struct __FILE_STRUCT__{
+    fs::path path;
+    QString relativePath;
+    bool encrypted;
+} FILE_STRUCT;
+
 typedef struct __VAULT_STRUCT__{
     wstring directory;
     string password;
@@ -142,15 +148,15 @@ public:
         return hub.vaults;
     }
 
-    static void addOrReplaceVault(const VAULT_STRUCT& vault){
+    static void addOrReplaceVault(const VAULT_STRUCT& target){
         for (auto& hVault : hub.vaults){
-            if (hVault.directory == vault.directory){
-                hVault = vault;
+            if (hVault.directory == target.directory){
+                hVault = target;
                 return;
             }
         }
         // if not found
-        hub.vaults.push_back(vault);
+        hub.vaults.push_back(target);
     }
 };
 

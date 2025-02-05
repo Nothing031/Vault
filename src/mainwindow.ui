@@ -6,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>700</width>
+    <width>722</width>
     <height>450</height>
    </rect>
   </property>
@@ -24,6 +24,9 @@
 	font: 100 11pt &quot;Noto Sans&quot;;
 	color: rgb(255, 255, 255);
 	background-color: rgb(30, 30, 30);
+}
+QWidget:disabled{
+	color: rgb(100, 100, 100);
 }
 
 /* ToolTip */
@@ -56,9 +59,9 @@ padding-right: 1px;*/
 
 /* TextEdit */
 QTextEdit{
+font: 9pt;
 border: 1px solid rgb(55, 55, 55);
 border-radius: 5px;
-
 }
 /* LineEdit */
 QLineEdit{
@@ -139,8 +142,14 @@ QCheckBox::indicator:checked{
         <property name="maximumSize">
          <size>
           <width>16777215</width>
-          <height>100</height>
+          <height>120</height>
          </size>
+        </property>
+        <property name="verticalScrollBarPolicy">
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
+        </property>
+        <property name="horizontalScrollBarPolicy">
+         <enum>Qt::ScrollBarPolicy::ScrollBarAlwaysOff</enum>
         </property>
        </widget>
       </item>
@@ -309,6 +318,9 @@ QCheckBox::indicator:checked{
                <iconset resource="../asset/resource.qrc">
                 <normaloff>:/icons/lock.png</normaloff>:/icons/lock.png</iconset>
               </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -332,6 +344,9 @@ QCheckBox::indicator:checked{
                <iconset resource="../asset/resource.qrc">
                 <normaloff>:/icons/unlock.png</normaloff>:/icons/unlock.png</iconset>
               </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
             <item>
@@ -343,6 +358,9 @@ QCheckBox::indicator:checked{
                <iconset resource="../asset/resource.qrc">
                 <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
               </property>
+              <property name="checkable">
+               <bool>false</bool>
+              </property>
              </widget>
             </item>
            </layout>
@@ -352,7 +370,7 @@ QCheckBox::indicator:checked{
             <item>
              <widget class="QLabel" name="vault_edit_label">
               <property name="enabled">
-               <bool>false</bool>
+               <bool>true</bool>
               </property>
               <property name="sizePolicy">
                <sizepolicy hsizetype="Fixed" vsizetype="Preferred">

@@ -10,12 +10,15 @@
 #include <fstream>
 #include <Windows.h>
 #include <iostream>
-
+#include <thread>
 #include <openssl/aes.h>
 #include <openssl/sha.h>
+#include "crypto.hpp"
+
 
 int main(int argc, char *argv[])
 {
+
     // load json
     QApplication a(argc, argv);
     MainWindow w;
