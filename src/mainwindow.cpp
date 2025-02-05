@@ -30,16 +30,25 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
     ui->setupUi(this);
 
     // connect
-    connect(crypto, &Crypto::signal_encrypted, this, [this](QString path){
-        ui->outputTerminal_textEdit->append("file encrypted : " + path);
-        ui->progressBar->setValue(ui->progressBar->value() + 1);
+    connect(crypto, &Crypto::signal_encrypted, this, [this](QStringList paths){
+        ui->progressBar->setValue(ui->progressBar->value() + paths.size());
+        for(const auto& path : paths){
+            ui->outputTerminal_textEdit->append("file encrypted : " + path);
+        }
     });
-    connect(crypto, &Crypto::signal_decrypted, this, [this](QString path){
-        ui->outputTerminal_textEdit->append("file decrypted : " + path);
-        ui->progressBar->setValue(ui->progressBar->value() + 1);
+    connect(crypto, &Crypto::signal_decrypted, this, [this](QStringList paths){
+        ui->progressBar->setValue(ui->progressBar->value() + paths.size());
+        for(const auto& path : paths){
+            ui->outputTerminal_textEdit->append("file decrypted : " + path);
+        }
     });
     connect(crypto, &Crypto::signal_suspended, this, [this](QString text){
         ui->outputTerminal_textEdit->append(text);
+        watcher->blockSignals(false);
+        ui->crypto_encrypt_button->setEnabled(true);
+        ui->crypto_decrypt_button->setEnabled(true);
+        ui->crypto_suspend_button->setEnabled(false);
+        refreshCryptoPage();
     });
     connect(crypto, &Crypto::signal_exception, this, [this](QString exception){
         ui->outputTerminal_textEdit->append(exception);
@@ -51,6 +60,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         ui->crypto_encrypt_button->setEnabled(true);
         ui->crypto_decrypt_button->setEnabled(true);
         ui->crypto_suspend_button->setEnabled(false);
+        refreshCryptoPage();
     });
     connect(crypto, &Crypto::signal_work_decryption_done, this, [this](){
         ui->outputTerminal_textEdit->append("file decryption completed");
@@ -58,6 +68,7 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         ui->crypto_encrypt_button->setEnabled(true);
         ui->crypto_decrypt_button->setEnabled(true);
         ui->crypto_suspend_button->setEnabled(false);
+        refreshCryptoPage();
     });
     connect(crypto, &Crypto::signal_finalExceptions, this, [this](QStringList exceptions){
         if (exceptions.size()){
@@ -108,11 +119,7 @@ void MainWindow::on_vault_select_comboBox_activated(int index)
         QString qDir = ui->vault_select_comboBox->itemData(index).toString();
         QString qName = ui->vault_select_comboBox->itemText(index);
         InitCryptoPage();
-
-
-        loadVault(qDir);
-
-
+        LoadCryptoPageData(qDir);
     }
 }
 void MainWindow::on_vault_createNew_button_clicked()
@@ -359,7 +366,7 @@ void MainWindow::InitCryptoPage(){
         watcher->disconnect();
     }
 }
-void MainWindow::loadVault(const QString& QDirectoryPath){
+void MainWindow::LoadCryptoPageData(const QString& QDirectoryPath){
     // load vault
     for (const auto& v : current_vaults){
         if (v.directory == QDirectoryPath.toStdWString()){
@@ -386,6 +393,16 @@ void MainWindow::loadVault(const QString& QDirectoryPath){
         return a.relativePath < b.relativePath;
     });
     // add to viewer
+    QListWidgetItem *item;
+    for (const auto& file : current_directory_files){
+        item = new QListWidgetItem;
+        item->setForeground(QBrush(file.encrypted ? QColor(100, 255, 100) : QColor(255, 100, 100)));
+        item->setText(file.relativePath);
+        ui->fileViewer_list->addItem(item);
+    }
+}
+void MainWindow::refreshCryptoPage(){
+    ui->fileViewer_list->clear();
     QListWidgetItem *item;
     for (const auto& file : current_directory_files){
         item = new QListWidgetItem;
@@ -444,7 +461,6 @@ void MainWindow::on_vault_openFolder_button_clicked()
     QDesktopServices::openUrl(url);
 }
 //// encrypt, decrypt, suspend
-/// #
 void MainWindow::on_crypto_encrypt_button_clicked()
 {
     // prepare
@@ -481,7 +497,6 @@ void MainWindow::on_crypto_encrypt_button_clicked()
 }
 void MainWindow::on_crypto_decrypt_button_clicked()
 {
-
     // prepare
     watcher->blockSignals(true);
     ui->crypto_encrypt_button->setEnabled(false);
@@ -516,6 +531,7 @@ void MainWindow::on_crypto_decrypt_button_clicked()
 }
 void MainWindow::on_crypto_suspend_button_clicked()
 {
+    ui->outputTerminal_textEdit->append("suspending...");
     ui->crypto_suspend_button->setEnabled(false);
     crypto->suspend();
 }

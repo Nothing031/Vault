@@ -43,11 +43,8 @@ private slots:
     void on_vault_openFolder_button_clicked();
 
 
-
     void on_crypto_encrypt_button_clicked();
-
     void on_crypto_decrypt_button_clicked();
-
     void on_crypto_suspend_button_clicked();
 
 private:
@@ -62,7 +59,7 @@ private:
     void initNewVaultPage();
     // crypto
     void InitCryptoPage();
-    void loadVault(const QString& vaultDirectory);
+    void LoadCryptoPageData(const QString& vaultDirectory);
 
     mutex vecMutex;
     VAULT_STRUCT current_vault;
@@ -72,5 +69,6 @@ private:
     vector<fs::path> current_directory_encrypted_files;
     vector<fs::path> current_directory_decrypted_files;
     void replaceFile(const FILE_STRUCT &fStruct);
+    void refreshCryptoPage();
 };
 #endif // MAINWINDOW_H

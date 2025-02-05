@@ -6,8 +6,9 @@
 #include <iomanip>
 #include <vector>
 #include <fstream>
+#include <chrono>
 #include <thread>
-
+#include <ctime>
 #include <QObject>
 #include <openssl/aes.h>
 #include <openssl/rand.h>
@@ -29,13 +30,16 @@ private:
 
     void _encrypt_files(vector<FILE_STRUCT>& fullFiles, const unsigned char* key){
         QStringList exceptionList;
+        QStringList encryptedList;
+        clock_t start, end;
+        clock_t mainStart = clock();
+        start = clock();
         for (auto& file : fullFiles){
             // break
             if (!run){
                 working = false;
-                QMetaObject::invokeMethod(this, [this](){
-                    emit signal_decrypted("encryption suspended");
-                }, Qt::QueuedConnection);
+                emit signal_encrypted(encryptedList);
+                emit signal_suspended("encryption suspended");
                 return;
             }
             // encrypt
@@ -57,29 +61,28 @@ private:
                     // set file
                     file.encrypted = true;
                     file.path = fs::path(outPath);
-                    // emit signal
-                    QString qOutPath = QString::fromStdWString(outPath);
-                    QMetaObject::invokeMethod(this, [this, qOutPath](){
-                        emit signal_encrypted(qOutPath);
-                    }, Qt::QueuedConnection);
+                    encryptedList.push_back(file.relativePath);
+                    // emit signal in every 100ms
+                    end = clock();
+                    if (end - start >= 100){
+                        emit signal_encrypted(encryptedList);
+                        encryptedList.clear();
+                        start = clock();
+                    }
                 }catch (wstring& e){
-                    exceptionList.push_back(QString::fromStdWString(e));
                     if (fs::exists(outPath)) fs::remove(outPath);
-                    QMetaObject::invokeMethod(this, [this, e]() {
-                        emit signal_exception(QString::fromStdWString(e));
-                    }, Qt::QueuedConnection);
+                    exceptionList.push_back(QString::fromStdWString(e));
+                    emit signal_exception(QString::fromStdWString(e));
                 }
             }
         }
+        qDebug() << clock() - mainStart << "ms";
         run = false;
         working = false;
         // emit signal
-        QMetaObject::invokeMethod(this, [this]() {
-            emit signal_work_encryption_done();
-        }, Qt::QueuedConnection);
-        QMetaObject::invokeMethod(this, [this, exceptionList](){
-            emit signal_finalExceptions(exceptionList);
-        }, Qt::QueuedConnection);
+        emit signal_encrypted(encryptedList);
+        emit signal_work_encryption_done();
+        emit signal_finalExceptions(exceptionList);
     }
     void _decrypt_files(vector<FILE_STRUCT>& fullFiles, const unsigned char* key){
         QStringList exceptionList;
@@ -88,7 +91,7 @@ private:
             if (!run){
                 working = false;
                 QMetaObject::invokeMethod(this, [this](){
-                    emit signal_decrypted("decryption suspended");
+                    emit signal_suspended("decryption suspended");
                 }, Qt::QueuedConnection);
                 return;
             }
@@ -113,9 +116,6 @@ private:
                     file.path = fs::path(outPath);
                     // emit signal
                     QString qOutPath = QString::fromStdWString(outPath);
-                    QMetaObject::invokeMethod(this, [this, qOutPath](){
-                        emit signal_decrypted(qOutPath);
-                    }, Qt::QueuedConnection);
                 }catch (wstring& e){
                     if (fs::exists(outPath)) fs::remove(outPath);
                     exceptionList.push_back(QString::fromStdWString(e));
@@ -246,8 +246,8 @@ public slots:
 
 signals:
     void signal_suspended(QString text);
-    void signal_decrypted(QString relativePath);
-    void signal_encrypted(QString relativePath);
+    void signal_decrypted(QStringList relativePaths);
+    void signal_encrypted(QStringList relativePaths);
     void signal_exception(QString exception);
     void signal_finalExceptions(QStringList exceptions);
     void signal_work_encryption_done();
