@@ -70,7 +70,10 @@ private:
     vector<VAULT_STRUCT> current_vaults; // access by comboboxData
     vector<FILE_STRUCT> current_directory_files;
     void replaceFile(const FILE_STRUCT &fStruct);
-    void refreshCryptoPage();
+    void refreshFileViewer(QStandardItemModel* model);
     void Vault_ComboBox_LoadVaults();
+    void loadCryptoPage();
+    void unlock();
+    void lock();
 };
 #endif // MAINWINDOW_H

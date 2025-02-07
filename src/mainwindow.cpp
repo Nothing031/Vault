@@ -77,11 +77,18 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
         case eCryptoState::END:
             outputText = QString(cMode == eCryptoMode::ENCRYPTION ? "File encryption " : "File decryption ") + "successed";
             ui->outputTerminal_textEdit->append(outputText);
+            ui->progressBar->setValue(0);
+            ui->progressBar->setRange(0, 100);
             watcher->blockSignals(false);
+            ui->vault_createExisting_button->setEnabled(true);
+            ui->vault_createNew_button->setEnabled(true);
             ui->vault_select_comboBox->setEnabled(true);
-            ui->crypto_decrypt_button->setEnabled(true);
             ui->crypto_encrypt_button->setEnabled(true);
+            ui->crypto_decrypt_button->setEnabled(true);
             ui->crypto_suspend_button->setEnabled(false);
+            QTimer::singleShot(0, this, [this](){
+                refreshFileViewer(qobject_cast<QStandardItemModel *>(ui->fileviewer_listView->model()));
+            });
             break;
         case eCryptoState::ABORT:
             outputText = QString(cMode == eCryptoMode::DECRYPTION ? "File encryption " : "File decryption ") + "suspended";
@@ -89,10 +96,15 @@ MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWin
             ui->progressBar->setValue(0);
             ui->progressBar->setRange(0, 100);
             watcher->blockSignals(false);
+            ui->vault_createExisting_button->setEnabled(true);
+            ui->vault_createNew_button->setEnabled(true);
             ui->vault_select_comboBox->setEnabled(true);
-            ui->crypto_decrypt_button->setEnabled(true);
             ui->crypto_encrypt_button->setEnabled(true);
+            ui->crypto_decrypt_button->setEnabled(true);
             ui->crypto_suspend_button->setEnabled(false);
+            QTimer::singleShot(0, this, [this](){
+                refreshFileViewer(qobject_cast<QStandardItemModel *>(ui->fileviewer_listView->model()));
+            });
             break;
         }
     });
@@ -151,17 +163,18 @@ void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
         }
 
         InitCryptoPage();
-        LoadCryptoPage();
         ui->stackedWidget->setCurrentIndex(0);
     }
 }
 void MainWindow::on_vault_createNew_button_clicked()
 {
+    ui->vault_select_comboBox->setCurrentIndex(-1);
     initNewVaultPage();
     ui->stackedWidget->setCurrentIndex(2);
 }
 void MainWindow::on_vault_createExisting_button_clicked()
 {
+    ui->vault_select_comboBox->setCurrentIndex(-1);
     initNewVaultPage();
     ui->vault_new_name_label->setProperty(PROPERTY_BOOL, QVariant(true));
     ui->stackedWidget->setCurrentIndex(2);
@@ -347,17 +360,17 @@ void MainWindow::on_vault_new_createVault_button_clicked()
 
     // add to combobox
     Vault_ComboBox_LoadVaults();
+    ui->stackedWidget->setCurrentIndex(1);
 }
 
 // crypto page /////////////////////////////////////////////////////////
-
-
 void MainWindow::InitCryptoPage(){
     // setenable
     ui->vault_select_comboBox->setEnabled(false);
     ui->vault_createExisting_button->setEnabled(false);
     ui->vault_createNew_button->setEnabled(false);
     ui->password_edit_lineedit->setEnabled(false);
+    ui->password_visible_button->setEnabled(false);
     ui->crypto_decrypt_button->setEnabled(false);
     ui->crypto_encrypt_button->setEnabled(false);
     ui->crypto_suspend_button->setEnabled(false);
@@ -379,13 +392,17 @@ void MainWindow::InitCryptoPage(){
         watcher->removePaths(list);
         watcher->disconnect();
     }
-}
-void MainWindow::LoadCryptoPage(){
+    watcher->addPath(QString::fromStdWString(current_vault.directory));
+    watcher->connect(watcher, &QFileSystemWatcher::directoryChanged, [this](){
+        qDebug() << "changed!";
+    });
+
+    // load data
     ui->vault_directory_path_label->setText(QString::fromStdWString(current_vault.directory));
     ui->vault_edit_lineEdit->setText(ui->vault_select_comboBox->currentText());
-    QTimer::singleShot(0, this, &MainWindow::refreshCryptoPage);
+    QTimer::singleShot(0, this, &MainWindow::loadCryptoPage);
 }
-void MainWindow::refreshCryptoPage(){
+void MainWindow::loadCryptoPage(){
     QThread *thread = QThread::create([this](){
         clock_t start, end;
         QString outputText;
@@ -445,17 +462,37 @@ void MainWindow::refreshCryptoPage(){
         end = clock();
         outputText = "added to file viewer";
         QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, outputText));
+        // finally
+        QMetaObject::invokeMethod(this, [this](){
+            emit unlock();
+        }, Qt::QueuedConnection);
     });
     thread->start();
 }
-void MainWindow::replaceFile(const FILE_STRUCT& fStruct){
-    auto it = lower_bound(current_directory_files.begin(), current_directory_files.end(), fStruct, [](const FILE_STRUCT& a, const FILE_STRUCT& b){
-        return a.relativePath < b.relativePath;
-    });
-    if (it != current_directory_files.end() && it->relativePath == fStruct.relativePath){
-        *it = fStruct;
-    }
+void MainWindow::lock(){
+    ui->vault_select_comboBox->setEnabled(false);
+    ui->vault_createExisting_button->setEnabled(false);
+    ui->vault_createNew_button->setEnabled(false);
+    ui->vault_new_password_lineEdit->setEnabled(false);
 }
+void MainWindow::unlock(){
+    ui->vault_select_comboBox->setEnabled(true);
+    ui->vault_createExisting_button->setEnabled(true);
+    ui->vault_createNew_button->setEnabled(true);
+    ui->password_edit_lineedit->setEnabled(true);
+}
+void MainWindow::refreshFileViewer(QStandardItemModel* model){
+    QStandardItem *item;
+    QBrush redBrush(QColor(255, 100, 100));
+    QBrush greenBrush(QColor(100, 255, 100));
+    for (int i = 0; i < current_directory_files.size(); i++){
+        item = model->item(i, 0);
+        item->setForeground(current_directory_files[i].encrypted ? greenBrush : redBrush);
+        model->setItem(i, 0, item);
+    }
+    QMetaObject::invokeMethod(this, "setFileViewerModel", Qt::QueuedConnection, Q_ARG(QStandardItemModel*, model));
+}
+
 //// password
 void MainWindow::on_password_edit_lineedit_editingFinished()
 {
@@ -501,32 +538,33 @@ void MainWindow::on_vault_openFolder_button_clicked()
 void MainWindow::on_crypto_encrypt_button_clicked()
 {
     // prepare
-    watcher->blockSignals(true);
-    ui->vault_select_comboBox->setEnabled(false);
-    ui->crypto_encrypt_button->setEnabled(false);
-    ui->crypto_decrypt_button->setEnabled(false);
-    ui->crypto_suspend_button->setEnabled(true);
     int count = 0;
     for (const auto& file : current_directory_files){
-        if(!file.encrypted){
+        if (!file.encrypted){
             count++;
         }
     }
     if (count == 0){
-        watcher->blockSignals(false);
-        ui->crypto_encrypt_button->setEnabled(true);
-        ui->crypto_decrypt_button->setEnabled(true);
-        ui->crypto_suspend_button->setEnabled(false);
         return;
-    }else{
-        ui->progressBar->setValue(0);
-        ui->progressBar->setRange(0, count);
     }
-    // start encrypt
+    watcher->blockSignals(true);
+    ui->vault_createExisting_button->setEnabled(false);
+    ui->vault_createNew_button->setEnabled(false);
+    ui->vault_select_comboBox->setEnabled(false);
+    ui->crypto_encrypt_button->setEnabled(false);
+    ui->crypto_decrypt_button->setEnabled(false);
+    ui->crypto_suspend_button->setEnabled(true);
+
+    ui->progressBar->setValue(0);
+    ui->progressBar->setRange(0, count);
     if (crypto->start_encrypt(current_directory_files, key)){
         return;
     }else{
+        // failed to start encrypt
         watcher->blockSignals(false);
+        ui->vault_createExisting_button->setEnabled(true);
+        ui->vault_createNew_button->setEnabled(true);
+        ui->vault_select_comboBox->setEnabled(true);
         ui->crypto_encrypt_button->setEnabled(true);
         ui->crypto_decrypt_button->setEnabled(true);
         ui->crypto_suspend_button->setEnabled(false);
@@ -536,32 +574,33 @@ void MainWindow::on_crypto_encrypt_button_clicked()
 void MainWindow::on_crypto_decrypt_button_clicked()
 {
     // prepare
-    watcher->blockSignals(true);
-    ui->vault_select_comboBox->setEnabled(false);
-    ui->crypto_encrypt_button->setEnabled(false);
-    ui->crypto_decrypt_button->setEnabled(false);
-    ui->crypto_suspend_button->setEnabled(true);
     int count = 0;
     for (const auto& file : current_directory_files){
-        if(file.encrypted){
+        if (file.encrypted){
             count++;
         }
     }
     if (count == 0){
-        watcher->blockSignals(false);
-        ui->crypto_encrypt_button->setEnabled(true);
-        ui->crypto_decrypt_button->setEnabled(true);
-        ui->crypto_suspend_button->setEnabled(false);
         return;
-    }else{
-        ui->progressBar->setValue(0);
-        ui->progressBar->setRange(0, count);
     }
-    // start encrypt
+    watcher->blockSignals(true);
+    ui->vault_createExisting_button->setEnabled(false);
+    ui->vault_createNew_button->setEnabled(false);
+    ui->vault_select_comboBox->setEnabled(false);
+    ui->crypto_encrypt_button->setEnabled(false);
+    ui->crypto_decrypt_button->setEnabled(false);
+    ui->crypto_suspend_button->setEnabled(true);
+
+    ui->progressBar->setValue(0);
+    ui->progressBar->setRange(0, count);
     if (crypto->start_decrypt(current_directory_files, key)){
         return;
     }else{
+        // failed to start encrypt
         watcher->blockSignals(false);
+        ui->vault_createExisting_button->setEnabled(true);
+        ui->vault_createNew_button->setEnabled(true);
+        ui->vault_select_comboBox->setEnabled(true);
         ui->crypto_encrypt_button->setEnabled(true);
         ui->crypto_decrypt_button->setEnabled(true);
         ui->crypto_suspend_button->setEnabled(false);
