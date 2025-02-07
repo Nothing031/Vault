@@ -395,6 +395,15 @@ void MainWindow::InitCryptoPage(){
     watcher->addPath(QString::fromStdWString(current_vault.directory));
     watcher->connect(watcher, &QFileSystemWatcher::directoryChanged, [this](){
         qDebug() << "changed!";
+        ui->vault_select_comboBox->setEnabled(false);
+        ui->vault_createExisting_button->setEnabled(false);
+        ui->vault_createNew_button->setEnabled(false);
+        ui->password_edit_lineedit->setEnabled(false);
+        ui->password_visible_button->setEnabled(false);
+        ui->crypto_decrypt_button->setEnabled(false);
+        ui->crypto_encrypt_button->setEnabled(false);
+        ui->crypto_suspend_button->setEnabled(false);
+        QTimer::singleShot(0, this, &MainWindow::loadCryptoPage);
     });
 
     // load data
