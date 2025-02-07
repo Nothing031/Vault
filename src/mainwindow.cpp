@@ -15,81 +15,90 @@
 #include <QFileSystemWatcher>
 #include <QDir>
 #include <QDirIterator>
+#include <QTimer>
+#include <QStandardItem>
+#include <QStandardItemModel>
+#include <QListView>
+#include <QThread>
 
 #include "crypto.hpp"
 
-#define NEW_VAULT_MODE_CREATE "NEW_VAULT_MODE_CREATE"
+
+
+#define PROPERTY_BOOL "_PROPERTY_BOOL_"
+
+#define PROPERTY_VAULT_DIRECTORY_PATH "__VAULT_DIRECTORY_PATH__"
+#define PROPERTY_VAULT_PASSWORD "__VAULT_PASSWORD__"
+#define PROPERTY_VAULT_NAME "__VAULT_NAME__"
+
+
 
 using namespace fs;
 namespace fs = std::filesystem;
 
-MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow), watcher(new QFileSystemWatcher(this))
+void MainWindow::Vault_ComboBox_LoadVaults(){
+    ui->vault_select_comboBox->blockSignals(true);
+    ui->vault_select_comboBox->clear();
+    VAULTS::load();
+    current_vaults = VAULTS::getVaults();
+    // load to combobox;
+    for (int i = 0; i < current_vaults.size(); i++){
+        QString vaultName = QString::fromStdWString(fs::path(current_vaults[i].directory).filename().wstring());
+        ui->vault_select_comboBox->addItem(vaultName, QVariant(i));
+        qDebug() << "Vault loaded: " << vaultName;
+        qDebug() << "  Directory: " << QString::fromStdWString(current_vaults.at(i).directory);
+        qDebug() << "  index: " << i;
+    }
+    ui->vault_select_comboBox->setCurrentIndex(-1);
+    ui->vault_select_comboBox->blockSignals(false);
+}
+
+MainWindow::MainWindow(QWidget *parent): QMainWindow(parent), ui(new Ui::MainWindow)
 {
     crypto = new Crypto();
+    watcher = new QFileSystemWatcher(this);
 
     ui->setupUi(this);
 
     // connect
-    connect(crypto, &Crypto::signal_encrypted, this, [this](QStringList paths){
-        ui->progressBar->setValue(ui->progressBar->value() + paths.size());
-        for(const auto& path : paths){
-            ui->outputTerminal_textEdit->append("file encrypted : " + path);
-        }
-    });
-    connect(crypto, &Crypto::signal_decrypted, this, [this](QStringList paths){
-        ui->progressBar->setValue(ui->progressBar->value() + paths.size());
-        for(const auto& path : paths){
-            ui->outputTerminal_textEdit->append("file decrypted : " + path);
-        }
-    });
-    connect(crypto, &Crypto::signal_suspended, this, [this](QString text){
-        ui->outputTerminal_textEdit->append(text);
-        watcher->blockSignals(false);
-        ui->crypto_encrypt_button->setEnabled(true);
-        ui->crypto_decrypt_button->setEnabled(true);
-        ui->crypto_suspend_button->setEnabled(false);
-        refreshCryptoPage();
-    });
-    connect(crypto, &Crypto::signal_exception, this, [this](QString exception){
-        ui->outputTerminal_textEdit->append(exception);
-        ui->progressBar->setValue(ui->progressBar->value() + 1);
-    });
-    connect(crypto, &Crypto::signal_work_encryption_done, this, [this](){
-        ui->outputTerminal_textEdit->append("file encryption completed");
-        watcher->blockSignals(false);
-        ui->crypto_encrypt_button->setEnabled(true);
-        ui->crypto_decrypt_button->setEnabled(true);
-        ui->crypto_suspend_button->setEnabled(false);
-        refreshCryptoPage();
-    });
-    connect(crypto, &Crypto::signal_work_decryption_done, this, [this](){
-        ui->outputTerminal_textEdit->append("file decryption completed");
-        watcher->blockSignals(false);
-        ui->crypto_encrypt_button->setEnabled(true);
-        ui->crypto_decrypt_button->setEnabled(true);
-        ui->crypto_suspend_button->setEnabled(false);
-        refreshCryptoPage();
-    });
-    connect(crypto, &Crypto::signal_finalExceptions, this, [this](QStringList exceptions){
-        if (exceptions.size()){
-            ui->outputTerminal_textEdit->append("exceptions: ");
-            for (const auto& exc : exceptions){
-                ui->outputTerminal_textEdit->append(exc);
+    connect(crypto, &Crypto::signal_outputMessage, this, [this](QStringList msgs, eCryptoState cState, eCryptoMode cMode){
+        QString outputText;
+        switch (cState){
+        case eCryptoState::SUCCESS:
+            ui->progressBar->setValue(ui->progressBar->value() + msgs.size());
+            break;
+        case eCryptoState::FAIL:
+            ui->progressBar->setValue(ui->progressBar->value() + msgs.size());
+            for (const auto& msg : msgs){
+                outputText = "<font color=#ff6464>Failed to " + QString(cMode == eCryptoMode::ENCRYPTION ? "encrypt file: " : "decrypt file: ") + msg + "</font>";
+                ui->outputTerminal_textEdit->append(outputText);
             }
+            break;
+        case eCryptoState::END:
+            outputText = QString(cMode == eCryptoMode::ENCRYPTION ? "File encryption " : "File decryption ") + "successed";
+            ui->outputTerminal_textEdit->append(outputText);
+            watcher->blockSignals(false);
+            ui->vault_select_comboBox->setEnabled(true);
+            ui->crypto_decrypt_button->setEnabled(true);
+            ui->crypto_encrypt_button->setEnabled(true);
+            ui->crypto_suspend_button->setEnabled(false);
+            break;
+        case eCryptoState::ABORT:
+            outputText = QString(cMode == eCryptoMode::DECRYPTION ? "File encryption " : "File decryption ") + "suspended";
+            ui->outputTerminal_textEdit->append(outputText);
+            ui->progressBar->setValue(0);
+            ui->progressBar->setRange(0, 100);
+            watcher->blockSignals(false);
+            ui->vault_select_comboBox->setEnabled(true);
+            ui->crypto_decrypt_button->setEnabled(true);
+            ui->crypto_encrypt_button->setEnabled(true);
+            ui->crypto_suspend_button->setEnabled(false);
+            break;
         }
     });
-
 
     // load data
-    VAULTS::load();
-    current_vaults = VAULTS::getVaults();
-    // load to combobox;
-    ui->vault_select_comboBox->addItem("select vault");
-    for (const auto& vault : current_vaults){
-        QString directory = QString::fromStdWString(vault.directory);
-        QString vaultName = QString::fromStdWString(fs::path(vault.directory).filename().wstring());
-        ui->vault_select_comboBox->addItem(vaultName, QVariant(directory));
-    }
+    Vault_ComboBox_LoadVaults();
 
     // set validator
     QRegularExpression pwRegex("^[A-Za-z0-9!@#$%^&*()_+\\-=\\[\\]{};':\"\\\\|,.<>\\/?]*$");
@@ -106,47 +115,65 @@ MainWindow::~MainWindow()
     delete ui;
 }
 
-// left ///////////////////////////////////////////////////////
-void MainWindow::on_vault_select_comboBox_activated(int index)
+void MainWindow::appendToTerminal(const QString &message)
 {
-    if (index == 0){
+    ui->outputTerminal_textEdit->append(message);
+}
+
+void MainWindow::setFileViewerModel(QStandardItemModel *model)
+{
+    ui->fileviewer_listView->setModel(model);
+}
+
+// left ///////////////////////////////////////////////////////
+void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
+{
+    if (index == -1){
         // default page
         ui->stackedWidget->setCurrentIndex(1);
     }else{
-        // goto crypto page
-        ui->stackedWidget->setCurrentIndex(0);
-        // init
-        QString qDir = ui->vault_select_comboBox->itemData(index).toString();
-        QString qName = ui->vault_select_comboBox->itemText(index);
+        // load vault
+        QString qName = ui->vault_select_comboBox->currentText();
+        int vault_index = ui->vault_select_comboBox->currentData().toInt();
+        current_vault = current_vaults.at(vault_index);
+        QString qDir = QString::fromStdWString(current_vault.directory);
+        if (qDir.isEmpty() || qName.isEmpty()){
+            qDebug() << "error : no data in comboBox";
+            ui->outputTerminal_textEdit->append("<font color=\"red\">Error no data in selectBox</font>");
+            ui->vault_select_comboBox->setCurrentIndex(-1);
+            return;
+        }
+        if (!fs::exists(qDir.toStdWString())){
+            qDebug() << "error : cannot find directory : " << qDir;
+            ui->outputTerminal_textEdit->append("<font color=\"red\">Error cannot find directory: " + qDir + "</font><br>");
+            ui->vault_select_comboBox->setCurrentIndex(-1);
+            return;
+        }
+
         InitCryptoPage();
-        LoadCryptoPageData(qDir);
+        LoadCryptoPage();
+        ui->stackedWidget->setCurrentIndex(0);
     }
 }
 void MainWindow::on_vault_createNew_button_clicked()
 {
     initNewVaultPage();
-    // set property
-    ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(true));
-    // goto new vault page
     ui->stackedWidget->setCurrentIndex(2);
 }
 void MainWindow::on_vault_createExisting_button_clicked()
 {
     initNewVaultPage();
-    // set property
-    ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(false));
-    ui->vault_new_name_label->setProperty("BOOL", QVariant(true));
-    // goto new vault page
+    ui->vault_new_name_label->setProperty(PROPERTY_BOOL, QVariant(true));
     ui->stackedWidget->setCurrentIndex(2);
-
 }
 
 // new vault page ///////////////////////////////////////////////////////
 void MainWindow::initNewVaultPage(){
-    // set stylesheet
-    ui->vault_new_name_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
-    ui->vault_new_password_confirm_label->setStyleSheet("QWidget{ color: rgb(100, 100, 100);}");
+    qDebug() << "initializing new vault page";
+    // stylesheet
+    ui->vault_new_name_label->setStyleSheet("QWidget{color:rgb(100,100,100);}");
+    ui->vault_new_name_lineEdit->setStyleSheet("QWidget{color:rgb(100,100,100);}");
+    ui->vault_new_password_label->setStyleSheet("QWidget{color:rgb(100,100,100);}");
     // disable
     ui->vault_new_name_label->setEnabled(false);
     ui->vault_new_name_lineEdit->setEnabled(false);
@@ -166,16 +193,15 @@ void MainWindow::initNewVaultPage(){
     ui->vault_new_password_visible_button->setChecked(false);
     ui->vault_new_password_confirm_visible_button->setChecked(false);
     // reset property
-    ui->vault_new_name_label->setProperty(NEW_VAULT_MODE_CREATE, QVariant(false));
-    ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
-    ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
-    ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
+    ui->vault_new_name_label->setProperty(PROPERTY_BOOL, QVariant(false));
+    ui->vault_new_password_label->setProperty(PROPERTY_BOOL, QVariant(false));
+    ui->vault_new_password_confirm_label->setProperty(PROPERTY_BOOL, QVariant(false));
 }
 //// set confirm state
 void MainWindow::setCreateButton(){
-    bool bool1 = ui->vault_new_name_label->property("BOOL").toBool();
-    bool bool2 = ui->vault_new_password_label->property("BOOL").toBool();
-    bool bool3 = ui->vault_new_password_confirm_label->property("BOOL").toBool();
+    bool bool1 = ui->vault_new_name_label->property(PROPERTY_BOOL).toBool();
+    bool bool2 = ui->vault_new_password_label->property(PROPERTY_BOOL).toBool();
+    bool bool3 = ui->vault_new_password_confirm_label->property(PROPERTY_BOOL).toBool();
     // !ui->vault_new_createVault_button->isEnabled()
     if (bool1 && bool2 && bool3)
         ui->vault_new_createVault_button->setEnabled(true);
@@ -183,33 +209,33 @@ void MainWindow::setCreateButton(){
         ui->vault_new_createVault_button->setEnabled(false);
 }
 void MainWindow::setPasswordLabel(){
-    bool labelBool = ui->vault_new_password_label->property("BOOL").toBool();
+    bool labelBool = ui->vault_new_password_label->property(PROPERTY_BOOL).toBool();
     bool pw_condition_confirmed;
     int textSize = ui->vault_new_password_lineEdit->text().size();
     if(textSize < 4) pw_condition_confirmed = false;
     else pw_condition_confirmed = true;
     if (pw_condition_confirmed && !labelBool){
         ui->vault_new_password_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
-        ui->vault_new_password_label->setProperty("BOOL", QVariant(true));
+        ui->vault_new_password_label->setProperty(PROPERTY_BOOL, QVariant(true));
     }
     else if (!pw_condition_confirmed && labelBool){
         ui->vault_new_password_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
-        ui->vault_new_password_label->setProperty("BOOL", QVariant(false));
+        ui->vault_new_password_label->setProperty(PROPERTY_BOOL, QVariant(false));
     }
 }
 void MainWindow::setPasswordConfirmLabel(){
-    bool labelBool = ui->vault_new_password_confirm_label->property("BOOL").toBool();
+    bool labelBool = ui->vault_new_password_confirm_label->property(PROPERTY_BOOL).toBool();
     QString password = ui->vault_new_password_lineEdit->text();
     QString password_confirm = ui->vault_new_password_confirm_lineEdit->text();
     if (password.size() >= 4 && password == password_confirm && !labelBool){
         if (!labelBool){
             ui->vault_new_password_confirm_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
-            ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(true));
+            ui->vault_new_password_confirm_label->setProperty(PROPERTY_BOOL, QVariant(true));
         }
     }else{
         if (labelBool){
             ui->vault_new_password_confirm_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
-            ui->vault_new_password_confirm_label->setProperty("BOOL", QVariant(false));
+            ui->vault_new_password_confirm_label->setProperty(PROPERTY_BOOL, QVariant(false));
         }
     }
 }
@@ -219,22 +245,16 @@ void MainWindow::on_vault_new_openFolder_button_clicked()
     QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
     if (dir.isEmpty()) return;
     // set property
-    ui->vault_new_path_label->setProperty("PATH", QVariant(dir));
+    ui->vault_new_path_label->setProperty(PROPERTY_BOOL, QVariant(dir));
     // read property
-    if (ui->vault_new_name_label->property(NEW_VAULT_MODE_CREATE).toBool()){
-        // tooltip
+    if (!ui->vault_new_name_label->property(PROPERTY_BOOL).toBool()){
         ui->vault_new_path_label->setToolTip(dir + "/");
-        // set text
         ui->vault_new_path_label->setText(dir + "/");
-        // set stylesheet
         ui->vault_new_name_label->setStyleSheet(R"(QWidget{ color: rgb(255, 100, 100);})");
-        // ui->vault_new_name_lineEdit->setStyleSheet(R"(QWidget{ color: rgb(255, 255, 255);})");
-        // enable
         ui->vault_new_name_lineEdit->setEnabled(true);
     }else{
         // tooltip
         ui->vault_new_path_label->setToolTip(dir);
-        // set text
         ui->vault_new_path_label->setText(dir);
         ui->vault_new_name_lineEdit->setText(QString::fromStdWString(fs::path(dir.toStdWString()).filename().generic_wstring()));
     }
@@ -249,7 +269,7 @@ void MainWindow::on_vault_new_openFolder_button_clicked()
 void MainWindow::on_vault_new_name_lineEdit_textEdited(const QString &arg1)
 {
     // set text
-    QString str = ui->vault_new_path_label->property("PATH").toString() + "/" + arg1;
+    QString str = ui->vault_new_path_label->property(PROPERTY_BOOL).toString() + "/" + arg1;
     int maxWidth = ui->vault_new_path_label->width();
     QFontMetrics metrics(ui->vault_new_path_label->font());
     QString elidedStr = metrics.elidedText(str, Qt::ElideLeft, maxWidth);
@@ -258,17 +278,17 @@ void MainWindow::on_vault_new_name_lineEdit_textEdited(const QString &arg1)
     ui->vault_new_path_label->setToolTip(str);
 
     // check
-    bool nameBool = ui->vault_new_name_label->property("BOOL").toBool();
+    bool nameBool = ui->vault_new_name_label->property(PROPERTY_BOOL).toBool();
     bool condition_confirmed;
     if(arg1.size() < 1) condition_confirmed = false;
     else condition_confirmed = true && !fs::exists(str.toStdWString());
 
     if (condition_confirmed && !nameBool){
         ui->vault_new_name_label->setStyleSheet("QWidget{color: rgb(100, 255, 100);}");
-        ui->vault_new_name_label->setProperty("BOOL", QVariant(true));
+        ui->vault_new_name_label->setProperty(PROPERTY_BOOL, QVariant(true));
     }else if (!condition_confirmed && nameBool){
         ui->vault_new_name_label->setStyleSheet("QWidget{color: rgb(255, 100, 100);}");
-        ui->vault_new_name_label->setProperty("BOOL", QVariant(false));
+        ui->vault_new_name_label->setProperty(PROPERTY_BOOL, QVariant(false));
     }
     setCreateButton();
 }
@@ -326,27 +346,24 @@ void MainWindow::on_vault_new_createVault_button_clicked()
     }
 
     // add to combobox
-    ui->vault_select_comboBox->addItem(qVaultName, QVariant(qDirectory));
-    int comboBoxCount = ui->vault_select_comboBox->count();
-    ui->vault_select_comboBox->setCurrentIndex(comboBoxCount - 1);
-    on_vault_select_comboBox_activated(comboBoxCount - 1);
+    Vault_ComboBox_LoadVaults();
 }
 
 // crypto page /////////////////////////////////////////////////////////
-void MainWindow::InitCryptoPage(){
-    // set stylesheet
-    // ui->crypto_decrypt_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
-    // ui->crypto_encrypt_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
-    // ui->crypto_suspend_button->setStyleSheet("QWidget{color: rgb(100, 100, 100);}");
 
+
+void MainWindow::InitCryptoPage(){
     // setenable
-    ui->password_edit_lineedit->setEnabled(true);
+    ui->vault_select_comboBox->setEnabled(false);
+    ui->vault_createExisting_button->setEnabled(false);
+    ui->vault_createNew_button->setEnabled(false);
+    ui->password_edit_lineedit->setEnabled(false);
     ui->crypto_decrypt_button->setEnabled(false);
     ui->crypto_encrypt_button->setEnabled(false);
     ui->crypto_suspend_button->setEnabled(false);
 
     // clear ui
-    ui->fileViewer_list->clear();
+    ui->fileviewer_listView->setModel(nullptr);
     ui->vault_directory_path_label->setText("");
     ui->vault_edit_lineEdit->setText("");
     ui->password_edit_lineedit->setText("");
@@ -354,10 +371,7 @@ void MainWindow::InitCryptoPage(){
     ui->progressBar->setValue(0);
 
     // clear data
-    current_vault = {};
     current_directory_files.clear();
-    current_directory_encrypted_files.clear();
-    current_directory_decrypted_files.clear();
 
     // init watcher
     QStringList list = watcher->directories();
@@ -366,50 +380,73 @@ void MainWindow::InitCryptoPage(){
         watcher->disconnect();
     }
 }
-void MainWindow::LoadCryptoPageData(const QString& QDirectoryPath){
-    // load vault
-    for (const auto& v : current_vaults){
-        if (v.directory == QDirectoryPath.toStdWString()){
-            current_vault = v;
-            break;
-        }
-    }
-    // load all files
-    for (const auto& file : fs::recursive_directory_iterator(current_vault.directory)){
-        if (file.is_regular_file()){
-            FILE_STRUCT fStruct;
-            fStruct.path = file.path();
-            fStruct.relativePath = QString::fromStdWString(fs::relative(fStruct.path, current_vault.directory).wstring());
-            fStruct.encrypted = fStruct.path.extension() == ".enc" ? true : false;
-            if (fStruct.encrypted){
-                int size = fStruct.relativePath.size();
-                fStruct.relativePath = fStruct.relativePath.left(size - 4);
-            }
-            current_directory_files.push_back(fStruct);
-        }
-    }
-    // sort
-    sort(current_directory_files.begin(), current_directory_files.end(), [](const FILE_STRUCT& a, const FILE_STRUCT& b){
-        return a.relativePath < b.relativePath;
-    });
-    // add to viewer
-    QListWidgetItem *item;
-    for (const auto& file : current_directory_files){
-        item = new QListWidgetItem;
-        item->setForeground(QBrush(file.encrypted ? QColor(100, 255, 100) : QColor(255, 100, 100)));
-        item->setText(file.relativePath);
-        ui->fileViewer_list->addItem(item);
-    }
+void MainWindow::LoadCryptoPage(){
+    ui->vault_directory_path_label->setText(QString::fromStdWString(current_vault.directory));
+    ui->vault_edit_lineEdit->setText(ui->vault_select_comboBox->currentText());
+    QTimer::singleShot(0, this, &MainWindow::refreshCryptoPage);
 }
 void MainWindow::refreshCryptoPage(){
-    ui->fileViewer_list->clear();
-    QListWidgetItem *item;
-    for (const auto& file : current_directory_files){
-        item = new QListWidgetItem;
-        item->setForeground(QBrush(file.encrypted ? QColor(100, 255, 100) : QColor(255, 100, 100)));
-        item->setText(file.relativePath);
-        ui->fileViewer_list->addItem(item);
-    }
+    QThread *thread = QThread::create([this](){
+        clock_t start, end;
+        QString outputText;
+        // search files;
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, "searching files... please wait"));
+        start = clock();
+        current_directory_files.clear();
+        FILE_STRUCT fStruct;
+        for (const auto& file : fs::recursive_directory_iterator(current_vault.directory)){
+            if (file.is_regular_file()){
+                fStruct.path = file.path();
+                fStruct.relativePath = QString::fromStdWString(fs::relative(fStruct.path, current_vault.directory).wstring());
+                fStruct.encrypted = fStruct.path.extension() == ".enc" ? true : false;
+                if (fStruct.encrypted){
+                    int size = fStruct.relativePath.size();
+                    fStruct.relativePath = fStruct.relativePath.left(size - 4);
+                }
+                current_directory_files.push_back(fStruct);
+            }
+        }
+        end = clock();
+        outputText = "found <font color=#64ff64>" + QString::number(current_directory_files.size()) + "</font> files, elapsed time: " + QString::number(end - start) + "ms";
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, outputText));
+
+        // sort
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, "sorting files... please wait"));
+        QApplication::processEvents();
+        start = clock();
+
+        sort(current_directory_files.begin(), current_directory_files.end(), [](const FILE_STRUCT& a, const FILE_STRUCT& b){
+            return a.relativePath < b.relativePath;
+        });
+
+        end = clock();
+        outputText = "sorting end!, elapsed time: " + QString::number(end - start) + "ms";
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, outputText));
+        QApplication::processEvents();
+
+        // add to fileviewer
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, "adding to file viewer... please wait"));
+        QApplication::processEvents();
+        start = clock();
+
+        QStandardItemModel *model = new QStandardItemModel();
+
+        QStandardItem *item;
+        QBrush redBrush(QColor(255, 100, 100));
+        QBrush greenBrush(QColor(100, 255, 100));
+        for (const auto& file : current_directory_files){
+            item = new QStandardItem(file.relativePath);
+            item->setForeground(file.encrypted ? greenBrush : redBrush);
+            model->appendRow(item);
+        }
+
+        QMetaObject::invokeMethod(this, "setFileViewerModel", Qt::QueuedConnection, Q_ARG(QStandardItemModel*, model));
+
+        end = clock();
+        outputText = "added to file viewer";
+        QMetaObject::invokeMethod(this, "appendToTerminal", Qt::QueuedConnection, Q_ARG(QString, outputText));
+    });
+    thread->start();
 }
 void MainWindow::replaceFile(const FILE_STRUCT& fStruct){
     auto it = lower_bound(current_directory_files.begin(), current_directory_files.end(), fStruct, [](const FILE_STRUCT& a, const FILE_STRUCT& b){
@@ -465,6 +502,7 @@ void MainWindow::on_crypto_encrypt_button_clicked()
 {
     // prepare
     watcher->blockSignals(true);
+    ui->vault_select_comboBox->setEnabled(false);
     ui->crypto_encrypt_button->setEnabled(false);
     ui->crypto_decrypt_button->setEnabled(false);
     ui->crypto_suspend_button->setEnabled(true);
@@ -499,6 +537,7 @@ void MainWindow::on_crypto_decrypt_button_clicked()
 {
     // prepare
     watcher->blockSignals(true);
+    ui->vault_select_comboBox->setEnabled(false);
     ui->crypto_encrypt_button->setEnabled(false);
     ui->crypto_decrypt_button->setEnabled(false);
     ui->crypto_suspend_button->setEnabled(true);
@@ -535,3 +574,6 @@ void MainWindow::on_crypto_suspend_button_clicked()
     ui->crypto_suspend_button->setEnabled(false);
     crypto->suspend();
 }
+
+
+

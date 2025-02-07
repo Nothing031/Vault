@@ -8,6 +8,7 @@
 #include <vector>
 #include <QFileSystemWatcher>
 #include <string>
+#include <QStandardItemModel>
 
 using namespace std;
 
@@ -20,13 +21,17 @@ QT_END_NAMESPACE
 class MainWindow : public QMainWindow
 {
     Q_OBJECT
-
 public:
     MainWindow(QWidget *parent = nullptr);
     ~MainWindow();
 
 private slots:
-    void on_vault_select_comboBox_activated(int index);
+    void appendToTerminal(const QString& message);
+    void setFileViewerModel(QStandardItemModel* model);
+
+
+
+    void on_vault_select_comboBox_currentIndexChanged(int index);
     void on_vault_createExisting_button_clicked();
     void on_vault_createNew_button_clicked();
 
@@ -42,11 +47,9 @@ private slots:
     void on_password_visible_button_toggled(bool checked);
     void on_vault_openFolder_button_clicked();
 
-
     void on_crypto_encrypt_button_clicked();
     void on_crypto_decrypt_button_clicked();
     void on_crypto_suspend_button_clicked();
-
 private:
     Ui::MainWindow *ui;
     QFileSystemWatcher *watcher;
@@ -57,18 +60,17 @@ private:
     void setPasswordLabel();
     void setPasswordConfirmLabel();
     void initNewVaultPage();
+
     // crypto
     void InitCryptoPage();
-    void LoadCryptoPageData(const QString& vaultDirectory);
+    void LoadCryptoPage();
 
-    mutex vecMutex;
     VAULT_STRUCT current_vault;
     unsigned char key[32];
-    vector<VAULT_STRUCT> current_vaults;
+    vector<VAULT_STRUCT> current_vaults; // access by comboboxData
     vector<FILE_STRUCT> current_directory_files;
-    vector<fs::path> current_directory_encrypted_files;
-    vector<fs::path> current_directory_decrypted_files;
     void replaceFile(const FILE_STRUCT &fStruct);
     void refreshCryptoPage();
+    void Vault_ComboBox_LoadVaults();
 };
 #endif // MAINWINDOW_H
