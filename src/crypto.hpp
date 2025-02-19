@@ -38,118 +38,6 @@ private:
     bool run = false;
     bool working = false;
 
-    // void _encrypt_files(vector<FILE_STRUCT>& fullFiles, const unsigned char* key){
-    //     QStringList exceptionList;
-    //     QStringList encryptedList;
-    //     clock_t start, end;
-    //     clock_t mainStart = clock();
-    //     start = clock();
-    //     for (auto& file : fullFiles){
-    //         // break
-    //         if (!run){
-    //             working = false;
-    //             emit signal_encrypted(encryptedList);
-    //             emit signal_suspended("encryption suspended");
-    //             return;
-    //         }
-    //         // encrypt
-    //         if (!file.encrypted){
-    //             wstring inPath = file.path.generic_wstring();
-    //             wstring outPath = inPath + L".enc";
-    //             try{
-    //                 vector<unsigned char> plainBytes = ReadFile(inPath);
-    //                 // generate random iv
-    //                 unsigned char iv[16];
-    //                 RAND_bytes(iv, sizeof(iv));
-    //                 // encrypt
-    //                 vector<unsigned char> cipherBytes = aes256_encrypt(plainBytes, key, iv);
-    //                 // write iv
-    //                 cipherBytes.insert(cipherBytes.begin(), iv, iv + 16);
-    //                 WriteFile(outPath, cipherBytes);
-    //                 // remove plain
-    //                 fs::remove(inPath);
-    //                 // set file
-    //                 file.encrypted = true;
-    //                 file.path = fs::path(outPath);
-    //                 encryptedList.push_back(file.relativePath);
-    //                 // emit signal in every 100ms
-    //                 end = clock();
-    //                 if (end - start >= 100){
-    //                     emit signal_encrypted(encryptedList);
-    //                     encryptedList.clear();
-    //                     start = clock();
-    //                 }
-    //             }catch (wstring& e){
-    //                 if (fs::exists(outPath)) fs::remove(outPath);
-    //                 exceptionList.push_back(QString::fromStdWString(e));
-    //                 emit signal_exception(QString::fromStdWString(e));
-    //             }
-    //         }
-    //     }
-    //     qDebug() << clock() - mainStart << "ms";
-    //     run = false;
-    //     working = false;
-    //     // emit signal
-    //     emit signal_encrypted(encryptedList);
-    //     emit signal_work_encryption_done();
-    //     emit signal_finalExceptions(exceptionList);
-    // }
-    // void _decrypt_files(vector<FILE_STRUCT>& fullFiles, const unsigned char* key){
-    //     QStringList exceptionList;
-    //     QStringList decryptedList;
-    //     clock_t start, end;
-    //     clock_t mainStart = clock();
-    //     for (auto& file : fullFiles){
-    //         // break
-    //         if (!run){
-    //             working = false;
-    //             emit signal_decrypted(decryptedList);
-    //             emit signal_suspended("decryption suspended");
-    //             return;
-    //         }
-    //         // decrypt
-    //         if (file.encrypted){
-    //             wstring inPath = file.path.generic_wstring();
-    //             wstring outPath = inPath.substr(0, inPath.size() - 4);
-    //             try{
-    //                 vector<unsigned char> cipherBytes = ReadFile(inPath);
-    //                 // read iv
-    //                 unsigned char iv[16];
-    //                 copy(cipherBytes.begin(), cipherBytes.begin() + 16, iv);
-    //                 // remove iv
-    //                 cipherBytes.erase(cipherBytes.begin(), cipherBytes.begin() + 16);
-    //                 // decrypt
-    //                 vector<unsigned char> plainBytes = aes256_decrypt(cipherBytes, key, iv);
-    //                 WriteFile(outPath, plainBytes);
-    //                 // remove cipher
-    //                 fs::remove(inPath);
-    //                 // set file
-    //                 file.encrypted = false;
-    //                 file.path = fs::path(outPath);
-    //                 decryptedList.push_back(file.relativePath);
-    //                 // emit signal every 100ms
-    //                 end = clock();
-    //                 if (end - start >= 100){
-    //                     emit signal_decrypted(decryptedList);
-    //                     decryptedList.clear();
-    //                     start = clock();
-    //                 }
-    //             }catch (wstring& e){
-    //                 if (fs::exists(outPath)) fs::remove(outPath);
-    //                 exceptionList.push_back(QString::fromStdWString(e));
-    //                 emit signal_exception(QString::fromStdWString(e));
-    //             }
-    //         }
-    //     }
-    //     qDebug() << clock() - mainStart << "ms";
-    //     run = false;
-    //     working = false;
-    //     // emit signal
-    //     emit signal_decrypted(decryptedList);
-    //     emit signal_work_decryption_done();
-    //     emit signal_finalExceptions(exceptionList);
-    // }
-
     void _encrypt_file(const wstring& inPath,const wstring& outPath, const unsigned char* key){
         vector<unsigned char> plainBytes = ReadFile(inPath);
         // create iv
@@ -192,6 +80,12 @@ private:
             }
             //encrypt
             if (cMode == eCryptoMode::ENCRYPTION && !file.encrypted){
+                if (!fs::exists(file.path)){
+                    failList.push_back(file.relativePath);
+                    tempList.clear();
+                    tempList.push_back(QString::fromStdString("File not exists: ") + file.relativePath);
+                    emit signal_outputMessage(tempList, eCryptoState::FAIL, cMode);
+                }
                 wstring inPath = file.path.generic_wstring();
                 wstring outPath = inPath + L".enc";
                 try{
@@ -210,6 +104,12 @@ private:
             }
             // decrypt
             else if (cMode == eCryptoMode::DECRYPTION && file.encrypted){
+                if (!fs::exists(file.path)){
+                    failList.push_back(file.relativePath);
+                    tempList.clear();
+                    tempList.push_back(QString::fromStdString("File not exists: ") + file.relativePath);
+                    emit signal_outputMessage(tempList, eCryptoState::FAIL, cMode);
+                }
                 wstring inPath = file.path.generic_wstring();
                 wstring outPath = inPath.substr(0, inPath.size() - 4);
                 try{
@@ -259,7 +159,7 @@ public:
         return buffer;
     }
     static void WriteFile(const wstring& path, const vector<unsigned char>& bytes){
-        ofstream of(path, std::ios::binary);
+        ofstream of(path, std::ios::binary | std::ios::trunc);
         of.write(reinterpret_cast<const char*>(bytes.data()), bytes.size());
         of.close();
     }
