@@ -10,12 +10,10 @@ CONFIG += c++17
 
 SOURCES += \
     src/main.cpp \
-    src/mainwindow.cpp \
-    src/vault.cpp
+    src/mainwindow.cpp
 
 HEADERS += \
     src/crypto.hpp \
-    src/json.hpp \
     src/mainwindow.h \
     src/utils.hpp \
     src/vault.h
