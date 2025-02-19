@@ -11,12 +11,20 @@
 
 typedef struct __FILE_INFO__{
     QFileInfo file;
+    QString relativePath;
     bool encrypted;
 }FILE_INFO;
 
+class Backup{
+private:
+    QDir dir;
+public:
+
+};
 
 class Vault{
 public:
+    Backup *backup;
     QDir dir;
     QString display_name;
 
