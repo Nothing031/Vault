@@ -56,7 +56,7 @@ public:
             files.clear();
             QVector<QFileInfo> fileInfoVec = dir.entryInfoList(QDir::Files, QDir::SortFlag::Name);
             for (const auto& fileInfo : fileInfoVec){
-                FILE_INFO file = {fileInfo, (fileInfo.path().endsWith(".enc") ? true : false)};
+                FILE_INFO file = {fileInfo, dir.relativeFilePath(fileInfo) ,(fileInfo.path().endsWith(".enc") ? true : false)};
                 files.push_back(file);
             }
             qDebug() << "[VAULT] loading done. elapsed time " << timer.elapsed() << "ms";
