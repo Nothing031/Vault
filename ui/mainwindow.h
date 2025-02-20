@@ -1,14 +1,11 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
+
 #include <QMainWindow>
-#include "vault.h"
-#include "crypto.hpp"
-#include <mutex>
-#include <vector>
 #include <QFileSystemWatcher>
-#include <string>
 #include <QStandardItemModel>
+
 
 using namespace std;
 

@@ -1,0 +1,411 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>window_crypto</class>
+ <widget class="QWidget" name="window_crypto">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>635</width>
+    <height>454</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	font: 100 11pt &quot;Noto Sans&quot;;
+	color: rgb(255, 255, 255);
+	background-color: rgb(30, 30, 30);
+}
+QWidget:disabled{
+	color: rgb(100, 100, 100);
+}
+
+/* ToolTip */
+QToolTip {
+	color: rgb(255, 255, 255); 
+	background: rgb(55, 55, 55);
+	border: 1px solid rgb(70, 70, 70); 
+	border-radius: 5px;
+}
+
+/* ProgressBar */
+QProgressBar{
+ 	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	padding-left: 0px;
+	color: rgb(0, 65, 74);
+	text-align: center;
+}
+QProgressBar::chunk{
+	border-radius: 5px;
+ 	background-color: rgb(44, 222, 133);
+}
+
+/* Label */
+QLabel{
+border: 0px;
+}
+
+/* TextEdit */
+QTextEdit{
+font: 9pt;
+border: 1px solid rgb(55, 55, 55);
+border-radius: 5px;
+}
+/* LineEdit */
+QLineEdit{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+}
+
+/* ListView */
+QListView{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	font: 11pt;
+	gridline-color: rgb(0, 0, 0);
+}
+
+/* ComboBox */
+QComboBox{
+	background-color: rgb(40, 40, 40);
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	padding-left: 3px;
+}
+QComboBox::drop-down {
+    width: 20px;
+    border-left: 1px solid rgb(55, 55, 55);
+    border-top-right-radius: 5px; 
+    border-bottom-right-radius: 5px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+}
+QComboBox::down-arrow {
+    image: url(:/icons/arrow_down.png);
+}
+
+/* PushButton */
+QPushButton{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	background-color: rgb(40, 40, 40);
+}
+QPushButton:pressed{
+	background-color: rgb(30, 30, 30);
+}
+
+/* CheckBox */
+QCheckBox{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+}
+QCheckBox::indicator{
+	margin-left: 2px;
+	margin-right: -2px;
+}
+QCheckBox::indicator:unchecked{
+	border: 1px solid rgb(0, 0, 0);
+	background-color: rgb(200, 40 ,40);
+}
+QCheckBox::indicator:checked{
+	border: 1px solid rgb(0, 0, 0);
+	background-color: rgb(40, 200 ,40);
+}
+
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QLabel" name="directory_l_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="directory_path_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>C:/Path/to/wherever</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="7" column="0">
+    <widget class="QListWidget" name="directory_viewer">
+     <item>
+      <property name="text">
+       <string>A.mp4</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>B.mp3</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>C.jpg</string>
+      </property>
+     </item>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <item>
+      <widget class="QPushButton" name="encrypt_button">
+       <property name="text">
+        <string>Encrypt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="decrypt_button">
+       <property name="text">
+        <string>Decrypt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="suspend_button">
+       <property name="text">
+        <string>Suspend</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <item>
+      <widget class="QLabel" name="vault_l_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Vault</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="vault_name_label">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Documents</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="8" column="0">
+    <widget class="QProgressBar" name="progressBar">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>22</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>22</height>
+      </size>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+    </widget>
+   </item>
+   <item row="4" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <item>
+      <widget class="QLabel" name="password_l_label">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Password</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="password_input_lineedit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>asdf</string>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="password_visibility_button">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../asset/resource.qrc">
+         <normaloff>:/icons/visibility_off.png</normaloff>
+         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <item>
+      <widget class="QPushButton" name="openFolder_button">
+       <property name="text">
+        <string>Open Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="backup_button">
+       <property name="text">
+        <string>Backup</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../asset/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

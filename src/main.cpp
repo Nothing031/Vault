@@ -1,8 +1,8 @@
-#include "mainwindow.h"
+#include "../ui/mainwindow.h"
 
 #include <QApplication>
-#include <Windows.h>
-#include <dwmapi.h>
+// #include <Windows.h>
+// #include <dwmapi.h>
 #include <QMessageBox>
 
 #include <QDebug>

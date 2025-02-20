@@ -1,11 +1,7 @@
 #ifndef CRYPTO_HPP
 #define CRYPTO_HPP
 
-#include <string>
-#include <sstream>
-#include <iomanip>
-#include <vector>
-#include <fstream>
+
 #include <thread>
 #include <ctime>
 #include <memory>
@@ -38,11 +34,11 @@ class Crypto : public QObject{
     Q_OBJECT
 
 private:
-    bool flag_run;
-    bool state_running;
-
     QThread *thread;
 
+    bool flag_run;
+    bool state_running;
+\
     bool AES256_Encrypt_File(const QString& inPath, const QString& outPath, const QByteArray& key)
     {
         QByteArray plainData;
@@ -67,15 +63,15 @@ private:
         }
         return true;
     }
-    bool AES256_Decrypt_File(const QString& inPath, const QString& outPath, const QByteArray& key){
+    bool AES256_Decrypt_File(const QString& inPath, const QString& outPath, const QByteArray& key)
+    {
         QByteArray cipherData;
         if (!ReadFile(inPath, cipherData)){
             qDebug() << "[DECRYPT] Failed to read file, path : " << inPath;
             return false;
         }
         // read iv
-        QByteArray iv;
-        copy(cipherData.begin(), cipherData.begin() + 16, &iv);
+        QByteArray iv = cipherData.mid(0, 16);
         // erase iv
         cipherData.erase(cipherData.begin(), cipherData.begin() + 16);
         // decrypt
@@ -90,9 +86,9 @@ private:
         }
         return true;
     }
-
-    void AES256_EN_DE_Crypt_All(Vault& vault, const QByteArray key, const CRYPTIONMODE cryptionMode, const bool Backup, const int processor_count)
+    void AES256_EN_DE_Crypt_All(Vault& vault, const QByteArray key, const CRYPTIONMODE cryptionMode, const int processor_count)
     {
+        emit signal_start();
         QVector<FILE_INFO*> targetFiles;
         QVector<FILE_INFO*>::Iterator file_info_it = targetFiles.begin();
 
@@ -234,6 +230,7 @@ private:
                 mutex.lock();
                 emit signal_progress(successList.size() + failList.size());
                 emit signal_outputMessage(flushList);
+                flushList.clear();
                 mutex.unlock();
                 QThread::msleep(500);
             }
@@ -257,10 +254,21 @@ private:
         qDebug() << "  Elapsed time  : " << timer.elapsed() << "ms";
         qDebug() << "  Successed     : " << successList.size();
         qDebug() << "  Failed        : " << failList.size();
+
+        emit signal_outputMessage(flushList);
+        emit signal_done();
+        flushList.clear();
+        flushList = {"Done",
+                    "  Elapsed time : " + QString::number(timer.elapsed()) + "ms",
+                    "  Successed    : " + QString::number(successList.size()),
+                    "  Failed      : " + QString::number(failList.size())
+                    };
+        emit signal_outputMessage(flushList);
     }
 
 public:
-    static bool ReadFile(const QString& path, QByteArray& out){
+    static bool ReadFile(const QString& path, QByteArray& out)
+    {
         out.clear();
         QFile f(path);
         if (f.open(QFile::ReadOnly)){
@@ -270,7 +278,8 @@ public:
             return false;
         }
     }
-    static bool WriteFile(const QString& path, const QByteArray& bytes){
+    static bool WriteFile(const QString& path, const QByteArray& bytes)
+    {
         QFile f(path);
         if (!f.open(QFile::WriteOnly)){
             f.write(bytes);
@@ -280,11 +289,12 @@ public:
         }
     }
 
-    static QString sha256(const QByteArray& str){
-        QCryptographicHash hash(QCryptographicHash::Algorithm::Sha256);
-        hash.addData(str);
-        return hash.result();
+
+    inline static QString SHA256(const QString& str)
+    {
+        return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
     }
+
 
     static bool AES256_Encrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
@@ -343,24 +353,34 @@ public:
         return true;
     }
 
-    bool start_encrypt(Vault& vault, const QByteArray key){
+    bool start_encrypt(Vault& vault, const QByteArray key)
+    {
         if (state_running){
             return false;
         }
-        flag_run = true;
-        state_running = true;
+        thread = QThread::create([&vault, key, this](){
+            flag_run = true;
+            state_running = true;
+            AES256_EN_DE_Crypt_All(vault, key, ENCRYPTION, std::thread::hardware_concurrency());
+        });
+        thread->start();
         return true;
     }
-    bool start_decrypt(Vault& vault, const QByteArray key){
+    bool start_decrypt(Vault& vault, const QByteArray key)
+    {
         if (state_running){
             return false;
         }
-        flag_run = true;
-        state_running = true;
-        // create thread
+        thread = QThread::create([&vault, key, this](){
+            flag_run = true;
+            state_running = true;
+            AES256_EN_DE_Crypt_All(vault, key, DECRYPTION, std::thread::hardware_concurrency());
+        });
+        thread->start();
         return true;
     }
-    void suspend(){
+    void suspend()
+    {
         flag_run = false;
     }
 
