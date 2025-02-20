@@ -4,49 +4,89 @@
 
 #include <QProcess>
 #include <QDebug>
+#include <QUrl>
+#include <QDesktopServices>
 
-#define DEBUG_LOCAL "[WINDOW_CRYPTO] "
+#define RED "\033[31m"
+#define GREEN "\033[32m"
+#define DEFAULT "\033[0m"
+#define GRAY "\033[37m"
 
-window_crypto::window_crypto(QWidget *parent)
+#define LOCAL_DEBUG() qDebug() << "[WINDOW_CRYPTO]"
+
+Window_crypto::Window_crypto(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::window_crypto)
-    , vault(new Vault)
+    , crypto(new Crypto)
+    , vault()
 {
+    LOCAL_DEBUG() << DEFAULT << "Initializing...";
     ui->setupUi(this);
 
+    // set enables
+    ui->encrypt_button->setEnabled(false);
+    ui->decrypt_button->setEnabled(false);
+    ui->suspend_button->setEnabled(false);
 
-    vault->dir = QDir("C:/Users/LSH/Documents/TestDirectory");
-    vault->display_name = "TestDirectory";
 
 }
 
-window_crypto::~window_crypto()
+Window_crypto::~Window_crypto()
 {
     delete ui;
 }
 
-void window_crypto::on_password_input_lineedit_returnPressed()
+void Window_crypto::Load(const Vault &newVault)
 {
-    vault->password = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4";
-    QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
-    if (vault->password == hashed_password){
-        qDebug() << DEBUG_LOCAL << " \033[32mCorrect password\033[0m";
-        // unlock
-
-
-
-
-
-    }else{
-        qDebug() << DEBUG_LOCAL << "\033[31mWrong password\033[0m";
-        qDebug() << "  input    : " << hashed_password;
-        qDebug() << "  password : " << vault->password;
+    QElapsedTimer timer;
+    vault = newVault;
+    if (!vault.LoadFiles()){
+        LOCAL_DEBUG() << RED << "Error Failed to load files" << DEFAULT;
+        return;
     }
 
+    //ui
+    ui->encrypt_button->setEnabled(false);
+    ui->decrypt_button->setEnabled(false);
+    ui->suspend_button->setEnabled(false);
+
+    ui->directory_path_label->setText(vault.dir.path());
+    ui->vault_name_label->setText(vault.display_name);
+    ui->directory_viewer->clear();
+
+    timer.start();
+    QColor Green(55, 255, 55);
+    QColor Red(255, 55, 55);
+    QListWidgetItem *item;
+    LOCAL_DEBUG() << DEFAULT << "Adding to directory viewer..";
+    for (const auto& file : vault.files){
+        item = new QListWidgetItem(file.relativePath);
+        item->foreground().setColor(file.encrypted ? Green : Red);
+        ui->directory_viewer->addItem(item);
+    }
+    LOCAL_DEBUG() << DEFAULT << "Elapsed time :" << GREEN << timer.elapsed() << DEFAULT;
 }
 
+void Window_crypto::on_password_input_lineedit_returnPressed()
+{
+    QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
+    if (vault.password == hashed_password){
+        ui->password_input_lineedit->setEnabled(false);
 
-void window_crypto::on_password_visibility_button_toggled(bool checked)
+
+        LOCAL_DEBUG() << GREEN << "Correct password" << DEFAULT;
+        vault.CreateKey(ui->password_input_lineedit->text());
+        ui->decrypt_button->setEnabled(true);
+        ui->encrypt_button->setEnabled(true);
+    }
+    else{
+        LOCAL_DEBUG() << RED << "Wrong password" << DEFAULT;
+        qDebug() << GRAY << "  input    : " << hashed_password << DEFAULT;
+        qDebug() << GRAY << "  password : " << vault.password << DEFAULT;
+    }
+}
+
+void Window_crypto::on_password_visibility_button_toggled(bool checked)
 {
     if (checked){
         ui->password_input_lineedit->setEchoMode(QLineEdit::Normal);
@@ -55,18 +95,33 @@ void window_crypto::on_password_visibility_button_toggled(bool checked)
     }
 }
 
-
-
-
-void window_crypto::on_openFolder_button_clicked()
+void Window_crypto::on_openFolder_button_clicked()
 {
-    qDebug() << vault->dir;
-    if (vault->dir.exists()){
-        qDebug() << DEBUG_LOCAL << "opening";
-        QStringList args = {vault->dir.path()};
-        QProcess::startDetached("explorer.exe", args);
+    if (vault.dir.exists()){
+        LOCAL_DEBUG() << DEFAULT << "Opending Directory :" << vault.dir.path();
+        QDesktopServices::openUrl(QUrl(vault.dir.path()));
     }else{
-        qDebug() << DEBUG_LOCAL "\033[31mError directory not exists\033[0m : " << vault->dir.path();
+        LOCAL_DEBUG() << RED << "Error directory not exists :" << vault.dir.path() << DEFAULT;
     }
+}
+
+void Window_crypto::on_encrypt_button_clicked()
+{
+
+}
+
+void Window_crypto::on_decrypt_button_clicked()
+{
+
+}
+
+void Window_crypto::on_suspend_button_clicked()
+{
+
+}
+
+void Window_crypto::on_backup_button_clicked()
+{
+
 }
 

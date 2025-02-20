@@ -4,19 +4,21 @@
 #include <QWidget>
 
 #include "src/vault.h"
+#include "src/crypto.hpp"
 
 namespace Ui {
 class window_crypto;
 }
 
-class window_crypto : public QWidget
+class Window_crypto : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit window_crypto(QWidget *parent = nullptr);
-    ~window_crypto();
+    explicit Window_crypto(QWidget *parent = nullptr);
+    ~Window_crypto();
 
+    void Load(const Vault& vault);
 
 private slots:
     void on_password_input_lineedit_returnPressed();
@@ -25,11 +27,22 @@ private slots:
 
     void on_openFolder_button_clicked();
 
+    void on_encrypt_button_clicked();
+
+    void on_decrypt_button_clicked();
+
+    void on_suspend_button_clicked();
+
+    void on_backup_button_clicked();
+
+signals:
+    void request_disable_ui(bool b);
+
+
 private:
-
-
     Ui::window_crypto *ui;
-    Vault *vault;
+    Crypto *crypto;
+    Vault vault;
 };
 
 #endif // WINDOW_CRYPTO_H

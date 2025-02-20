@@ -1,6 +1,9 @@
 #ifndef VAULT_H
 #define VAULT_H
 
+#include "openssl/evp.h"
+#include <filesystem>
+
 #include <QVector>
 #include <QString>
 #include <QFile>
@@ -8,6 +11,9 @@
 #include <QDir>
 #include <QException>
 #include <QElapsedTimer>
+
+#include <QDirListing>
+#include <QDirIterator>
 
 typedef struct __FILE_INFO__{
     QFileInfo file;
@@ -28,11 +34,64 @@ public:
     QDir dir;
     QString display_name;
     QString password;
+    QByteArray key;
 
     QVector<FILE_INFO> files;
     QVector<int> index_encrypted;
     QVector<int> index_decrypted;
 
+    Vault(){
+
+    }
+    Vault(const Vault& other)
+    {
+        backup = other.backup;
+        dir = other.dir;
+        display_name = other.display_name;
+        password = other.password;
+        files = other.files;
+        index_encrypted = other.index_encrypted;
+        index_decrypted = other.index_decrypted;
+    }
+    Vault& operator=(const Vault& other)
+    {
+        if (this == &other)
+            return *this;
+        backup = other.backup;
+        dir = other.dir;
+        display_name = other.display_name;
+        password = other.password;
+        files = other.files;
+        index_encrypted = other.index_encrypted;
+        index_decrypted = other.index_decrypted;
+        return *this;
+    }
+
+
+    void CreateKey(const QString& input)
+    {
+        qDebug() << "[VAULT]  Generating key";
+        QElapsedTimer timer;
+        timer.start();
+
+        key.resize(32);
+
+        if(PKCS5_PBKDF2_HMAC_SHA1(
+            (const char*)input.constData(),
+            input.size(),
+            nullptr,
+            0,
+            600000,
+            32,
+            (unsigned char*)key.data()
+        )){
+            qDebug() << "[VAULT]  Key Created";
+            qDebug() << "  Elapsed time :" << timer.elapsed() << "ms";
+            qDebug() << "  Key          :" << key.toHex();
+        }else{
+            qDebug() << "[VAULT]  ERROR Key generation failure";
+        }
+    }
     void UpdateIndex()
     {
         QElapsedTimer timer;
@@ -46,23 +105,38 @@ public:
             else
                 index_decrypted.push_back(i);
         }
-        qDebug() << "[VAULT] indexing done. elapsed time " << timer.elapsed() << "ms";
+        qDebug() << "[VAULT] Indexing done" << timer.elapsed() << "ms";
+        qDebug() << "  Elapsed time    :" << timer.elapsed() << "ms";
+        qDebug() << "  Encrypted files :" << index_encrypted.size();
+        qDebug() << "  Decrypted files :" << index_decrypted.size();
+        qDebug() << "  Total           :" << files.size();
     }
     bool LoadFiles()
     {
         QElapsedTimer timer;
         timer.start();
         qDebug() << "[VAULT] loading files...";
+
         if (dir.exists()){
             files.clear();
-            QVector<QFileInfo> fileInfoVec = dir.entryInfoList(QDir::Files, QDir::SortFlag::Name);
-            for (const auto& fileInfo : fileInfoVec){
-                FILE_INFO file = {fileInfo, dir.relativeFilePath(fileInfo.path()) ,(fileInfo.path().endsWith(".enc") ? true : false)};
-                files.push_back(file);
+            for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
+                QFileInfo qinfo = QFileInfo(file.path());
+                FILE_INFO file_info;
+                file_info.file = qinfo;
+                file_info.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
+                file_info.encrypted = (qinfo.path().endsWith(".enc") ? true : false);
+                files.push_back(file_info);
             }
-            qDebug() << "[VAULT] loading done. elapsed time " << timer.elapsed() << "ms";
-            qDebug() << "[VAULT] calling method UpdateIndex()";
+
+            std::sort(files.begin(), files.end(), [](const FILE_INFO& a, const FILE_INFO& b){
+                return a.relativePath < b.relativePath;
+            });
+
+            qDebug() << "[VAULT] Loading done";
+            qDebug() << "  Elapsed time :" << timer.elapsed() << "ms";
+            qDebug() << "  Files        :" << files.size();
             UpdateIndex();
+            return true;
         }else{
             qDebug() << "[VAULT] ERROR directory not exists";
             return false;

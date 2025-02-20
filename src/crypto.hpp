@@ -272,6 +272,7 @@ public:
         out.clear();
         QFile f(path);
         if (f.open(QFile::ReadOnly)){
+            out.resize(f.size());
             out = f.readAll();
             return true;
         }else{
@@ -289,66 +290,62 @@ public:
         }
     }
 
-
     inline static QString SHA256(const QString& str)
     {
         return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
     }
 
-
     static bool AES256_Encrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-        QByteArray encryptedData;
-
         // init
         if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
             qDebug() << "[ENCRYPT] EVP_EncryptInit_ex Failure";
             return false;
         }
+        int blockSize =EVP_CIPHER_CTX_get_block_size(ctx);
+        out.resize(input.size() + blockSize);
         // encrypt
         int len;
-        if (1 != EVP_EncryptUpdate(ctx, (unsigned char*)encryptedData.data(), &len, (const unsigned char*)input.data(), input.size())) {
+        if (1 != EVP_EncryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.data(), input.size())) {
             qDebug() << "[ENCRYPT] EVP_EncryptUpdate Failure";
             return false;
         }
         // finalize
-        int encryptedLen = len;
-        if (1 != EVP_EncryptFinal_ex(ctx, (unsigned char*)encryptedData.data() + len, &len)) {
+        int outLen = len;
+        if (1 != EVP_EncryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
             qDebug() << "[ENCRYPT] EVP_EncryptFinal_ex Failure";
             return false;
         }
-        encryptedLen += len;
-        encryptedData.resize(encryptedLen);
-        out = encryptedData;
+        outLen += len;
+        out.resize(outLen);
         EVP_CIPHER_CTX_free(ctx);
         return true;
     }
     static bool AES256_Decrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
-        QByteArray decryptedData;
 
         // init
         if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
             qDebug() << "[DECRYPT] EVP_DecryptInit_ex Failure";
             return false;
         }
+        out.resize(input.size(), 0);
         // decrypt
         int len;
-        if (1 != EVP_DecryptUpdate(ctx, (unsigned char*)decryptedData.data(), &len, (const unsigned char*)input.constData(), input.size())) {
+        if (1 != EVP_DecryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.constData(), input.size())) {
             qDebug() << "[DECRYPT] EVP_DecryptUpdate Failure";
             return false;
         }
         // finalize
-        int decryptedLen = len;
-        if (1 != EVP_DecryptFinal_ex(ctx, (unsigned char*)decryptedData.data() + len, &len)) {
+        int outLen = len;
+        if (1 != EVP_DecryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
             qDebug() << "[DECRYPT] EVP_DecryptFinal_ex Failure";
             return false;
         }
-        decryptedLen += len;
-        decryptedData.resize(decryptedLen);
-        out = decryptedData;
+        outLen += len;
+        out.resize(outLen);
         EVP_CIPHER_CTX_free(ctx);
         return true;
     }
