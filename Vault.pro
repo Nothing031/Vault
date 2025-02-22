@@ -16,6 +16,7 @@ SOURCES += \
 
 HEADERS += \
     src/crypto.hpp \
+    src/json.h \
     ui/mainwindow.h \
     src/utils.hpp \
     src/vault.h \

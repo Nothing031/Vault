@@ -13,7 +13,6 @@ class window_crypto;
 class Window_crypto : public QWidget
 {
     Q_OBJECT
-
 public:
     explicit Window_crypto(QWidget *parent = nullptr, Vault vault = Vault());
     ~Window_crypto();
@@ -37,7 +36,6 @@ private slots:
 
 signals:
     void request_disable_ui(bool b);
-
 
 private:
     Ui::window_crypto *ui;

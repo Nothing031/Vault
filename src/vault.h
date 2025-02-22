@@ -31,7 +31,7 @@ public:
 
 class Vault{
 public:
-    Backup *backup;
+    QDir backup_dir;
     QDir dir;
     QString display_name;
     QString password;
@@ -47,7 +47,7 @@ public:
     }
     Vault(const Vault& other)
     {
-        backup = other.backup;
+        backup_dir = other.backup_dir;
         dir = other.dir;
         display_name = other.display_name;
         password = other.password;
@@ -59,7 +59,7 @@ public:
     {
         if (this == &other)
             return *this;
-        backup = other.backup;
+        backup_dir = other.backup_dir;
         dir = other.dir;
         display_name = other.display_name;
         password = other.password;

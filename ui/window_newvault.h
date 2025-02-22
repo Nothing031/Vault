@@ -22,7 +22,6 @@ public:
     explicit Window_NewVault(QWidget *parent = nullptr, NewVault parentVaultMode = NewVault::CreateNew);
     ~Window_NewVault();
 
-
 private slots:
     void on_directory_open_button_clicked();
 
@@ -43,7 +42,6 @@ signals:
 
 private:
     void ConditionCheck();
-
 
     QDir directory = QDir();
     bool condition_path = false;

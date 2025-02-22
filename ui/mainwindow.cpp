@@ -22,6 +22,8 @@
 #include "window_crypto.h"
 #include "window_newvault.h"
 
+#include "src/json.h"
+
 namespace fs = std::filesystem;
 
 MainWindow::MainWindow(QWidget *parent):
@@ -29,6 +31,8 @@ MainWindow::MainWindow(QWidget *parent):
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    vaults = Json().LoadVaultJson();
+
 
 }
 MainWindow::~MainWindow()
@@ -42,8 +46,6 @@ void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
     if (ui->stackedWidget->currentWidget() != nullptr){
         ui->stackedWidget->currentWidget()->deleteLater();
     }
-
-
 
     Vault vault;
     vault.dir = QDir("C:/Users/LSH/Documents/TestDirectory");

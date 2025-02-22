@@ -2,12 +2,11 @@
 #define MAINWINDOW_H
 
 
-#include "qdir.h"
 #include <QMainWindow>
-#include <QFileSystemWatcher>
-#include <QStandardItemModel>
-
+#include <QVector>
 #include <QDir>
+
+#include "src/vault.h"
 
 using namespace std;
 
@@ -33,6 +32,9 @@ private slots:
     void on_vault_createExisting_button_clicked();
 
 private:
+    QVector<Vault> vaults;
+
+
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H
