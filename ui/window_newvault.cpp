@@ -139,6 +139,7 @@ void Window_NewVault::on_vault_create_clicked()
     }
 
     Vault newVault;
+    newVault.display_name = directory.dirName();
     newVault.dir = directory;
     newVault.password = Crypto::SHA256(ui->confirm_input_lineedit->text());
 

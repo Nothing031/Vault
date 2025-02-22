@@ -16,9 +16,10 @@
 
 #define LOCAL_DEBUG() qDebug() << "[WINDOW_CRYPTO]"
 
-Window_crypto::Window_crypto(QWidget *parent, Vault parent_vault)
+Window_crypto::Window_crypto(QWidget *parent, Vault parent_vault, int parent_index)
     : QWidget(parent)
     , ui(new Ui::window_crypto)
+    , persistence_index(parent_index)
     , crypto(nullptr)
     , thread(nullptr)
     , vault(parent_vault)
@@ -123,8 +124,6 @@ void Window_crypto::on_openFolder_button_clicked()
 void Window_crypto::on_encrypt_button_clicked()
 {
     vault.UpdateIndex();
-    ui->progressBar->setRange(0, vault.index_decrypted.size());
-    ui->progressBar->setValue(0);
     if (thread || crypto){
         qDebug() << "[ERROR] Thread is running, try later";
         return;
@@ -133,11 +132,14 @@ void Window_crypto::on_encrypt_button_clicked()
         qDebug() << "[ERROR] no any encryptable files";
         return;
     }
+    ui->progressBar->setRange(0, vault.index_decrypted.size());
+    ui->progressBar->setValue(0);
 
     thread = new QThread();
     crypto = new Crypto();
     crypto->moveToThread(thread);
     connect(thread, &QThread::started, this, [this](){
+        emit request_setEnable_ui(false);
         qDebug() << "[ENCRYPTION]  Started";
         ui->encrypt_button->setEnabled(false);
         ui->decrypt_button->setEnabled(false);
@@ -147,6 +149,8 @@ void Window_crypto::on_encrypt_button_clicked()
         crypto->AES256_Encrypt_All(vault);
     });
     connect(crypto, &Crypto::signal_done, this, [this](){
+        UpdateDirectoryViewer();
+        emit request_setEnable_ui(true);
         ui->encrypt_button->setEnabled(true);
         ui->decrypt_button->setEnabled(true);
         ui->backup_button->setEnabled(true);
@@ -165,8 +169,6 @@ void Window_crypto::on_encrypt_button_clicked()
 void Window_crypto::on_decrypt_button_clicked()
 {
     vault.UpdateIndex();
-    ui->progressBar->setRange(0, vault.index_decrypted.size());
-    ui->progressBar->setValue(0);
     if (thread || crypto){
         qDebug() << "[ERROR] Thread is running, try later";
         return;
@@ -175,11 +177,14 @@ void Window_crypto::on_decrypt_button_clicked()
         qDebug() << "[ERROR] no any decryptable files";
         return;
     }
+    ui->progressBar->setRange(0, vault.index_encrypted.size());
+    ui->progressBar->setValue(0);
 
     thread = new QThread();
     crypto = new Crypto();
     crypto->moveToThread(thread);
     connect(thread, &QThread::started, this, [this](){
+        emit request_setEnable_ui(false);
         qDebug() << "[DECRYPTION]  Started";
         ui->encrypt_button->setEnabled(false);
         ui->decrypt_button->setEnabled(false);
@@ -189,6 +194,8 @@ void Window_crypto::on_decrypt_button_clicked()
         crypto->AES256_Decrypt_All(vault);
     });
     connect(crypto, &Crypto::signal_done, this, [this](){
+        UpdateDirectoryViewer();
+        emit request_setEnable_ui(true);
         ui->encrypt_button->setEnabled(true);
         ui->decrypt_button->setEnabled(true);
         ui->backup_button->setEnabled(true);
@@ -219,6 +226,28 @@ void Window_crypto::on_suspend_button_clicked()
 void Window_crypto::on_backup_button_clicked()
 {
     qDebug() << "[BACKUP]  Backup button pressed";
-
 }
 
+void Window_crypto::on_vault_detach_button_clicked()
+{
+    emit request_detachVault_(persistence_index);
+    this->deleteLater();
+}
+
+void Window_crypto::UpdateDirectoryViewer(){
+    vault.UpdateIndex();
+    QBrush Green(QColor(55, 255, 55));
+    QBrush Red(QColor(255, 55, 55));
+    QListWidgetItem *item;
+    for (const auto& index : vault.index_encrypted){
+        item = ui->directory_viewer->item(index);
+        item->setText(vault.files[index].relativePath);
+        item->setForeground(Green);
+    }
+    for (const auto& index : vault.index_decrypted){
+        item = ui->directory_viewer->item(index);
+        item->setText(vault.files[index].relativePath);
+        item->setForeground(Red);
+    }
+    qDebug() << "[WINDOW_CRYPTO]  updated";
+};

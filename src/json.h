@@ -26,8 +26,8 @@ public:
             file.open(QFile::WriteOnly);
             QJsonObject jObj;
             jObj["Vaults"] = QJsonArray();
-            QJsonDocument doc = QJsonDocument(jObj);
-            file.write(doc.toJson(QJsonDocument::Indented));
+            QJsonDocument doc(jObj);
+            file.write(doc.toJson());
             file.close();
             qDebug() << "[JSON] file not exists";
             return QVector<Vault>();
@@ -50,26 +50,30 @@ public:
             vault.password = jVaultObj["Password"].toString();
             vaults.push_back(vault);
             qDebug() << "[JSON] Vault found";
-            qDebug() << "  Directory  :" << vault.dir.path();
-            qDebug() << "  Backup Dir :" << vault.backup_dir.path();
-            qDebug() << "  Password   :" << vault.password;
+            qDebug() << "  Display name :" << vault.display_name;
+            qDebug() << "  Directory    :" << vault.dir.path();
+            qDebug() << "  Backup Dir   :" << vault.backup_dir.path();
+            qDebug() << "  Password     :" << vault.password;
         }
         file.close();
+        qDebug() << "[JSON] Json loaded";
         return vaults;
     }
 
     void SaveVaultJson(const QVector<Vault>& vaults){
 
         QJsonObject jObj;
-        jObj["Vaults"] = QJsonArray();
+        QJsonArray jVaults;
         for (const auto& vault : vaults){
             QJsonObject jVault;
             jVault["Directory"] = vault.dir.path();
             jVault["Backup"] = vault.backup_dir.path();
             jVault["Password"] = vault.password;
-            jObj["Vaults"].toArray().push_back(jVault);
+            jVaults.push_back(jVault);
         }
-        QJsonDocument jDoc;
+        jObj["Vaults"] = jVaults;
+
+        QJsonDocument jDoc(jObj);
 
         QFile file(jsonPath);
         if (!file.open(QFile::WriteOnly | QFile::Truncate)){
@@ -80,6 +84,7 @@ public:
         file.close();
         qDebug() << "[JSON] Json saved";
     }
+
 };
 
 

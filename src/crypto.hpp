@@ -191,11 +191,25 @@ public slots:
         for (int tI = 0; tI < thread_count; tI++){
             int files_for_current = files_per_thread + (tI < remaining ? 1 : 0);
             for (int j = 0; j < files_for_current; j++){
-                qDebug() << targetFiles[file_info_it]->relativePath;
                 pFilesArr[tI].push_back(targetFiles[file_info_it++]);
             }
         }
 
+        for (int tI = 0; tI < thread_count; tI++){
+            pWorkerArr[tI] = QThread::create([tI, &pFilesArr](){
+                for (int i = 0; i < pFilesArr[tI].size(); i++){
+                    qDebug() << pFilesArr[tI][i]->relativePath;
+                    pFilesArr[tI][i]->encrypted = true;
+                }
+            });
+            pWorkerArr[tI]->start();
+        }
+
+        for (int tI = 0; tI < thread_count; tI++){
+            if(pWorkerArr[tI]->isRunning()){
+                pWorkerArr[tI]->wait();
+            }
+        }
 
         vault.mutex.unlock();
         emit signal_done();
@@ -221,8 +235,23 @@ public slots:
         for (int tI = 0; tI < thread_count; tI++){
             int files_for_current = files_per_thread + (tI < remaining ? 1 : 0);
             for (int j = 0; j < files_for_current; j++){
-                qDebug() << targetFiles[file_info_it]->relativePath;
                 pFilesArr[tI].push_back(targetFiles[file_info_it++]);
+            }
+        }
+
+        for (int tI = 0; tI < thread_count; tI++){
+            pWorkerArr[tI] = QThread::create([tI, &pFilesArr](){
+                for (int i = 0; i < pFilesArr[tI].size(); i++){
+                    qDebug() << pFilesArr[tI][i]->relativePath;
+                    pFilesArr[tI][i]->encrypted = false;
+                }
+            });
+            pWorkerArr[tI]->start();
+        }
+
+        for (int tI = 0; tI < thread_count; tI++){
+            if(pWorkerArr[tI]->isRunning()){
+                pWorkerArr[tI]->wait();
             }
         }
 

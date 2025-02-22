@@ -33,7 +33,12 @@ MainWindow::MainWindow(QWidget *parent):
     ui->setupUi(this);
     vaults = Json().LoadVaultJson();
 
-
+    ui->vault_select_comboBox->blockSignals(true);
+    for (const Vault& vault : vaults){
+        ui->vault_select_comboBox->addItem(vault.display_name);
+    }
+    ui->vault_select_comboBox->setCurrentIndex(-1);
+    ui->vault_select_comboBox->blockSignals(false);
 }
 MainWindow::~MainWindow()
 {
@@ -42,17 +47,38 @@ MainWindow::~MainWindow()
 
 void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
 {
+    if (index == -1){
+        return;
+    }
+
     ui->vault_createNew_button->blockSignals(true);
-    if (ui->stackedWidget->currentWidget() != nullptr){
+    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
         ui->stackedWidget->currentWidget()->deleteLater();
     }
 
-    Vault vault;
-    vault.dir = QDir("C:/Users/LSH/Documents/TestDirectory");
-    vault.display_name = "TestDirectory";
-    vault.password = "03ac674216f3e15c761ee1a5e255f067953623c8b388b4459e13f978d7c846f4"; //1234
+    Window_crypto* win_crypto = new Window_crypto(this, vaults[index], index);
+    connect(win_crypto, &Window_crypto::request_detachVault_, this, [this](const int persistence_index){
+        // delete index;
 
-    Window_crypto* win_crypto = new Window_crypto(this, vault);
+        vaults.erase(vaults.begin() + persistence_index);
+
+        ui->vault_select_comboBox->blockSignals(true);
+        ui->vault_select_comboBox->clear();
+        for (const Vault& vault : vaults){
+            ui->vault_select_comboBox->addItem(vault.display_name);
+        }
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->vault_select_comboBox->blockSignals(false);
+        Json().SaveVaultJson(vaults);
+        ui->stackedWidget->setCurrentIndex(0);
+        qDebug() << "Vault Created";
+    });
+    connect(win_crypto, &Window_crypto::request_setEnable_ui, this, [this](const bool b){
+        ui->vault_select_comboBox->setEnabled(b);
+        ui->vault_createExisting_button->setEnabled(b);
+        ui->vault_createNew_button->setEnabled(b);
+    });
+
     ui->stackedWidget->addWidget(win_crypto);
     ui->stackedWidget->setCurrentWidget(win_crypto);
     ui->vault_createNew_button->blockSignals(false);
@@ -60,7 +86,7 @@ void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
 
 void MainWindow::on_vault_createNew_button_clicked()
 {
-    if (ui->stackedWidget->currentWidget() != nullptr){
+    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
         ui->stackedWidget->currentWidget()->deleteLater();
     }
     Window_NewVault* win_newVault = new Window_NewVault(this, NewVault::CreateNew);
@@ -68,14 +94,22 @@ void MainWindow::on_vault_createNew_button_clicked()
     ui->stackedWidget->setCurrentWidget(win_newVault);
     connect(win_newVault, &Window_NewVault::signal_create_new_vault, this, [this](const Vault vault){
        // create vault;
-
+        vaults.push_back(vault);
+        ui->vault_select_comboBox->blockSignals(true);
+        for (const Vault& vault : vaults){
+            ui->vault_select_comboBox->addItem(vault.display_name);
+        }
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->vault_select_comboBox->blockSignals(false);
+        Json().SaveVaultJson(vaults);
+        ui->stackedWidget->setCurrentIndex(0);
+        qDebug() << "Vault Created";
     });
 }
 
-
 void MainWindow::on_vault_createExisting_button_clicked()
 {
-    if (ui->stackedWidget->currentWidget() != nullptr){
+    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
         ui->stackedWidget->currentWidget()->deleteLater();
     }
     Window_NewVault* win_newVault = new Window_NewVault(this, NewVault::CreateExisting);
@@ -83,7 +117,16 @@ void MainWindow::on_vault_createExisting_button_clicked()
     ui->stackedWidget->setCurrentWidget(win_newVault);
     connect(win_newVault, &Window_NewVault::signal_create_new_vault, this, [this](const Vault vault){
         // create vault;
-
+        vaults.push_back(vault);
+        ui->vault_select_comboBox->blockSignals(true);
+        Vault loopVault;
+        for (const Vault& vault : vaults){
+            ui->vault_select_comboBox->addItem(vault.display_name);
+        }
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->vault_select_comboBox->blockSignals(false);
+        Json().SaveVaultJson(vaults);
+        qDebug() << "Vault Created";
     });
 }
 

@@ -14,7 +14,7 @@ class Window_crypto : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Window_crypto(QWidget *parent = nullptr, Vault vault = Vault());
+    explicit Window_crypto(QWidget *parent = nullptr, Vault parent_vault = Vault(), int parent_index = -1);
     ~Window_crypto();
 
     void Load(const Vault& vault);
@@ -34,11 +34,19 @@ private slots:
 
     void on_backup_button_clicked();
 
+    void on_vault_detach_button_clicked();
+
 signals:
-    void request_disable_ui(bool b);
+    void request_detachVault_(int index);
+    void request_setEnable_ui(bool b);
 
 private:
+    void UpdateDirectoryViewer();
+
+
     Ui::window_crypto *ui;
+
+    int persistence_index;
     Crypto *crypto;
     QThread *thread;
     Vault vault;
