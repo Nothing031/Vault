@@ -148,6 +148,6 @@ void Window_NewVault::on_vault_create_clicked()
     qDebug() << "  Password  :" << newVault.password;
 
     // create
-
+    emit signal_create_new_vault(newVault);
 }
 
