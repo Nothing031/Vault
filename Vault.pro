@@ -11,18 +11,21 @@ CONFIG += c++17
 SOURCES += \
     src/main.cpp \
     ui/mainwindow.cpp \
-    ui/window_crypto.cpp
+    ui/window_crypto.cpp \
+    ui/window_newvault.cpp
 
 HEADERS += \
     src/crypto.hpp \
     ui/mainwindow.h \
     src/utils.hpp \
     src/vault.h \
-    ui/window_crypto.h
+    ui/window_crypto.h \
+    ui/window_newvault.h
 
 FORMS += \
     ui/mainwindow.ui \
-    ui/window_crypto.ui
+    ui/window_crypto.ui \
+    ui/window_newvault.ui
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MTd/ -llibcrypto -llibssl

@@ -2,10 +2,12 @@
 #define MAINWINDOW_H
 
 
+#include "qdir.h"
 #include <QMainWindow>
 #include <QFileSystemWatcher>
 #include <QStandardItemModel>
-#include "window_crypto.h"
+
+#include <QDir>
 
 using namespace std;
 
@@ -28,8 +30,9 @@ private slots:
 
     void on_vault_createNew_button_clicked();
 
+    void on_vault_createExisting_button_clicked();
+
 private:
     Ui::MainWindow *ui;
-    Window_crypto *window_crypto;
 };
 #endif // MAINWINDOW_H

@@ -15,7 +15,7 @@ class Window_crypto : public QWidget
     Q_OBJECT
 
 public:
-    explicit Window_crypto(QWidget *parent = nullptr);
+    explicit Window_crypto(QWidget *parent = nullptr, Vault vault = Vault());
     ~Window_crypto();
 
     void Load(const Vault& vault);
@@ -42,6 +42,7 @@ signals:
 private:
     Ui::window_crypto *ui;
     Crypto *crypto;
+    QThread *thread;
     Vault vault;
 };
 

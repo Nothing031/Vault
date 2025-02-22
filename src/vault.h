@@ -11,8 +11,9 @@
 #include <QDir>
 #include <QException>
 #include <QElapsedTimer>
-
+#include <QApplication>
 #include <QDirListing>
+#include <QMutex>
 #include <QDirIterator>
 
 typedef struct __FILE_INFO__{
@@ -36,6 +37,7 @@ public:
     QString password;
     QByteArray key;
 
+    QMutex mutex;
     QVector<FILE_INFO> files;
     QVector<int> index_encrypted;
     QVector<int> index_decrypted;
@@ -67,10 +69,10 @@ public:
         return *this;
     }
 
-
     void CreateKey(const QString& input)
     {
         qDebug() << "[VAULT]  Generating key";
+        QApplication::processEvents();
         QElapsedTimer timer;
         timer.start();
 
@@ -97,6 +99,7 @@ public:
         QElapsedTimer timer;
         timer.start();
         qDebug() << "[VAULT] indexing...";
+        QApplication::processEvents();
         index_encrypted.clear();
         index_decrypted.clear();
         for (int i = 0; i < files.size(); i++){
@@ -116,7 +119,7 @@ public:
         QElapsedTimer timer;
         timer.start();
         qDebug() << "[VAULT] loading files...";
-
+        QApplication::processEvents();
         if (dir.exists()){
             files.clear();
             for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
