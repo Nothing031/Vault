@@ -14,13 +14,16 @@ namespace Ui {
 class Window_NewVault;
 }
 
-class Window_NewVault : public QWidget
+class window_newvault : public QWidget
 {
     Q_OBJECT
 
 public:
-    explicit Window_NewVault(QWidget *parent = nullptr, NewVault parentVaultMode = NewVault::CreateNew);
-    ~Window_NewVault();
+    explicit window_newvault(QWidget *parent = nullptr);
+    ~window_newvault();
+
+public slots:
+    void on_request_page(const NewVault& mode);
 
 private slots:
     void on_directory_open_button_clicked();

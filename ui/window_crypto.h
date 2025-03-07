@@ -10,16 +10,17 @@ namespace Ui {
 class window_crypto;
 }
 
-class Window_crypto : public QWidget
+class window_crypto : public QWidget
 {
     Q_OBJECT
 public:
-    explicit Window_crypto(QWidget *parent = nullptr, Vault parent_vault = Vault(), int parent_index = -1);
-    ~Window_crypto();
-
-    void Load(const Vault& vault);
+    explicit window_crypto(QWidget *parent = nullptr);
+    ~window_crypto();
+public slots:
+    void on_request_page(int index, Vault vault);
 
 private slots:
+
     void on_password_input_lineedit_returnPressed();
 
     void on_password_visibility_button_toggled(bool checked);
@@ -37,7 +38,7 @@ private slots:
     void on_vault_detach_button_clicked();
 
 signals:
-    void request_detachVault_(int index);
+    void request_detachVault(int index);
     void request_setEnable_ui(bool b);
 
 private:

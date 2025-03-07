@@ -12,26 +12,11 @@
 
 namespace fs = std::filesystem;
 
-Window_NewVault::Window_NewVault(QWidget *parent, NewVault parent_vault)
+window_newvault::window_newvault(QWidget *parent)
     : QWidget(parent)
-    , NewVaultMode(parent_vault)
     , ui(new Ui::Window_NewVault)
 {
     ui->setupUi(this);
-    ui->vault_l_label->setEnabled(false);
-    ui->vault_name_lineedit->setEnabled(false);
-    ui->password_l_label->setEnabled(false);
-    ui->password_input_lineedit->setEnabled(false);
-    ui->password_visibility_button->setEnabled(false);
-    ui->confirm_l_label->setEnabled(false);
-    ui->confirm_input_lineedit->setEnabled(false);
-    ui->confirm_visibility_button->setEnabled(false);
-    ui->vault_create->setEnabled(false);
-
-    ui->directory_path_label->setText("");
-    ui->vault_name_lineedit->setText("");
-    ui->password_input_lineedit->setText("");
-    ui->confirm_input_lineedit->setText("");
 
     // validator
     QRegularExpression path_re(R"([^\\/:*?\"<>|]*)");
@@ -44,12 +29,12 @@ Window_NewVault::Window_NewVault(QWidget *parent, NewVault parent_vault)
     ui->confirm_input_lineedit->setValidator(password_validator);
 }
 
-Window_NewVault::~Window_NewVault()
+window_newvault::~window_newvault()
 {
     delete ui;
 }
 
-void Window_NewVault::ConditionCheck()
+void window_newvault::ConditionCheck()
 {
     QString styleSheet;
     if (NewVaultMode == NewVault::CreateNew){
@@ -70,7 +55,26 @@ void Window_NewVault::ConditionCheck()
     }
 }
 
-void Window_NewVault::on_directory_open_button_clicked()
+void window_newvault::on_request_page(const NewVault& mode)
+{
+    NewVaultMode = mode;
+    ui->vault_l_label->setEnabled(false);
+    ui->vault_name_lineedit->setEnabled(false);
+    ui->password_l_label->setEnabled(false);
+    ui->password_input_lineedit->setEnabled(false);
+    ui->password_visibility_button->setEnabled(false);
+    ui->confirm_l_label->setEnabled(false);
+    ui->confirm_input_lineedit->setEnabled(false);
+    ui->confirm_visibility_button->setEnabled(false);
+    ui->vault_create->setEnabled(false);
+
+    ui->directory_path_label->setText("");
+    ui->vault_name_lineedit->setText("");
+    ui->password_input_lineedit->setText("");
+    ui->confirm_input_lineedit->setText("");
+}
+
+void window_newvault::on_directory_open_button_clicked()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
     if (dir.isEmpty()) return;
@@ -92,19 +96,19 @@ void Window_NewVault::on_directory_open_button_clicked()
     ConditionCheck();
 }
 
-void Window_NewVault::on_vault_name_lineedit_textEdited(const QString &arg1)
+void window_newvault::on_vault_name_lineedit_textEdited(const QString &arg1)
 {
     ui->directory_path_label->setText(directory.path() + "/" + arg1);
     condition_path = (!fs::exists(ui->directory_path_label->text().toStdWString()) ? true : false);
     ConditionCheck();
 }
 
-void Window_NewVault::on_password_visibility_button_toggled(bool checked)
+void window_newvault::on_password_visibility_button_toggled(bool checked)
 {
     ui->password_input_lineedit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
 }
 
-void Window_NewVault::on_password_input_lineedit_textEdited(const QString &arg1)
+void window_newvault::on_password_input_lineedit_textEdited(const QString &arg1)
 {
     condition_password = !(arg1.size() < 4);
     if (condition_password && arg1 == ui->confirm_input_lineedit->text()){
@@ -115,12 +119,12 @@ void Window_NewVault::on_password_input_lineedit_textEdited(const QString &arg1)
     ConditionCheck();
 }
 
-void Window_NewVault::on_confirm_visibility_button_toggled(bool checked)
+void window_newvault::on_confirm_visibility_button_toggled(bool checked)
 {
     ui->confirm_input_lineedit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
 }
 
-void Window_NewVault::on_confirm_input_lineedit_textEdited(const QString &arg1)
+void window_newvault::on_confirm_input_lineedit_textEdited(const QString &arg1)
 {
     if (arg1 == ui->password_input_lineedit->text() && !(arg1.size() < 4)){
         condition_confirm = true;
@@ -130,7 +134,7 @@ void Window_NewVault::on_confirm_input_lineedit_textEdited(const QString &arg1)
     ConditionCheck();
 }
 
-void Window_NewVault::on_vault_create_clicked()
+void window_newvault::on_vault_create_clicked()
 {
     directory = QDir(ui->directory_path_label->text());
     if (!directory.exists()){

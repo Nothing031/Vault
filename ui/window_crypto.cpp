@@ -16,18 +16,27 @@
 
 #define LOCAL_DEBUG() qDebug() << "[WINDOW_CRYPTO]"
 
-Window_crypto::Window_crypto(QWidget *parent, Vault parent_vault, int parent_index)
+window_crypto::window_crypto(QWidget *parent)
     : QWidget(parent)
     , ui(new Ui::window_crypto)
-    , persistence_index(parent_index)
     , crypto(nullptr)
     , thread(nullptr)
-    , vault(parent_vault)
 {
     LOCAL_DEBUG() << DEFAULT << "Initializing...";
     ui->setupUi(this);
 
-    // set enables
+}
+
+window_crypto::~window_crypto()
+{
+    delete ui;
+}
+
+void window_crypto::on_request_page(int index, Vault vault)
+{
+    persistence_index = index;
+    this->vault = vault;
+
     ui->openFolder_button->setEnabled(true);
     ui->backup_button->setEnabled(true);
     ui->encrypt_button->setEnabled(false);
@@ -40,50 +49,43 @@ Window_crypto::Window_crypto(QWidget *parent, Vault parent_vault, int parent_ind
     ui->vault_name_label->setText("");
     ui->password_input_lineedit->setText("");
     ui->directory_viewer->clear();
-
-    Load(vault);
 }
 
-Window_crypto::~Window_crypto()
-{
-    delete ui;
-}
+// void Window_crypto::Load(const Vault &newVault)
+// {
+//     QElapsedTimer timer;
+//     vault = newVault;
+//     if (!vault.LoadFiles()){
+//         LOCAL_DEBUG() << RED << "Error Failed to load files" << DEFAULT;
+//         return;
+//     }
 
-void Window_crypto::Load(const Vault &newVault)
-{
-    QElapsedTimer timer;
-    vault = newVault;
-    if (!vault.LoadFiles()){
-        LOCAL_DEBUG() << RED << "Error Failed to load files" << DEFAULT;
-        return;
-    }
+//     //ui
+//     ui->encrypt_button->setEnabled(false);
+//     ui->decrypt_button->setEnabled(false);
+//     ui->suspend_button->setEnabled(false);
 
-    //ui
-    ui->encrypt_button->setEnabled(false);
-    ui->decrypt_button->setEnabled(false);
-    ui->suspend_button->setEnabled(false);
+//     ui->directory_path_label->setText(vault.dir.path());
+//     ui->vault_name_label->setText(vault.display_name);
+//     ui->directory_viewer->clear();
 
-    ui->directory_path_label->setText(vault.dir.path());
-    ui->vault_name_label->setText(vault.display_name);
-    ui->directory_viewer->clear();
+//     timer.start();
+//     QBrush Red = QBrush(QColor(255, 55, 55));
+//     QBrush Green = QBrush(QColor(55, 255, 55));
 
-    timer.start();
-    QBrush Red = QBrush(QColor(255, 55, 55));
-    QBrush Green = QBrush(QColor(55, 255, 55));
+//     QBrush QBrush(QColor(255, 55, 55));
+//     QListWidgetItem *item;
+//     LOCAL_DEBUG() << DEFAULT << "Adding to directory viewer..";
+//     QApplication::processEvents();
+//     for (const auto& file : vault.files){
+//         item = new QListWidgetItem(file.relativePath);
+//         item->setForeground(file.encrypted ? Green : Red);
+//         ui->directory_viewer->addItem(item);
+//     }
+//     LOCAL_DEBUG() << DEFAULT << "Elapsed time :" << GREEN << timer.elapsed() << DEFAULT;
+// }
 
-    QBrush QBrush(QColor(255, 55, 55));
-    QListWidgetItem *item;
-    LOCAL_DEBUG() << DEFAULT << "Adding to directory viewer..";
-    QApplication::processEvents();
-    for (const auto& file : vault.files){
-        item = new QListWidgetItem(file.relativePath);
-        item->setForeground(file.encrypted ? Green : Red);
-        ui->directory_viewer->addItem(item);
-    }
-    LOCAL_DEBUG() << DEFAULT << "Elapsed time :" << GREEN << timer.elapsed() << DEFAULT;
-}
-
-void Window_crypto::on_password_input_lineedit_returnPressed()
+void window_crypto::on_password_input_lineedit_returnPressed()
 {
     QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
     if (vault.password == hashed_password){
@@ -102,7 +104,7 @@ void Window_crypto::on_password_input_lineedit_returnPressed()
     }
 }
 
-void Window_crypto::on_password_visibility_button_toggled(bool checked)
+void window_crypto::on_password_visibility_button_toggled(bool checked)
 {
     if (checked){
         ui->password_input_lineedit->setEchoMode(QLineEdit::Normal);
@@ -111,7 +113,7 @@ void Window_crypto::on_password_visibility_button_toggled(bool checked)
     }
 }
 
-void Window_crypto::on_openFolder_button_clicked()
+void window_crypto::on_openFolder_button_clicked()
 {
     if (vault.dir.exists()){
         LOCAL_DEBUG() << DEFAULT << "Opending Directory :" << vault.dir.path();
@@ -121,7 +123,7 @@ void Window_crypto::on_openFolder_button_clicked()
     }
 }
 
-void Window_crypto::on_encrypt_button_clicked()
+void window_crypto::on_encrypt_button_clicked()
 {
     vault.UpdateIndex();
     if (thread || crypto){
@@ -166,7 +168,7 @@ void Window_crypto::on_encrypt_button_clicked()
     thread->start();
 }
 
-void Window_crypto::on_decrypt_button_clicked()
+void window_crypto::on_decrypt_button_clicked()
 {
     vault.UpdateIndex();
     if (thread || crypto){
@@ -212,7 +214,7 @@ void Window_crypto::on_decrypt_button_clicked()
     thread->start();
 }
 
-void Window_crypto::on_suspend_button_clicked()
+void window_crypto::on_suspend_button_clicked()
 {
     if (crypto || thread){
         qDebug() << "[CRYPTO]  Suspending";
@@ -223,18 +225,19 @@ void Window_crypto::on_suspend_button_clicked()
     }
 }
 
-void Window_crypto::on_backup_button_clicked()
+void window_crypto::on_backup_button_clicked()
 {
     qDebug() << "[BACKUP]  Backup button pressed";
 }
 
-void Window_crypto::on_vault_detach_button_clicked()
+void window_crypto::on_vault_detach_button_clicked()
 {
-    emit request_detachVault_(persistence_index);
+    emit request_detachVault(persistence_index);
     this->deleteLater();
 }
 
-void Window_crypto::UpdateDirectoryViewer(){
+
+void window_crypto::UpdateDirectoryViewer(){
     vault.UpdateIndex();
     QBrush Green(QColor(55, 255, 55));
     QBrush Red(QColor(255, 55, 55));

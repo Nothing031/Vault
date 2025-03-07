@@ -31,37 +31,29 @@ MainWindow::MainWindow(QWidget *parent):
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
+    // Load data
     vaults = Json().LoadVaultJson();
-
     ui->vault_select_comboBox->blockSignals(true);
     for (const Vault& vault : vaults){
         ui->vault_select_comboBox->addItem(vault.display_name);
     }
     ui->vault_select_comboBox->setCurrentIndex(-1);
     ui->vault_select_comboBox->blockSignals(false);
-}
-MainWindow::~MainWindow()
-{
-    delete ui;
-}
 
-void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
-{
-    if (index == -1){
-        return;
-    }
-
-    ui->vault_createNew_button->blockSignals(true);
-    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
-        ui->stackedWidget->currentWidget()->deleteLater();
-    }
-
-    Window_crypto* win_crypto = new Window_crypto(this, vaults[index], index);
-    connect(win_crypto, &Window_crypto::request_detachVault_, this, [this](const int persistence_index){
-        // delete index;
-
-        vaults.erase(vaults.begin() + persistence_index);
-
+    // window new vault
+    window_newvault *win_newvault = new window_newvault(this);
+    connect(ui->vault_createNew_button, &QPushButton::pressed, win_newvault, [this, win_newvault](){
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->stackedWidget->setCurrentWidget(win_newvault);
+        win_newvault->on_request_page(NewVault::CreateNew);
+    });
+    connect(ui->vault_createExisting_button, &QPushButton::pressed, win_newvault, [this, win_newvault](){
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->stackedWidget->setCurrentWidget(win_newvault);
+        win_newvault->on_request_page(NewVault::CreateExisting);
+    });
+    connect(win_newvault, &window_newvault::signal_create_new_vault, this, [this](const Vault vault){
+        vaults.push_back(vault);
         ui->vault_select_comboBox->blockSignals(true);
         ui->vault_select_comboBox->clear();
         for (const Vault& vault : vaults){
@@ -70,63 +62,58 @@ void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
         ui->vault_select_comboBox->setCurrentIndex(-1);
         ui->vault_select_comboBox->blockSignals(false);
         Json().SaveVaultJson(vaults);
-        ui->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentIndex((int)page::Empty);
         qDebug() << "Vault Created";
     });
-    connect(win_crypto, &Window_crypto::request_setEnable_ui, this, [this](const bool b){
+    ui->stackedWidget->addWidget(win_newvault);
+
+    // window crypto
+    window_crypto *win_crypto = new window_crypto(this);
+    connect(ui->vault_select_comboBox, &QComboBox::activated, win_crypto, [this, win_crypto](const int index){
+        if (index == -1){
+            return;
+        }
+
+        ui->stackedWidget->setCurrentWidget(win_crypto);
+        win_crypto->on_request_page(index, vaults.at(index));
+    });
+    connect(win_crypto, &window_crypto::request_detachVault, this, [this](const int index){
+        vaults.erase(vaults.begin() + index);
+        ui->vault_select_comboBox->blockSignals(true);
+        ui->vault_select_comboBox->clear();
+        for (const Vault& vault : vaults){
+            ui->vault_select_comboBox->addItem(vault.display_name);
+        }
+        ui->vault_select_comboBox->setCurrentIndex(-1);
+        ui->vault_select_comboBox->blockSignals(false);
+        ui->stackedWidget->setCurrentIndex(0);
+        Json().SaveVaultJson(vaults);
+    });
+    connect(win_crypto, &window_crypto::request_setEnable_ui, this, [this](const bool b){
         ui->vault_select_comboBox->setEnabled(b);
         ui->vault_createExisting_button->setEnabled(b);
         ui->vault_createNew_button->setEnabled(b);
     });
-
     ui->stackedWidget->addWidget(win_crypto);
-    ui->stackedWidget->setCurrentWidget(win_crypto);
-    ui->vault_createNew_button->blockSignals(false);
+
+}
+MainWindow::~MainWindow()
+{
+    delete ui;
+}
+
+void MainWindow::on_vault_select_comboBox_currentIndexChanged(int index)
+{
+
 }
 
 void MainWindow::on_vault_createNew_button_clicked()
 {
-    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
-        ui->stackedWidget->currentWidget()->deleteLater();
-    }
-    Window_NewVault* win_newVault = new Window_NewVault(this, NewVault::CreateNew);
-    ui->stackedWidget->addWidget(win_newVault);
-    ui->stackedWidget->setCurrentWidget(win_newVault);
-    connect(win_newVault, &Window_NewVault::signal_create_new_vault, this, [this](const Vault vault){
-       // create vault;
-        vaults.push_back(vault);
-        ui->vault_select_comboBox->blockSignals(true);
-        for (const Vault& vault : vaults){
-            ui->vault_select_comboBox->addItem(vault.display_name);
-        }
-        ui->vault_select_comboBox->setCurrentIndex(-1);
-        ui->vault_select_comboBox->blockSignals(false);
-        Json().SaveVaultJson(vaults);
-        ui->stackedWidget->setCurrentIndex(0);
-        qDebug() << "Vault Created";
-    });
+
 }
 
 void MainWindow::on_vault_createExisting_button_clicked()
 {
-    if (ui->stackedWidget->currentIndex() != 0 && ui->stackedWidget->currentWidget() != nullptr){
-        ui->stackedWidget->currentWidget()->deleteLater();
-    }
-    Window_NewVault* win_newVault = new Window_NewVault(this, NewVault::CreateExisting);
-    ui->stackedWidget->addWidget(win_newVault);
-    ui->stackedWidget->setCurrentWidget(win_newVault);
-    connect(win_newVault, &Window_NewVault::signal_create_new_vault, this, [this](const Vault vault){
-        // create vault;
-        vaults.push_back(vault);
-        ui->vault_select_comboBox->blockSignals(true);
-        Vault loopVault;
-        for (const Vault& vault : vaults){
-            ui->vault_select_comboBox->addItem(vault.display_name);
-        }
-        ui->vault_select_comboBox->setCurrentIndex(-1);
-        ui->vault_select_comboBox->blockSignals(false);
-        Json().SaveVaultJson(vaults);
-        qDebug() << "Vault Created";
-    });
+
 }
 

@@ -1,7 +1,6 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-
 #include <QMainWindow>
 #include <QVector>
 #include <QDir>
@@ -32,9 +31,13 @@ private slots:
     void on_vault_createExisting_button_clicked();
 
 private:
+    enum class page : int{
+        Empty = 0,
+        NewVault = 1,
+        Crypto = 2
+    };
+
     QVector<Vault> vaults;
-
-
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H
