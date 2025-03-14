@@ -16,6 +16,8 @@ SOURCES += \
 
 HEADERS += \
     src/crypto.hpp \
+    src/file_t.hpp \
+    src/filelistmodel.hpp \
     src/json.h \
     ui/mainwindow.h \
     src/utils.hpp \
@@ -28,11 +30,11 @@ FORMS += \
     ui/window_crypto.ui \
     ui/window_newvault.ui
 
-win32:CONFIG(release, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MT/ -llibcrypto -llibssl
-else:win32:CONFIG(debug, debug|release): LIBS += -LC:/openssl/lib/VC/x64/MTd/ -llibcrypto -llibssl
+win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
+else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl
 
-INCLUDEPATH += C:/openssl/include
-DEPENDPATH += C:/openssl/include
+INCLUDEPATH += C:/Library/openssl/3.4.1/include
+DEPENDPATH += C:/Library/openssl/3.4.1/include
 
 # Default rules for deployment.
 qnx: target.path = /tmp/$${TARGET}/bin

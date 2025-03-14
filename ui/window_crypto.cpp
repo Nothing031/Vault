@@ -9,6 +9,8 @@
 #include <QBrush>
 #include <QColor>
 
+#include "src/filelistmodel.hpp"
+
 #define RED "\033[31m"
 #define GREEN "\033[32m"
 #define DEFAULT "\033[0m"
@@ -22,8 +24,11 @@ window_crypto::window_crypto(QWidget *parent)
     , crypto(nullptr)
     , thread(nullptr)
 {
-    LOCAL_DEBUG() << DEFAULT << "Initializing...";
     ui->setupUi(this);
+    ui->files_listview->setModel(new FileListModel(this));
+
+
+
 
 }
 
@@ -44,46 +49,10 @@ void window_crypto::on_request_page(int index, Vault vault)
     ui->suspend_button->setEnabled(false);
     ui->progressBar->setValue(0);
 
-
     ui->directory_path_label->setText("");
     ui->vault_name_label->setText("");
     ui->password_input_lineedit->setText("");
-    ui->directory_viewer->clear();
 }
-
-// void Window_crypto::Load(const Vault &newVault)
-// {
-//     QElapsedTimer timer;
-//     vault = newVault;
-//     if (!vault.LoadFiles()){
-//         LOCAL_DEBUG() << RED << "Error Failed to load files" << DEFAULT;
-//         return;
-//     }
-
-//     //ui
-//     ui->encrypt_button->setEnabled(false);
-//     ui->decrypt_button->setEnabled(false);
-//     ui->suspend_button->setEnabled(false);
-
-//     ui->directory_path_label->setText(vault.dir.path());
-//     ui->vault_name_label->setText(vault.display_name);
-//     ui->directory_viewer->clear();
-
-//     timer.start();
-//     QBrush Red = QBrush(QColor(255, 55, 55));
-//     QBrush Green = QBrush(QColor(55, 255, 55));
-
-//     QBrush QBrush(QColor(255, 55, 55));
-//     QListWidgetItem *item;
-//     LOCAL_DEBUG() << DEFAULT << "Adding to directory viewer..";
-//     QApplication::processEvents();
-//     for (const auto& file : vault.files){
-//         item = new QListWidgetItem(file.relativePath);
-//         item->setForeground(file.encrypted ? Green : Red);
-//         ui->directory_viewer->addItem(item);
-//     }
-//     LOCAL_DEBUG() << DEFAULT << "Elapsed time :" << GREEN << timer.elapsed() << DEFAULT;
-// }
 
 void window_crypto::on_password_input_lineedit_returnPressed()
 {
@@ -236,21 +205,3 @@ void window_crypto::on_vault_detach_button_clicked()
     this->deleteLater();
 }
 
-
-void window_crypto::UpdateDirectoryViewer(){
-    vault.UpdateIndex();
-    QBrush Green(QColor(55, 255, 55));
-    QBrush Red(QColor(255, 55, 55));
-    QListWidgetItem *item;
-    for (const auto& index : vault.index_encrypted){
-        item = ui->directory_viewer->item(index);
-        item->setText(vault.files[index].relativePath);
-        item->setForeground(Green);
-    }
-    for (const auto& index : vault.index_decrypted){
-        item = ui->directory_viewer->item(index);
-        item->setText(vault.files[index].relativePath);
-        item->setForeground(Red);
-    }
-    qDebug() << "[WINDOW_CRYPTO]  updated";
-};

@@ -69,7 +69,7 @@ MainWindow::MainWindow(QWidget *parent):
 
     // window crypto
     window_crypto *win_crypto = new window_crypto(this);
-    connect(ui->vault_select_comboBox, &QComboBox::activated, win_crypto, [this, win_crypto](const int index){
+    connect(ui->vault_select_comboBox, &QComboBox::currentIndexChanged, win_crypto, [this, win_crypto](const int index){
         if (index == -1){
             return;
         }

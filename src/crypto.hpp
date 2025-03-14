@@ -18,8 +18,10 @@
 #include <QDir>
 #include <QThread>
 #include <QByteArray>
+#include <QQueue>
 
 #include "vault.h"
+#include "file_t.hpp"
 
 using namespace std;
 namespace fs = std::filesystem;
@@ -30,61 +32,40 @@ enum CRYPTIONMODE{
 };
 
 
+
 class Crypto : public QObject{
     Q_OBJECT
+    class Error{
+    public:
+        enum eError{
+            Unknown,
+            FileNotExists,
+            FailedToRead,
+            FailedToSave,
+            Encryption,
+            Decryption,
+
+        };
+        Error() : e_type(Unknown), e_what("Unknown Error"){
+
+        }
+        Error(const eError type, const QString what) : e_type(type), e_what(what){
+
+        }
+    private:
+        eError e_type;
+        QString e_what;
+
+        eError& type(){
+            return e_type;
+        }
+        QString& what(){
+            return e_what;
+        };
+    };
 
 private:
     bool state_running = false;
-
-    inline static bool AES256_Encrypt_File(const QString& inPath, const QString& outPath, const QByteArray& key)
-    {
-        QByteArray plainData;
-        if (!ReadFile(inPath, plainData)) {
-            qDebug() << "[ENCRYPT] Failed to read file, path : " << inPath;
-            return false;
-        }
-        // create iv
-        QByteArray iv;
-        RAND_bytes((unsigned char*)iv.data(), 16);
-        // encrypt
-        QByteArray encryptedData;
-        if (!AES256_Encrypt(plainData, key, iv, encryptedData)) {
-            qDebug() << "[ENCRYPT] Failed to encrypt file, path : " << inPath;
-            return false;
-        }
-        // insert iv
-        encryptedData.insert(0, iv);
-        if (!WriteFile(outPath, encryptedData)){
-            qDebug() << "[ENCRYPT] Failed to save file to " << outPath;
-            return false;
-        }
-        return true;
-    }
-    inline static bool AES256_Decrypt_File(const QString& inPath, const QString& outPath, const QByteArray& key)
-    {
-        QByteArray cipherData;
-        if (!ReadFile(inPath, cipherData)){
-            qDebug() << "[DECRYPT] Failed to read file, path : " << inPath;
-            return false;
-        }
-        // read iv
-        QByteArray iv = cipherData.mid(0, 16);
-        // erase iv
-        cipherData.erase(cipherData.begin(), cipherData.begin() + 16);
-        // decrypt
-        QByteArray plainData;
-        if (AES256_Decrypt(cipherData, key, iv, plainData)){
-            qDebug() << "[DECRYPT] Failed to decrypt file, path : " << inPath;
-            return false;
-        }
-        if (WriteFile(outPath, plainData)){
-            qDebug() << "[DECRYPT] Failed to save file to " << outPath;
-            return false;
-        }
-        return true;
-    }
-public:
-    bool flag_run = false;
 
     inline static bool ReadFile(const QString& path, QByteArray& out)
     {
@@ -111,103 +92,129 @@ public:
         }
     }
 
-    inline static QString SHA256(const QString& str)
-    {
-        return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
-    }
-
-    static bool AES256_Encrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
+    static void AES256_Encrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
         // init
         if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
-            qDebug() << "[ENCRYPT] EVP_EncryptInit_ex Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to finalize EVP");
         }
         int blockSize =EVP_CIPHER_CTX_get_block_size(ctx);
         out.resize(input.size() + blockSize);
         // encrypt
         int len;
         if (1 != EVP_EncryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.data(), input.size())) {
-            qDebug() << "[ENCRYPT] EVP_EncryptUpdate Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to encrypt");
         }
         // finalize
         int outLen = len;
         if (1 != EVP_EncryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
-            qDebug() << "[ENCRYPT] EVP_EncryptFinal_ex Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to finalize EVP");
         }
         outLen += len;
         out.resize(outLen);
         EVP_CIPHER_CTX_free(ctx);
-        return true;
     }
-    static bool AES256_Decrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
+    static void AES256_Decrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
         // init
         if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
-            qDebug() << "[DECRYPT] EVP_DecryptInit_ex Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to initialize EVP");
         }
         out.resize(input.size(), 0);
         // decrypt
         int len;
         if (1 != EVP_DecryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.constData(), input.size())) {
-            qDebug() << "[DECRYPT] EVP_DecryptUpdate Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to decrypt");
         }
         // finalize
         int outLen = len;
         if (1 != EVP_DecryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
-            qDebug() << "[DECRYPT] EVP_DecryptFinal_ex Failure";
-            return false;
+            throw Error(Error::Decryption, "Failed to finalize EVP");
         }
         outLen += len;
         out.resize(outLen);
         EVP_CIPHER_CTX_free(ctx);
-        return true;
     }
 
-public slots:
+    inline static void AES256_Encrypt_File(file_t* file, const QByteArray& key){
+        QByteArray plainData;
+        if (!ReadFile(file->absolutepath, plainData)){
+            throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
+        }
+        QByteArray iv;
+        RAND_bytes(reinterpret_cast<unsigned char*>(iv.data()), 16);
+
+        QByteArray cipherData;
+        AES256_Encrypt(plainData, key, iv, cipherData);
+
+        cipherData.insert(0, iv);
+        if (WriteFile(file->absolutepath + ".enc", cipherData)){
+            throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
+        }
+        file->absolutepath+= ".enc";
+        file->relativePath+= ".enc";
+        file->state = file_t_state::CipherData;
+    }
+    inline static void AES256_Decrypt_File(file_t* file, const QByteArray& key){
+        QByteArray cipherData;
+        if (!ReadFile(file->absolutepath, cipherData)){
+            throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
+        }
+        QByteArray iv = cipherData.mid(0, 16);
+        cipherData.erase(cipherData.begin(), cipherData.begin() + 16);
+
+        QByteArray plainData;
+        AES256_Decrypt(cipherData, key, iv, plainData);
+
+
+        if (WriteFile(file->absolutepath.left(file->absolutepath.size() - 4), plainData)){
+            throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
+        }
+        file->absolutepath = file->absolutepath.left(file->absolutepath.size() - 4);
+        file->relativePath = file->relativePath.left(file->relativePath.size() - 4);
+        file->state = file_t_state::PlainData;
+    }
+
     void AES256_Encrypt_All(Vault& vault){
         emit signal_start();
         vault.mutex.lock();
-        QVector<FILE_INFO*> targetFiles;
-        for (const auto& index : vault.index_decrypted){
-            targetFiles.push_back(&vault.files[index]);
-        }
-        int processor_count = std::thread::hardware_concurrency();
-        int thread_count = static_cast<int>(targetFiles.size() > processor_count ? processor_count : targetFiles.size());
-        int files_per_thread = static_cast<int>(targetFiles.size() / thread_count);
-        int remaining = targetFiles.size() % thread_count;
 
-        std::unique_ptr<QThread*[]> pWorkerArr = std::make_unique<QThread*[]>(thread_count);
-        std::unique_ptr<QVector<FILE_INFO*>[]> pFilesArr = std::make_unique<QVector<FILE_INFO*>[]>(thread_count);
-        int file_info_it = 0;
+        int threadCount = std::thread::hardware_concurrency();
+        QVector<QThread*> threads(threadCount);
 
-        for (int tI = 0; tI < thread_count; tI++){
-            int files_for_current = files_per_thread + (tI < remaining ? 1 : 0);
-            for (int j = 0; j < files_for_current; j++){
-                pFilesArr[tI].push_back(targetFiles[file_info_it++]);
+        QQueue<file_t*> files;
+        QMutex files_m;
+        for (int i = 0; i < vault.files.size(); i++){
+            if (vault.files[i].state == file_t_state::PlainData){
+                files.push_back(&vault.files[i]);
             }
         }
 
-        for (int tI = 0; tI < thread_count; tI++){
-            pWorkerArr[tI] = QThread::create([tI, &pFilesArr](){
-                for (int i = 0; i < pFilesArr[tI].size(); i++){
-                    qDebug() << pFilesArr[tI][i]->relativePath;
-                    pFilesArr[tI][i]->encrypted = true;
+        for (int i = 0; i < threadCount; i++){
+            threads[i] = QThread::create([&](){
+                while(true){
+                    files_m.lock();
+                    if (files.empty()){
+                        files_m.unlock();
+                        return;
+                    }
+                    file_t* file = files.front();
+                    files.pop_front();
+                    files_m.unlock();
+
+                    qDebug() << file->displayPath;
+                    //AES256_Encrypt_File(file, vault.key);
                 }
             });
-            pWorkerArr[tI]->start();
+            threads[i]->start();
         }
 
-        for (int tI = 0; tI < thread_count; tI++){
-            if(pWorkerArr[tI]->isRunning()){
-                pWorkerArr[tI]->wait();
+        for (int i = 0; i < threadCount; i++){
+            if (threads[i]->isRunning()){
+                threads[i]->wait();
             }
         }
 
@@ -215,51 +222,56 @@ public slots:
         emit signal_done();
     }
     void AES256_Decrypt_All(Vault& vault){
-        QMetaObject::invokeMethod(this, [this](){
-            emit signal_start();
-        });
+        emit signal_start();
         vault.mutex.lock();
-        QVector<FILE_INFO*> targetFiles;
-        for (const auto& index : vault.index_encrypted){
-            targetFiles.push_back(&vault.files[index]);
-        }
-        int processor_count = std::thread::hardware_concurrency();
-        int thread_count = static_cast<int>(targetFiles.size() > processor_count ? processor_count : targetFiles.size());
-        int files_per_thread = static_cast<int>(targetFiles.size() / thread_count);
-        int remaining = targetFiles.size() % thread_count;
 
-        std::unique_ptr<QThread*[]> pWorkerArr = std::make_unique<QThread*[]>(thread_count);
-        std::unique_ptr<QVector<FILE_INFO*>[]> pFilesArr = std::make_unique<QVector<FILE_INFO*>[]>(thread_count);
-        int file_info_it = 0;
+        int threadCount = std::thread::hardware_concurrency();
+        QVector<QThread*> threads(threadCount);
 
-        for (int tI = 0; tI < thread_count; tI++){
-            int files_for_current = files_per_thread + (tI < remaining ? 1 : 0);
-            for (int j = 0; j < files_for_current; j++){
-                pFilesArr[tI].push_back(targetFiles[file_info_it++]);
+        QQueue<file_t*> files;
+        QMutex files_m;
+        for (int i = 0; i < vault.files.size(); i++){
+            if (vault.files[i].state == file_t_state::CipherData){
+                files.push_back(&vault.files[i]);
             }
         }
 
-        for (int tI = 0; tI < thread_count; tI++){
-            pWorkerArr[tI] = QThread::create([tI, &pFilesArr](){
-                for (int i = 0; i < pFilesArr[tI].size(); i++){
-                    qDebug() << pFilesArr[tI][i]->relativePath;
-                    pFilesArr[tI][i]->encrypted = false;
+        // start
+        for (int i = 0; i < threadCount; i++){
+            threads[i] = QThread::create([&](){
+                while(true){
+                    files_m.lock();
+                    if (files.empty()){
+                        files_m.unlock();
+                        return;
+                    }
+                    file_t* file = files.front();
+                    files.pop_front();
+                    files_m.unlock();
+                    qDebug() << file->displayPath;
+
+                    //AES256_Decrypt_File(file, vault.key);
                 }
             });
-            pWorkerArr[tI]->start();
+            threads[i]->start();
         }
 
-        for (int tI = 0; tI < thread_count; tI++){
-            if(pWorkerArr[tI]->isRunning()){
-                pWorkerArr[tI]->wait();
+        // wait
+        for (int i = 0; i < threadCount; i++){
+            if (threads[i]->isRunning()){
+                threads[i]->wait();
             }
         }
 
-
         vault.mutex.unlock();
-        QMetaObject::invokeMethod(this, [this](){
-            emit signal_done();
-        });
+        emit signal_done();
+    }
+
+public:
+    bool flag_run = false;
+    inline static QString SHA256(const QString& str)
+    {
+        return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
     }
 
 signals:

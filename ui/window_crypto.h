@@ -42,8 +42,6 @@ signals:
     void request_setEnable_ui(bool b);
 
 private:
-    void UpdateDirectoryViewer();
-
 
     Ui::window_crypto *ui;
 
