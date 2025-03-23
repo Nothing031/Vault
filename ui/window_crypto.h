@@ -3,7 +3,7 @@
 
 #include <QWidget>
 
-#include "src/vault.h"
+#include "src/vault.hpp"
 #include "src/crypto.hpp"
 
 namespace Ui {
@@ -16,7 +16,7 @@ class window_crypto : public QWidget
 public:
     explicit window_crypto(QWidget *parent = nullptr);
     ~window_crypto();
-public slots:
+
     void on_request_page(int index, Vault vault);
 
 private slots:

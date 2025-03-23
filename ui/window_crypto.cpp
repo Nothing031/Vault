@@ -49,6 +49,7 @@ void window_crypto::on_request_page(int index, Vault vault)
     ui->suspend_button->setEnabled(false);
     ui->progressBar->setValue(0);
 
+
     ui->directory_path_label->setText("");
     ui->vault_name_label->setText("");
     ui->password_input_lineedit->setText("");
@@ -99,11 +100,11 @@ void window_crypto::on_encrypt_button_clicked()
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.index_decrypted.size() == 0){
+    if (vault.index_plain.size() == 0){
         qDebug() << "[ERROR] no any encryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.index_decrypted.size());
+    ui->progressBar->setRange(0, vault.index_plain.size());
     ui->progressBar->setValue(0);
 
     thread = new QThread();
@@ -120,7 +121,6 @@ void window_crypto::on_encrypt_button_clicked()
         crypto->AES256_Encrypt_All(vault);
     });
     connect(crypto, &Crypto::signal_done, this, [this](){
-        UpdateDirectoryViewer();
         emit request_setEnable_ui(true);
         ui->encrypt_button->setEnabled(true);
         ui->decrypt_button->setEnabled(true);
@@ -144,11 +144,11 @@ void window_crypto::on_decrypt_button_clicked()
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.index_encrypted.size() == 0){
+    if (vault.index_cipher.size() == 0){
         qDebug() << "[ERROR] no any decryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.index_encrypted.size());
+    ui->progressBar->setRange(0, vault.index_cipher.size());
     ui->progressBar->setValue(0);
 
     thread = new QThread();
@@ -165,7 +165,6 @@ void window_crypto::on_decrypt_button_clicked()
         crypto->AES256_Decrypt_All(vault);
     });
     connect(crypto, &Crypto::signal_done, this, [this](){
-        UpdateDirectoryViewer();
         emit request_setEnable_ui(true);
         ui->encrypt_button->setEnabled(true);
         ui->decrypt_button->setEnabled(true);

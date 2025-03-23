@@ -18,10 +18,10 @@ HEADERS += \
     src/crypto.hpp \
     src/file_t.hpp \
     src/filelistmodel.hpp \
-    src/json.h \
+    src/json.hpp \
+    src/vault.hpp \
     ui/mainwindow.h \
     src/utils.hpp \
-    src/vault.h \
     ui/window_crypto.h \
     ui/window_newvault.h
 

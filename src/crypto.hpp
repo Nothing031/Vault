@@ -1,16 +1,7 @@
 #ifndef CRYPTO_HPP
 #define CRYPTO_HPP
 
-
-#include <thread>
-#include <ctime>
-#include <memory>
 #include <QObject>
-#include <openssl/aes.h>
-#include <openssl/rand.h>
-#include <openssl/evp.h>
-#include <openssl/sha.h>
-
 #include <QCryptographicHash>
 #include <QElapsedTimer>
 #include <QMutex>
@@ -20,7 +11,15 @@
 #include <QByteArray>
 #include <QQueue>
 
-#include "vault.h"
+#include <thread>
+#include <ctime>
+
+#include <openssl/aes.h>
+#include <openssl/rand.h>
+#include <openssl/evp.h>
+#include <openssl/sha.h>
+
+#include "vault.hpp"
 #include "file_t.hpp"
 
 using namespace std;
@@ -31,10 +30,9 @@ enum CRYPTIONMODE{
     DECRYPTION
 };
 
-
-
 class Crypto : public QObject{
     Q_OBJECT
+public:
     class Error{
     public:
         enum eError{
@@ -44,17 +42,13 @@ class Crypto : public QObject{
             FailedToSave,
             Encryption,
             Decryption,
-
         };
         Error() : e_type(Unknown), e_what("Unknown Error"){
 
         }
-        Error(const eError type, const QString what) : e_type(type), e_what(what){
+        Error(const eError type = eError::Unknown, const QString what = "Unknown Error") : e_type(type), e_what(what){
 
         }
-    private:
-        eError e_type;
-        QString e_what;
 
         eError& type(){
             return e_type;
@@ -62,6 +56,9 @@ class Crypto : public QObject{
         QString& what(){
             return e_what;
         };
+    private:
+        eError e_type;
+        QString e_what;
     };
 
 private:
@@ -83,7 +80,7 @@ private:
     inline static bool WriteFile(const QString& path, const QByteArray& bytes)
     {
         QFile f(path);
-        if (f.open(QIODevice::WriteOnly)){
+        if (f.open(QFile::WriteOnly)){
             f.write(bytes);
             f.close();
             return true;
@@ -99,20 +96,20 @@ private:
         if (1 != EVP_EncryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
             throw Error(Error::Decryption, "Failed to finalize EVP");
         }
-        int blockSize =EVP_CIPHER_CTX_get_block_size(ctx);
-        out.resize(input.size() + blockSize);
+
         // encrypt
-        int len;
-        if (1 != EVP_EncryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.data(), input.size())) {
+        out.resize(input.size() + AES_BLOCK_SIZE);
+        int outLen;
+        if (1 != EVP_EncryptUpdate(ctx, (unsigned char*)out.data(), &outLen, (const unsigned char*)input.data(), input.size())) {
             throw Error(Error::Decryption, "Failed to encrypt");
         }
+        int finalLen = outLen;
         // finalize
-        int outLen = len;
-        if (1 != EVP_EncryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
+        if (1 != EVP_EncryptFinal_ex(ctx, (unsigned char*)out.data() + outLen, &outLen)) {
             throw Error(Error::Decryption, "Failed to finalize EVP");
         }
-        outLen += len;
-        out.resize(outLen);
+        finalLen += outLen;
+        out.resize(finalLen);
         EVP_CIPHER_CTX_free(ctx);
     }
     static void AES256_Decrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
@@ -121,44 +118,51 @@ private:
 
         // init
         if (1 != EVP_DecryptInit_ex(ctx, EVP_aes_256_cbc(), NULL, (const unsigned char*)key.constData(), (const unsigned char*)iv.constData())) {
+            EVP_CIPHER_CTX_free(ctx);
             throw Error(Error::Decryption, "Failed to initialize EVP");
         }
-        out.resize(input.size(), 0);
+        out.resize(input.size());
         // decrypt
-        int len;
-        if (1 != EVP_DecryptUpdate(ctx, (unsigned char*)out.data(), &len, (const unsigned char*)input.constData(), input.size())) {
+        int outLen;
+        if (1 != EVP_DecryptUpdate(ctx, (unsigned char*)out.data(), &outLen, (const unsigned char*)input.constData(), input.size())) {
+            EVP_CIPHER_CTX_free(ctx);
             throw Error(Error::Decryption, "Failed to decrypt");
         }
         // finalize
-        int outLen = len;
-        if (1 != EVP_DecryptFinal_ex(ctx, (unsigned char*)out.data() + len, &len)) {
+        int finalLen = outLen;
+        if (1 != EVP_DecryptFinal_ex(ctx, (unsigned char*)out.data() + outLen, &outLen)) {
+            EVP_CIPHER_CTX_free(ctx);
             throw Error(Error::Decryption, "Failed to finalize EVP");
         }
-        outLen += len;
-        out.resize(outLen);
+        finalLen += outLen;
+        out.resize(finalLen);
         EVP_CIPHER_CTX_free(ctx);
     }
 
-    inline static void AES256_Encrypt_File(file_t* file, const QByteArray& key){
+public:
+    static void AES256_Encrypt_File(file_t* file, const QByteArray& key){
         QByteArray plainData;
         if (!ReadFile(file->absolutepath, plainData)){
             throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
         }
         QByteArray iv;
+        iv.resize(16);
         RAND_bytes(reinterpret_cast<unsigned char*>(iv.data()), 16);
 
         QByteArray cipherData;
         AES256_Encrypt(plainData, key, iv, cipherData);
 
         cipherData.insert(0, iv);
-        if (WriteFile(file->absolutepath + ".enc", cipherData)){
+        if (!WriteFile(file->absolutepath + ".enc", cipherData)){
             throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
         }
+        QFile::remove(file->absolutepath);
+
         file->absolutepath+= ".enc";
         file->relativePath+= ".enc";
-        file->state = file_t_state::CipherData;
+        file->state = file_t::CipherData;
     }
-    inline static void AES256_Decrypt_File(file_t* file, const QByteArray& key){
+    static void AES256_Decrypt_File(file_t* file, const QByteArray& key){
         QByteArray cipherData;
         if (!ReadFile(file->absolutepath, cipherData)){
             throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
@@ -169,26 +173,27 @@ private:
         QByteArray plainData;
         AES256_Decrypt(cipherData, key, iv, plainData);
 
-
-        if (WriteFile(file->absolutepath.left(file->absolutepath.size() - 4), plainData)){
+        if (!WriteFile(file->absolutepath.left(file->absolutepath.size() - 4), plainData)){
             throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
         }
+        QFile::remove(file->absolutepath);
         file->absolutepath = file->absolutepath.left(file->absolutepath.size() - 4);
         file->relativePath = file->relativePath.left(file->relativePath.size() - 4);
-        file->state = file_t_state::PlainData;
+        file->state = file_t::PlainData;
     }
 
     void AES256_Encrypt_All(Vault& vault){
         emit signal_start();
         vault.mutex.lock();
 
-        int threadCount = std::thread::hardware_concurrency();
+        int processorCount = std::thread::hardware_concurrency();
+        int threadCount = vault.index_plain.size() < processorCount ? vault.index_plain.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
         QQueue<file_t*> files;
         QMutex files_m;
         for (int i = 0; i < vault.files.size(); i++){
-            if (vault.files[i].state == file_t_state::PlainData){
+            if (vault.files[i].state == file_t::PlainData){
                 files.push_back(&vault.files[i]);
             }
         }
@@ -225,13 +230,14 @@ private:
         emit signal_start();
         vault.mutex.lock();
 
-        int threadCount = std::thread::hardware_concurrency();
+        int processorCount = std::thread::hardware_concurrency();
+        int threadCount = vault.index_cipher.size() < processorCount ? vault.index_cipher.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
         QQueue<file_t*> files;
         QMutex files_m;
         for (int i = 0; i < vault.files.size(); i++){
-            if (vault.files[i].state == file_t_state::CipherData){
+            if (vault.files[i].state == file_t::CipherData){
                 files.push_back(&vault.files[i]);
             }
         }
@@ -267,12 +273,12 @@ private:
         emit signal_done();
     }
 
-public:
     bool flag_run = false;
     inline static QString SHA256(const QString& str)
     {
         return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
     }
+
 
 signals:
     void signal_outputMessage(QStringList messages);

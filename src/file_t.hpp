@@ -3,17 +3,17 @@
 
 #include <QString>
 
-enum file_t_state{
-    PlainData,
-    CipherData,
-};
-
 typedef struct __file_t__{
+    enum state{
+        PlainData,
+        CipherData
+    };
+
     int index = -1;
     QString absolutepath;
     QString relativePath;
     QString displayPath;
-    file_t_state state = PlainData;
+    state state = PlainData;
 } file_t;
 
 #endif // FILE_T_H

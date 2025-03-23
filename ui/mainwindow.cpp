@@ -22,7 +22,7 @@
 #include "window_crypto.h"
 #include "window_newvault.h"
 
-#include "src/json.h"
+#include "src/json.hpp"
 
 namespace fs = std::filesystem;
 
@@ -40,7 +40,7 @@ MainWindow::MainWindow(QWidget *parent):
     ui->vault_select_comboBox->setCurrentIndex(-1);
     ui->vault_select_comboBox->blockSignals(false);
 
-    // window new vault
+    //# window new vault ###############################################################
     window_newvault *win_newvault = new window_newvault(this);
     connect(ui->vault_createNew_button, &QPushButton::pressed, win_newvault, [this, win_newvault](){
         ui->vault_select_comboBox->setCurrentIndex(-1);
@@ -67,7 +67,7 @@ MainWindow::MainWindow(QWidget *parent):
     });
     ui->stackedWidget->addWidget(win_newvault);
 
-    // window crypto
+    //# window crypto####################################################################
     window_crypto *win_crypto = new window_crypto(this);
     connect(ui->vault_select_comboBox, &QComboBox::currentIndexChanged, win_crypto, [this, win_crypto](const int index){
         if (index == -1){

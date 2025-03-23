@@ -11,9 +11,13 @@
 #include <openssl/sha.h>
 
 
+#include "crypto.hpp"
+
 int main(int argc, char *argv[])
 {
     // load json
+
+
     QApplication a(argc, argv);
     MainWindow w;
     w.show();

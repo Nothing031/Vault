@@ -8,9 +8,8 @@
 #include <QColor>
 #include <QFile>
 #include <QFileInfo>
-#include <filesystem>
 
-#include "vault.h"
+#include "vault.hpp"
 #include "file_t.hpp"
 
 namespace fs = std::filesystem;
@@ -54,9 +53,9 @@ public:
         }
         else if (role == Qt::ForegroundRole){
             const file_t* file = items.at(index.row());
-            if (file->state == PlainData){
+            if (file->state == file_t::PlainData){
                 return QBrush(QColor(255, 55 ,55));
-            }else if (file->state == CipherData){
+            }else if (file->state == file_t::CipherData){
                 return QBrush(QColor(55, 255 ,55));
             }
         }

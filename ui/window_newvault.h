@@ -3,7 +3,7 @@
 
 #include <QWidget>
 #include <QDir>
-#include "src/vault.h"
+#include "src/vault.hpp"
 
 enum class NewVault{
     CreateNew,
@@ -22,7 +22,6 @@ public:
     explicit window_newvault(QWidget *parent = nullptr);
     ~window_newvault();
 
-public slots:
     void on_request_page(const NewVault& mode);
 
 private slots:

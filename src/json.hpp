@@ -5,7 +5,6 @@
 #include <QJsonArray>
 #include <QJsonDocument>
 #include <QJsonValue>
-
 #include <QByteArray>
 #include <QFile>
 #include <QString>
@@ -13,7 +12,7 @@
 #include <QDir>
 #include <QFile>
 
-#include "src/vault.h"
+#include "src/vault.hpp"
 
 class Json{
 private:
@@ -61,7 +60,6 @@ public:
     }
 
     void SaveVaultJson(const QVector<Vault>& vaults){
-
         QJsonObject jObj;
         QJsonArray jVaults;
         for (const auto& vault : vaults){

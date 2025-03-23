@@ -5,7 +5,7 @@
 #include <QVector>
 #include <QDir>
 
-#include "src/vault.h"
+#include "src/vault.hpp"
 
 using namespace std;
 

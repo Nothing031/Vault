@@ -68,6 +68,12 @@ void window_newvault::on_request_page(const NewVault& mode)
     ui->confirm_visibility_button->setEnabled(false);
     ui->vault_create->setEnabled(false);
 
+    QString style = "QWidget{color: rgb(255, 255, 255);}";
+    ui->vault_l_label->setStyleSheet(style);
+    ui->password_l_label->setStyleSheet(style);
+    ui->confirm_l_label->setStyleSheet(style);
+
+
     ui->directory_path_label->setText("");
     ui->vault_name_lineedit->setText("");
     ui->password_input_lineedit->setText("");

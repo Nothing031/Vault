@@ -1,9 +1,6 @@
 #ifndef VAULT_H
 #define VAULT_H
 
-#include "openssl/evp.h"
-#include <filesystem>
-
 #include <QVector>
 #include <QString>
 #include <QFile>
@@ -16,12 +13,9 @@
 #include <QMutex>
 #include <QDirIterator>
 
-class Backup{
-private:
-    QDir dir;
-public:
+#include <filesystem>
 
-};
+#include <openssl/evp.h>
 
 #include "file_t.hpp"
 
@@ -79,7 +73,7 @@ public:
             input.size(),
             nullptr,
             0,
-            600000,
+            100000,
             32,
             (unsigned char*)key.data()
         )){
@@ -99,7 +93,7 @@ public:
         index_cipher.clear();
         index_plain.clear();
         for (int i = 0; i < files.size(); i++){
-            if (files[i].state == CipherData)
+            if (files[i].state == file_t::CipherData)
                 index_cipher.push_back(i);
             else
                 index_plain.push_back(i);
@@ -123,7 +117,7 @@ public:
                 file_t filet;
                 filet.absolutepath = qinfo.absoluteFilePath();
                 filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
-                filet.state = (qinfo.path().endsWith(".enc") ? CipherData : PlainData);
+                filet.state = (qinfo.path().endsWith(".enc") ? file_t::CipherData : file_t::PlainData);
                 files.push_back(filet);
             }
 
