@@ -45,13 +45,11 @@ public:
             QJsonObject jVaultObj = jVault.toObject();
             vault.dir = QDir(jVaultObj["Directory"].toString());
             vault.display_name = vault.dir.dirName();
-            vault.backup_dir = QDir(jVaultObj["Backup"].toString());
             vault.password = jVaultObj["Password"].toString();
             vaults.push_back(vault);
             qDebug() << "[JSON] Vault found";
             qDebug() << "  Display name :" << vault.display_name;
             qDebug() << "  Directory    :" << vault.dir.path();
-            qDebug() << "  Backup Dir   :" << vault.backup_dir.path();
             qDebug() << "  Password     :" << vault.password;
         }
         file.close();
@@ -65,7 +63,6 @@ public:
         for (const auto& vault : vaults){
             QJsonObject jVault;
             jVault["Directory"] = vault.dir.path();
-            jVault["Backup"] = vault.backup_dir.path();
             jVault["Password"] = vault.password;
             jVaults.push_back(jVault);
         }

@@ -21,16 +21,16 @@
 
 class Vault{
 public:
-    QDir backup_dir;
     QDir dir;
-    QString display_name;
+    QDir backupDir;
+    QString displayName;
     QString password;
     QByteArray key;
 
-    QMutex mutex;
     QVector<file_t> files;
-    QVector<int> index_cipher;
-    QVector<int> index_plain;
+    QVector<int> cipherIndex;
+    QVector<int> plainIndex;
+    int id = -1;
 
     Vault(){
 
@@ -39,11 +39,11 @@ public:
     {
         backup_dir = other.backup_dir;
         dir = other.dir;
-        display_name = other.display_name;
+        displayName = other.displayName;
         password = other.password;
         files = other.files;
-        index_cipher = other.index_cipher;
-        index_plain = other.index_plain;
+        cipherIndex = other.cipherIndex;
+        plainIndex = other.plainIndex;
     }
     Vault& operator=(const Vault& other)
     {
@@ -51,11 +51,11 @@ public:
             return *this;
         backup_dir = other.backup_dir;
         dir = other.dir;
-        display_name = other.display_name;
+        displayName = other.displayName;
         password = other.password;
         files = other.files;
-        index_cipher = other.index_cipher;
-        index_plain = other.index_plain;
+        cipherIndex = other.cipherIndex;
+        plainIndex = other.plainIndex;
         return *this;
     }
 
@@ -90,18 +90,18 @@ public:
         timer.start();
         qDebug() << "[VAULT] indexing...";
         QApplication::processEvents();
-        index_cipher.clear();
-        index_plain.clear();
+        cipherIndex.clear();
+        plainIndex.clear();
         for (int i = 0; i < files.size(); i++){
             if (files[i].state == file_t::CipherData)
-                index_cipher.push_back(i);
+                cipherIndex.push_back(i);
             else
-                index_plain.push_back(i);
+                plainIndex.push_back(i);
         }
         qDebug() << "[VAULT] Indexing done" << timer.elapsed() << "ms";
         qDebug() << "  Elapsed time    :" << timer.elapsed() << "ms";
-        qDebug() << "  Encrypted files :" << index_cipher.size();
-        qDebug() << "  Decrypted files :" << index_plain.size();
+        qDebug() << "  Encrypted files :" << cipherIndex.size();
+        qDebug() << "  Decrypted files :" << plainIndex.size();
         qDebug() << "  Total           :" << files.size();
     }
     bool LoadFiles()
@@ -112,14 +112,21 @@ public:
         QApplication::processEvents();
         if (dir.exists()){
             files.clear();
-            for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
-                QFileInfo qinfo = QFileInfo(file.path());
-                file_t filet;
-                filet.absolutepath = qinfo.absoluteFilePath();
-                filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
-                filet.state = (qinfo.path().endsWith(".enc") ? file_t::CipherData : file_t::PlainData);
-                files.push_back(filet);
+            try{
+                for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
+                    QFileInfo qinfo = QFileInfo(file.path());
+                    file_t filet;
+                    filet.displayPath = qinfo.fileName();
+                    filet.absolutepath = qinfo.absoluteFilePath();
+                    filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
+                    filet.state = (qinfo.path().endsWith(".enc") ? file_t::CipherData : file_t::PlainData);
+                    files.push_back(filet);
+                }
+            } catch(std::exception& e){
+                qDebug() << e.what();
+                return false;
             }
+
 
             std::sort(files.begin(), files.end(), [](const file_t& a, const file_t& b){
                 return a.relativePath < b.relativePath;

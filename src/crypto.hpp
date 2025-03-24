@@ -184,10 +184,9 @@ public:
 
     void AES256_Encrypt_All(Vault& vault){
         emit signal_start();
-        vault.mutex.lock();
 
         int processorCount = std::thread::hardware_concurrency();
-        int threadCount = vault.index_plain.size() < processorCount ? vault.index_plain.size() : processorCount;
+        int threadCount = vault.plainIndex.size() < processorCount ? vault.plainIndex.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
         QQueue<file_t*> files;
@@ -223,15 +222,13 @@ public:
             }
         }
 
-        vault.mutex.unlock();
         emit signal_done();
     }
     void AES256_Decrypt_All(Vault& vault){
         emit signal_start();
-        vault.mutex.lock();
 
         int processorCount = std::thread::hardware_concurrency();
-        int threadCount = vault.index_cipher.size() < processorCount ? vault.index_cipher.size() : processorCount;
+        int threadCount = vault.cipherIndex.size() < processorCount ? vault.cipherIndex.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
         QQueue<file_t*> files;
@@ -269,7 +266,6 @@ public:
             }
         }
 
-        vault.mutex.unlock();
         emit signal_done();
     }
 

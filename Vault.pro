@@ -16,6 +16,7 @@ SOURCES += \
 
 HEADERS += \
     src/crypto.hpp \
+    src/enviroment.hpp \
     src/file_t.hpp \
     src/filelistmodel.hpp \
     src/json.hpp \

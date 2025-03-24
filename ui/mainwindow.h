@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QDir>
+#include <QStringList>
 
 #include "src/vault.hpp"
 
@@ -20,10 +21,10 @@ class MainWindow : public QMainWindow
     Q_OBJECT
 public:
     MainWindow(QWidget *parent = nullptr);
+    
     ~MainWindow();
 
 private slots:
-
     void on_vault_select_comboBox_currentIndexChanged(int index);
 
     void on_vault_createNew_button_clicked();
@@ -37,7 +38,6 @@ private:
         Crypto = 2
     };
 
-    QVector<Vault> vaults;
     Ui::MainWindow *ui;
 };
 #endif // MAINWINDOW_H

@@ -27,17 +27,14 @@ public:
         qRegisterMetaType<file_t*>("file_t*");
     }
 
-    void setData(Vault& vault){
+    void loadVault(Vault& vault){
         beginResetModel();
-
         items.clear();
-        for (auto& file : vault.files){
+        for (auto& file: vault.files){
             items.append(&file);
         }
-
         endResetModel();
     }
-
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
@@ -63,6 +60,18 @@ public:
             QVariant::fromValue(&items.at(index.row()));
         }
         return QVariant();
+    }
+
+    void clearitems(){
+        beginResetModel();
+        items.clear();
+        endResetModel();
+    }
+
+    void addItem(file_t* item) {
+        beginInsertRows(QModelIndex(), items.count(), items.count());
+        items.append(item);
+        endInsertRows();
     }
 };
 

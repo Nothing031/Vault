@@ -3,6 +3,7 @@
 
 #include <QString>
 
+
 typedef struct __file_t__{
     enum state{
         PlainData,
@@ -14,6 +15,6 @@ typedef struct __file_t__{
     QString relativePath;
     QString displayPath;
     state state = PlainData;
-} file_t;
+} file_t, *pfile_t;
 
 #endif // FILE_T_H

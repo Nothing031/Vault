@@ -23,6 +23,7 @@
 #include "window_newvault.h"
 
 #include "src/json.hpp"
+#include "src/enviroment.hpp"
 
 namespace fs = std::filesystem;
 
@@ -31,44 +32,45 @@ MainWindow::MainWindow(QWidget *parent):
     ui(new Ui::MainWindow)
 {
     ui->setupUi(this);
-    // Load data
-    vaults = Json().LoadVaultJson();
+    // Load getVaults
+    auto vaults = Enviroment::GetInstance().getVaults();
     ui->vault_select_comboBox->blockSignals(true);
-    for (const Vault& vault : vaults){
-        ui->vault_select_comboBox->addItem(vault.display_name);
+    for (auto& vault : std::as_const(vaults)){
+        ui->vault_select_comboBox->addItem(vault.displayName);
     }
     ui->vault_select_comboBox->setCurrentIndex(-1);
     ui->vault_select_comboBox->blockSignals(false);
 
+
     //# window new vault ###############################################################
     window_newvault *win_newvault = new window_newvault(this);
+    ui->stackedWidget->addWidget(win_newvault);
     connect(ui->vault_createNew_button, &QPushButton::pressed, win_newvault, [this, win_newvault](){
         ui->vault_select_comboBox->setCurrentIndex(-1);
-        ui->stackedWidget->setCurrentWidget(win_newvault);
         win_newvault->on_request_page(NewVault::CreateNew);
+        ui->stackedWidget->setCurrentWidget(win_newvault);
     });
     connect(ui->vault_createExisting_button, &QPushButton::pressed, win_newvault, [this, win_newvault](){
         ui->vault_select_comboBox->setCurrentIndex(-1);
-        ui->stackedWidget->setCurrentWidget(win_newvault);
         win_newvault->on_request_page(NewVault::CreateExisting);
+        ui->stackedWidget->setCurrentWidget(win_newvault);
     });
     connect(win_newvault, &window_newvault::signal_create_new_vault, this, [this](const Vault vault){
-        vaults.push_back(vault);
-        ui->vault_select_comboBox->blockSignals(true);
-        ui->vault_select_comboBox->clear();
-        for (const Vault& vault : vaults){
-            ui->vault_select_comboBox->addItem(vault.display_name);
-        }
-        ui->vault_select_comboBox->setCurrentIndex(-1);
-        ui->vault_select_comboBox->blockSignals(false);
-        Json().SaveVaultJson(vaults);
+        Enviroment::GetInstance().AddNewVault(vault, ui->vault_select_comboBox);
         ui->stackedWidget->setCurrentIndex((int)page::Empty);
-        qDebug() << "Vault Created";
+        ui->outputTerminal_textEdit->append("Vault Created");
+        ui->outputTerminal_textEdit->append("  " + vault.dir.path());
     });
-    ui->stackedWidget->addWidget(win_newvault);
+    connect(win_newvault, &window_newvault::request_terminal_message, this, [this](const QStringList messages){
+        for (auto& message : std::as_const(messages)){
+            ui->outputTerminal_textEdit->append(message);
+        }
+    });
+
 
     //# window crypto####################################################################
     window_crypto *win_crypto = new window_crypto(this);
+    ui->stackedWidget->addWidget(win_crypto);
     connect(ui->vault_select_comboBox, &QComboBox::currentIndexChanged, win_crypto, [this, win_crypto](const int index){
         if (index == -1){
             return;
@@ -94,7 +96,8 @@ MainWindow::MainWindow(QWidget *parent):
         ui->vault_createExisting_button->setEnabled(b);
         ui->vault_createNew_button->setEnabled(b);
     });
-    ui->stackedWidget->addWidget(win_crypto);
+
+
 
 }
 MainWindow::~MainWindow()

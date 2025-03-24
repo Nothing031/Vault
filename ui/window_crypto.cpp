@@ -20,16 +20,13 @@
 
 window_crypto::window_crypto(QWidget *parent)
     : QWidget(parent)
+    , model(new FileListModel(this))
     , ui(new Ui::window_crypto)
     , crypto(nullptr)
     , thread(nullptr)
 {
     ui->setupUi(this);
-    ui->files_listview->setModel(new FileListModel(this));
-
-
-
-
+    ui->files_listview->setModel(model);
 }
 
 window_crypto::~window_crypto()
@@ -41,6 +38,10 @@ void window_crypto::on_request_page(int index, Vault vault)
 {
     persistence_index = index;
     this->vault = vault;
+    this->vault.LoadFiles();
+
+    model->clearitems();
+    model->loadVault(this->vault);
 
     ui->openFolder_button->setEnabled(true);
     ui->backup_button->setEnabled(true);
@@ -49,9 +50,8 @@ void window_crypto::on_request_page(int index, Vault vault)
     ui->suspend_button->setEnabled(false);
     ui->progressBar->setValue(0);
 
-
-    ui->directory_path_label->setText("");
-    ui->vault_name_label->setText("");
+    ui->directory_path_label->setText(vault.dir.path());
+    ui->vault_name_label->setText(vault.displayName);
     ui->password_input_lineedit->setText("");
 }
 
@@ -83,6 +83,14 @@ void window_crypto::on_password_visibility_button_toggled(bool checked)
     }
 }
 
+//# buttons ###############################################
+
+void window_crypto::on_vault_detach_button_clicked()
+{
+    emit request_detachVault(persistence_index);
+    this->deleteLater();
+}
+
 void window_crypto::on_openFolder_button_clicked()
 {
     if (vault.dir.exists()){
@@ -100,11 +108,11 @@ void window_crypto::on_encrypt_button_clicked()
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.index_plain.size() == 0){
+    if (vault.plainIndex.size() == 0){
         qDebug() << "[ERROR] no any encryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.index_plain.size());
+    ui->progressBar->setRange(0, vault.plainIndex.size());
     ui->progressBar->setValue(0);
 
     thread = new QThread();
@@ -144,11 +152,11 @@ void window_crypto::on_decrypt_button_clicked()
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.index_cipher.size() == 0){
+    if (vault.cipherIndex.size() == 0){
         qDebug() << "[ERROR] no any decryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.index_cipher.size());
+    ui->progressBar->setRange(0, vault.cipherIndex.size());
     ui->progressBar->setValue(0);
 
     thread = new QThread();
@@ -184,7 +192,7 @@ void window_crypto::on_decrypt_button_clicked()
 
 void window_crypto::on_suspend_button_clicked()
 {
-    if (crypto || thread){
+    if (crypto && thread){
         qDebug() << "[CRYPTO]  Suspending";
         crypto->flag_run = false;
     }
@@ -195,12 +203,13 @@ void window_crypto::on_suspend_button_clicked()
 
 void window_crypto::on_backup_button_clicked()
 {
-    qDebug() << "[BACKUP]  Backup button pressed";
+    qDebug() << "Backup button pressed";
 }
 
-void window_crypto::on_vault_detach_button_clicked()
+void window_crypto::on_refresh_button_clicked()
 {
-    emit request_detachVault(persistence_index);
-    this->deleteLater();
+    qDebug() << "refresh button pressed";
 }
+
+
 

@@ -149,14 +149,9 @@ void window_newvault::on_vault_create_clicked()
     }
 
     Vault newVault;
-    newVault.display_name = directory.dirName();
+    newVault.displayName = directory.dirName();
     newVault.dir = directory;
     newVault.password = Crypto::SHA256(ui->confirm_input_lineedit->text());
-
-    qDebug() << "[NEWVAULT] Creating new vault";
-    qDebug() << "  Mode :" << (NewVaultMode == NewVault::CreateNew ? "CreateNew" : "CreateExisting");
-    qDebug() << "  Directory :" << newVault.dir.path();
-    qDebug() << "  Password  :" << newVault.password;
 
     // create
     emit signal_create_new_vault(newVault);

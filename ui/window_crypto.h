@@ -3,6 +3,7 @@
 
 #include <QWidget>
 
+#include "src/filelistmodel.hpp"
 #include "src/vault.hpp"
 #include "src/crypto.hpp"
 
@@ -37,18 +38,23 @@ private slots:
 
     void on_vault_detach_button_clicked();
 
+    void on_refresh_button_clicked();
+
 signals:
     void request_detachVault(int index);
     void request_setEnable_ui(bool b);
 
-private:
+    void request_terminal_message(const QStringList& messages);
 
+private:
+    FileListModel *model;
     Ui::window_crypto *ui;
 
     int persistence_index;
+    Vault vault;
+
     Crypto *crypto;
     QThread *thread;
-    Vault vault;
 };
 
 #endif // WINDOW_CRYPTO_H

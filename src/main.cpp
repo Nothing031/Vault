@@ -1,22 +1,17 @@
 #include "../ui/mainwindow.h"
 
 #include <QApplication>
-// #include <Windows.h>
-// #include <dwmapi.h>
 #include <QMessageBox>
-
 #include <QDebug>
-
 #include <openssl/aes.h>
 #include <openssl/sha.h>
 
-
-#include "crypto.hpp"
+#include "enviroment.hpp"
 
 int main(int argc, char *argv[])
 {
     // load json
-
+    Enviroment::GetInstance();
 
     QApplication a(argc, argv);
     MainWindow w;
