@@ -18,8 +18,8 @@ public:
         vaults = Json().LoadVaultJson();
     };
 
-    QVector<Vault>* getVaults() const{
-        return &vaults;
+    QVector<Vault> getVaults() const{
+        return vaults;
     };
 
     Vault* getVault(int index){
