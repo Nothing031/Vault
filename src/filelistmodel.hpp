@@ -12,9 +12,7 @@
 #include "vault.hpp"
 #include "file_t.hpp"
 
-namespace fs = std::filesystem;
 
-#include "file_t.hpp"
 
 class FileListModel : public QAbstractListModel {
     Q_OBJECT
@@ -24,14 +22,19 @@ private:
 
 public:
     FileListModel(QObject *parent = nullptr) : QAbstractListModel(parent) {
-        qRegisterMetaType<file_t*>("file_t*");
+        //qRegisterMetaType<file_t*>("file_t*");
     }
 
-    void loadVault(Vault& vault){
+    void update(){
+        beginResetModel();
+        endResetModel();
+    }
+
+    void loadVault(Vault* vault){
         beginResetModel();
         items.clear();
-        for (auto& file: vault.files){
-            items.append(&file);
+        for (int i = 0; i < vault->files.size(); i++){
+            items.append(&vault->files[i]);
         }
         endResetModel();
     }
@@ -50,6 +53,10 @@ public:
         }
         else if (role == Qt::ForegroundRole){
             const file_t* file = items.at(index.row());
+            if (file == nullptr){
+                qDebug() << "nullptr";
+                return QVariant();
+            }
             if (file->state == file_t::PlainData){
                 return QBrush(QColor(255, 55 ,55));
             }else if (file->state == file_t::CipherData){

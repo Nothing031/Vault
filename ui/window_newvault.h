@@ -42,8 +42,6 @@ private slots:
 signals:
     void signal_create_new_vault(const Vault& vault);
 
-    void request_terminal_message(const QStringList& messages);
-
 private:
     void ConditionCheck();
 

@@ -2,14 +2,25 @@
 #define UTILS_HPP
 #include <string>
 #include <Windows.h>
-#include <stdexcept>
 #include <chrono>
 #include <ostream>
 #include <sstream>
-#include <iomanip>
 #include <iostream>
+#include <QThread>
+
+#include <ctime>
 
 namespace Utils{
+
+    inline static void Sleep(const int& time, const int& resolution, const bool& flag){
+        clock_t start = clock();
+        while(flag && time >= clock() - start){
+            QThread::msleep(resolution);
+        }
+    }
+    inline static void Sleep(const int& time){
+        QThread::msleep(time);
+    }
 
     static std::string getTime(){
         std::chrono::time_point<std::chrono::system_clock> chrono_now = std::chrono::system_clock::now();

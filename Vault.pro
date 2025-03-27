@@ -19,7 +19,6 @@ HEADERS += \
     src/enviroment.hpp \
     src/file_t.hpp \
     src/filelistmodel.hpp \
-    src/json.hpp \
     src/vault.hpp \
     ui/mainwindow.h \
     src/utils.hpp \

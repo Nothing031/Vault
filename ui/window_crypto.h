@@ -18,7 +18,7 @@ public:
     explicit window_crypto(QWidget *parent = nullptr);
     ~window_crypto();
 
-    void on_request_page(int index, Vault vault);
+    void on_request_page(Vault* pvault);
 
 private slots:
 
@@ -41,19 +41,18 @@ private slots:
     void on_refresh_button_clicked();
 
 signals:
-    void request_detachVault(int index);
+    void request_detachVault(Vault* pvault);
     void request_setEnable_ui(bool b);
-
     void request_terminal_message(const QStringList& messages);
 
 private:
+
     FileListModel *model;
     Ui::window_crypto *ui;
 
-    int persistence_index;
-    Vault vault;
+    Vault* pVault;
 
-    Crypto *crypto;
+    Crypto crypto;
     QThread *thread;
 };
 

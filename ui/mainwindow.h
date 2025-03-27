@@ -6,9 +6,6 @@
 #include <QDir>
 #include <QStringList>
 
-#include "src/vault.hpp"
-
-using namespace std;
 
 QT_BEGIN_NAMESPACE
 namespace Ui {
@@ -25,11 +22,7 @@ public:
     ~MainWindow();
 
 private slots:
-    void on_vault_select_comboBox_currentIndexChanged(int index);
 
-    void on_vault_createNew_button_clicked();
-
-    void on_vault_createExisting_button_clicked();
 
 private:
     enum class page : int{

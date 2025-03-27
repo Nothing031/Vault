@@ -19,6 +19,7 @@
 
 #include "file_t.hpp"
 
+
 class Vault{
 public:
     QDir dir;
@@ -35,9 +36,22 @@ public:
     Vault(){
 
     }
+    Vault(const QString& directory, const QString& password, const int& backupLen){
+        this->dir =  QDir(directory);
+        this->backupDir = QDir(directory + "/" + password.left(backupLen));
+        this->displayName =  dir.dirName();
+        this->password = password;
+        this->key = {};
+
+        this->files = {};
+        this->cipherIndex = {};
+        this->plainIndex = {};
+        this->id = -1;
+    }
+
     Vault(const Vault& other)
     {
-        backup_dir = other.backup_dir;
+        backupDir = other.backupDir;
         dir = other.dir;
         displayName = other.displayName;
         password = other.password;
@@ -49,7 +63,7 @@ public:
     {
         if (this == &other)
             return *this;
-        backup_dir = other.backup_dir;
+        backupDir = other.backupDir;
         dir = other.dir;
         displayName = other.displayName;
         password = other.password;

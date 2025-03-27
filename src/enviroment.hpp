@@ -3,9 +3,20 @@
 
 #include <QWidget>
 #include <QComboBox>
+#include <QJsonObject>
+#include <QJsonArray>
+#include <QJsonDocument>
 
 #include "vault.hpp"
-#include "json.hpp"
+
+#define ENV_VAULT_PATH "vault.json"
+#define ENV_SETTING_PATH "setting.json"
+#define ENV_BACKUPDIR_LENGTH 8
+
+#define KEY_VAULTS "Vault"
+#define KEY_PASSWORD "Password"
+#define KEY_DIRECTORY "Directory"
+
 
 class Enviroment{
 public:
@@ -15,12 +26,23 @@ public:
     }
 
     Enviroment(){
-        vaults = Json().LoadVaultJson();
+
     };
 
-    QVector<Vault> getVaults() const{
-        return vaults;
-    };
+    void Init(QComboBox* box){
+        if (box){
+            Load();
+            box->blockSignals(true);
+            for (int i = 0; i < vaults.size(); i++){
+                vaults[i].id = i;
+                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
+            }
+            box->setCurrentIndex(-1);
+            box->blockSignals(false);
+        }else{
+            qDebug() << "Failed to initialize enviroment";
+        }
+    }
 
     Vault* getVault(int index){
         if (index < 0 || index >= vaults.size()){
@@ -31,36 +53,105 @@ public:
 
     void AddNewVault(const Vault& vault, QComboBox* box){
         if (box){
+            // add
             box->blockSignals(true);
             box->clear();
-            getVaults.push_back(vault);
-            for (int i = 0; i < getVaults.size(); i++){
-                getVaults[i].id = i;
-                box->addItem(getVaults[i].displayName);
+            vaults.push_back(vault);
+            for (int i = 0; i < vaults.size(); i++){
+                vaults[i].id = i;
+                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
             box->blockSignals(false);
+            qDebug() << "Vault Added, vault : " << vault.dir.path();
         }else{
-            qDebug() << "Error Failed to add vault";
+            qDebug() << "[ERROR] Failed to add vault";
+            return;
         }
-        Json().SaveVaultJson(getVaults);
+        Save();
     }
 
-    void DetachVault(const int& id, QComboBox* box){
-        if (box){
+    void DetachVault(Vault* pvault, QComboBox* box){
+        if (box && pvault){
+            // find index
+            int index;
+            for (index = 0; index < vaults.size();){
+                if (pvault == &vaults[index]){
+                    break;
+                }else if (++index == vaults.size()){
+                    qDebug() << "[ERROR] Failed to detach vault : " << pvault->dir.path();
+                    return;
+                }
+            }
+            // remove
             box->blockSignals(true);
             box->clear();
-            getVaults.remove(id);
-            for (int i = 0; i < getVaults.size(); i++){
-                getVaults[i].id = i;
-                box->addItem(getVaults[i].displayName);
+            vaults.remove(index);
+            for (int i = 0; i < vaults.size(); i++){
+                vaults[i].id = i;
+                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
             box->blockSignals(false);
+            qDebug() << "Vault Detached";
         }else{
-            qDebug() << "Error Failed to detach vault";
+            qDebug() << "[ERROR] parameters are nullptr";
+            return;
         }
-        Json().SaveVaultJson(getVaults);
+        Save();
+    }
+
+    void Save(){
+        QJsonObject jObj;
+        QJsonArray jVaults;
+
+        for (auto& vault : std::as_const(vaults)){
+            QJsonObject jVault;
+            jVault[KEY_DIRECTORY] = vault.dir.path();
+            jVault[KEY_PASSWORD] = vault.password;
+            jVaults.push_back(jVault);
+        }
+        jObj[KEY_VAULTS] = jVaults;
+
+        QJsonDocument jDoc(jObj);
+
+        QFile file(ENV_VAULT_PATH);
+        if (!file.open(QFile::WriteOnly | QFile::Truncate)){
+            qDebug() << "[ERROR] Json Save Failure";
+            return;
+        }
+
+        file.write(jDoc.toJson(QJsonDocument::Indented));
+        file.close();
+        qDebug() << "Json Saved";
+    }
+
+    void Load(){
+        QFile file(ENV_VAULT_PATH);
+
+        if (!file.exists() || !file.open(QFile::ReadOnly)){
+            file.open(QFile::WriteOnly);
+            QJsonObject jObj;
+            jObj[KEY_VAULTS] = QJsonArray();
+            QJsonDocument jDoc(jObj);
+            file.write(jDoc.toJson());
+            file.close();
+            qDebug() << "Json Created";
+            return;
+        }
+
+        QByteArray data = file.readAll();
+        QJsonDocument jDoc = QJsonDocument::fromJson(data);
+        QJsonObject jObj = jDoc.object();
+        QJsonArray jVaults = jObj[KEY_VAULTS].toArray();
+        for (auto& jVault : std::as_const(jVaults)){
+            QJsonObject jVaultObj = jVault.toObject();
+            QString directory = jVaultObj[KEY_DIRECTORY].toString();
+            QString password = jVaultObj[KEY_PASSWORD].toString();
+            vaults.emplaceBack(directory, password, ENV_BACKUPDIR_LENGTH);
+        }
+        file.close();
+        qDebug() << "Json Loaded";
     }
 
 private:

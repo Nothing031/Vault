@@ -8,25 +8,54 @@
 #include <QDesktopServices>
 #include <QBrush>
 #include <QColor>
+#include <QPropertyAnimation>
+#include <QTimer>
 
 #include "src/filelistmodel.hpp"
-
-#define RED "\033[31m"
-#define GREEN "\033[32m"
-#define DEFAULT "\033[0m"
-#define GRAY "\033[37m"
-
-#define LOCAL_DEBUG() qDebug() << "[WINDOW_CRYPTO]"
 
 window_crypto::window_crypto(QWidget *parent)
     : QWidget(parent)
     , model(new FileListModel(this))
     , ui(new Ui::window_crypto)
-    , crypto(nullptr)
     , thread(nullptr)
 {
     ui->setupUi(this);
     ui->files_listview->setModel(model);
+
+
+
+    connect(&crypto, &Crypto::signal_start, this, [this](){
+        ui->terminal_textedit->clear();
+        emit request_setEnable_ui(false);
+        ui->encrypt_button->setEnabled(false);
+        ui->decrypt_button->setEnabled(false);
+        ui->refresh_button->setEnabled(false);
+        ui->backup_button->setEnabled(false);
+        ui->suspend_button->setEnabled(true);
+    });
+    connect(&crypto, &Crypto::signal_done, this, [this](){
+        emit request_setEnable_ui(true);
+        ui->encrypt_button->setEnabled(true);
+        ui->decrypt_button->setEnabled(true);
+        ui->refresh_button->setEnabled(true);
+        ui->backup_button->setEnabled(true);
+        ui->suspend_button->setEnabled(false);
+        model->update();
+        QTimer::singleShot(1000, [this]{
+            ui->progressBar->setValue(0);
+        });
+    });
+    connect(&crypto, &Crypto::signal_progress, this, [this](int value){
+        ui->progressBar->setValue(value);
+    });
+    connect(&crypto, &Crypto::signal_terminal_message, this, [this](QStringList messages){
+        for (auto& message : std::as_const(messages)){
+            ui->terminal_textedit->append(message);
+        }        
+    });
+    connect(&crypto, &Crypto::signal_terminal_clear, this, [this](){
+        ui->terminal_textedit->clear();
+    });
 }
 
 window_crypto::~window_crypto()
@@ -34,14 +63,12 @@ window_crypto::~window_crypto()
     delete ui;
 }
 
-void window_crypto::on_request_page(int index, Vault vault)
+void window_crypto::on_request_page(Vault* pvault)
 {
-    persistence_index = index;
-    this->vault = vault;
-    this->vault.LoadFiles();
+    this->pVault = pvault;
+    this->pVault->LoadFiles();
 
-    model->clearitems();
-    model->loadVault(this->vault);
+    model->loadVault(pvault);
 
     ui->openFolder_button->setEnabled(true);
     ui->backup_button->setEnabled(true);
@@ -50,27 +77,25 @@ void window_crypto::on_request_page(int index, Vault vault)
     ui->suspend_button->setEnabled(false);
     ui->progressBar->setValue(0);
 
-    ui->directory_path_label->setText(vault.dir.path());
-    ui->vault_name_label->setText(vault.displayName);
+    ui->directory_path_label->setText(pVault->dir.path());
+    ui->vault_name_label->setText(pVault->displayName);
     ui->password_input_lineedit->setText("");
 }
+
+
 
 void window_crypto::on_password_input_lineedit_returnPressed()
 {
     QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
-    if (vault.password == hashed_password){
+    if (pVault->password == hashed_password){
         ui->password_input_lineedit->setEnabled(false);
-
-
-        LOCAL_DEBUG() << GREEN << "Correct password" << DEFAULT;
-        vault.CreateKey(ui->password_input_lineedit->text());
+        qDebug() << "Correct password";
+        pVault->CreateKey(ui->password_input_lineedit->text());
         ui->decrypt_button->setEnabled(true);
         ui->encrypt_button->setEnabled(true);
     }
     else{
-        LOCAL_DEBUG() << RED << "Wrong password" << DEFAULT;
-        qDebug() << GRAY << "  input    : " << hashed_password << DEFAULT;
-        qDebug() << GRAY << "  password : " << vault.password << DEFAULT;
+        qDebug() << "Wrong password";
     }
 }
 
@@ -87,104 +112,59 @@ void window_crypto::on_password_visibility_button_toggled(bool checked)
 
 void window_crypto::on_vault_detach_button_clicked()
 {
-    emit request_detachVault(persistence_index);
-    this->deleteLater();
+    emit request_detachVault(pVault);
 }
 
 void window_crypto::on_openFolder_button_clicked()
 {
-    if (vault.dir.exists()){
-        LOCAL_DEBUG() << DEFAULT << "Opending Directory :" << vault.dir.path();
-        QDesktopServices::openUrl(QUrl(vault.dir.path()));
+    if (pVault->dir.exists()){
+        QDesktopServices::openUrl(QUrl(pVault->dir.path()));
     }else{
-        LOCAL_DEBUG() << RED << "Error directory not exists :" << vault.dir.path() << DEFAULT;
+        qDebug() << "Error directory not exists :" << pVault->dir.path();
     }
 }
 
 void window_crypto::on_encrypt_button_clicked()
 {
-    vault.UpdateIndex();
-    if (thread || crypto){
+    pVault->UpdateIndex();
+    if (thread && thread->isRunning()){
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.plainIndex.size() == 0){
+    if (pVault->plainIndex.size() == 0){
         qDebug() << "[ERROR] no any encryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.plainIndex.size());
+    ui->progressBar->setRange(0, pVault->plainIndex.size());
     ui->progressBar->setValue(0);
 
-    thread = new QThread();
-    crypto = new Crypto();
-    crypto->moveToThread(thread);
-    connect(thread, &QThread::started, this, [this](){
-        emit request_setEnable_ui(false);
-        qDebug() << "[ENCRYPTION]  Started";
-        ui->encrypt_button->setEnabled(false);
-        ui->decrypt_button->setEnabled(false);
-        ui->backup_button->setEnabled(false);
-        ui->suspend_button->setEnabled(true);
-        QApplication::processEvents();
-        crypto->AES256_Encrypt_All(vault);
+    if (thread) thread->deleteLater();
+
+    thread = QThread::create([&](){
+        crypto.AES256_Encrypt_All(pVault);
     });
-    connect(crypto, &Crypto::signal_done, this, [this](){
-        emit request_setEnable_ui(true);
-        ui->encrypt_button->setEnabled(true);
-        ui->decrypt_button->setEnabled(true);
-        ui->backup_button->setEnabled(true);
-        ui->suspend_button->setEnabled(false);
-        thread->quit();
-        thread->wait();
-        delete crypto;
-        crypto = nullptr;
-        delete thread;
-        thread = nullptr;
-        qDebug() << "[ENCRYPTION]  Done";
-    });
+
     thread->start();
 }
 
 void window_crypto::on_decrypt_button_clicked()
 {
-    vault.UpdateIndex();
-    if (thread || crypto){
+    pVault->UpdateIndex();
+    if (thread && thread->isRunning()){
         qDebug() << "[ERROR] Thread is running, try later";
         return;
     }
-    if (vault.cipherIndex.size() == 0){
+    if (pVault->cipherIndex.size() == 0){
         qDebug() << "[ERROR] no any decryptable files";
         return;
     }
-    ui->progressBar->setRange(0, vault.cipherIndex.size());
+    ui->progressBar->setRange(0, pVault->cipherIndex.size());
     ui->progressBar->setValue(0);
 
-    thread = new QThread();
-    crypto = new Crypto();
-    crypto->moveToThread(thread);
-    connect(thread, &QThread::started, this, [this](){
-        emit request_setEnable_ui(false);
-        qDebug() << "[DECRYPTION]  Started";
-        ui->encrypt_button->setEnabled(false);
-        ui->decrypt_button->setEnabled(false);
-        ui->backup_button->setEnabled(false);
-        ui->suspend_button->setEnabled(true);
-        QApplication::processEvents();
-        crypto->AES256_Decrypt_All(vault);
-    });
-    connect(crypto, &Crypto::signal_done, this, [this](){
-        emit request_setEnable_ui(true);
-        ui->encrypt_button->setEnabled(true);
-        ui->decrypt_button->setEnabled(true);
-        ui->backup_button->setEnabled(true);
-        ui->suspend_button->setEnabled(false);
-        thread->quit();
-        thread->wait();
-        delete crypto;
-        crypto = nullptr;
-        delete thread;
-        thread = nullptr;
-        qDebug() << "[ENCRYPTION]  Done";
+    if (thread) thread->deleteLater();
+
+    thread = QThread::create([&](){
+        crypto.AES256_Decrypt_All(pVault);
     });
 
     thread->start();
@@ -192,9 +172,9 @@ void window_crypto::on_decrypt_button_clicked()
 
 void window_crypto::on_suspend_button_clicked()
 {
-    if (crypto && thread){
+    if (thread && thread->isRunning()){
         qDebug() << "[CRYPTO]  Suspending";
-        crypto->flag_run = false;
+        crypto.flag_suspend = true;
     }
     else{
         qDebug() << "[CRYPTO]  Error thread is not running";
@@ -204,11 +184,13 @@ void window_crypto::on_suspend_button_clicked()
 void window_crypto::on_backup_button_clicked()
 {
     qDebug() << "Backup button pressed";
+    qDebug() << "backup dir";
 }
 
 void window_crypto::on_refresh_button_clicked()
 {
-    qDebug() << "refresh button pressed";
+    pVault->LoadFiles();
+    model->loadVault(pVault);
 }
 
 
