@@ -260,10 +260,14 @@ public:
             files_m.unlock();
 
             messages_m.lock();
-            emit signal_terminal_message(flushMessages);
-            flushMessages.clear();
+            if (flushMessages.size()){
+                qDebug() << "emitting message";
+                emit signal_terminal_message(flushMessages);
+                flushMessages.clear();
+            }
             messages_m.unlock();
             emit signal_progress(success + failed);
+            qDebug() << "emitting progress : " << success + failed;
         }
 
         // wait
@@ -290,7 +294,8 @@ public:
     void AES256_Decrypt_All(Vault* vault){
         emit signal_start();
         flag_suspend = false;
-        int processorCount = std::thread::hardware_concurrency();
+        int processorCount = std::thread::hardware_concurrency() / 2;
+        processorCount += (processorCount == 0 ? 1 : 0);
         int threadCount = vault->cipherIndex.size() < processorCount ? vault->cipherIndex.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
@@ -349,7 +354,7 @@ public:
         }
 
         // output
-        while (flag_suspend){
+        while (true){
             Utils::Sleep(500, 16, !flag_suspend);
             files_m.lock();
             if (files.empty()){
@@ -365,10 +370,14 @@ public:
             files_m.unlock();
 
             messages_m.lock();
-            emit signal_terminal_message(flushMessages);
-            flushMessages.clear();
+            if (flushMessages.size()){
+                qDebug() << "emitting message";
+                emit signal_terminal_message(flushMessages);
+                flushMessages.clear();
+            }
             messages_m.unlock();
             emit signal_progress(success + failed);
+            qDebug() << "emitting progress : " << success + failed;
         }
 
         // wait
@@ -381,10 +390,10 @@ public:
         flushMessages.clear();
         emit signal_terminal_clear();
         if (success){
-            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files decrypted</font>");
+            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files encrypted</font>");
         }
         if (failed){
-            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files failed to decrypt</font>");
+            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files failed to encrypt</font>");
         }
         emit signal_terminal_message(flushMessages);
         if (failed){

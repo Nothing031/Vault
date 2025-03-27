@@ -26,11 +26,11 @@ window_crypto::window_crypto(QWidget *parent)
 
     connect(&crypto, &Crypto::signal_start, this, [this](){
         ui->terminal_textedit->clear();
+        ui->terminal_textedit->append("Starting...");
         emit request_setEnable_ui(false);
         ui->encrypt_button->setEnabled(false);
         ui->decrypt_button->setEnabled(false);
         ui->refresh_button->setEnabled(false);
-        ui->backup_button->setEnabled(false);
         ui->suspend_button->setEnabled(true);
     });
     connect(&crypto, &Crypto::signal_done, this, [this](){
@@ -38,7 +38,6 @@ window_crypto::window_crypto(QWidget *parent)
         ui->encrypt_button->setEnabled(true);
         ui->decrypt_button->setEnabled(true);
         ui->refresh_button->setEnabled(true);
-        ui->backup_button->setEnabled(true);
         ui->suspend_button->setEnabled(false);
         model->update();
         QTimer::singleShot(1000, [this]{
@@ -70,8 +69,9 @@ void window_crypto::on_request_page(Vault* pvault)
 
     model->loadVault(pvault);
 
+    ui->password_input_lineedit->setEnabled(true);
+
     ui->openFolder_button->setEnabled(true);
-    ui->backup_button->setEnabled(true);
     ui->encrypt_button->setEnabled(false);
     ui->decrypt_button->setEnabled(false);
     ui->suspend_button->setEnabled(false);
@@ -178,12 +178,6 @@ void window_crypto::on_suspend_button_clicked()
     else{
         qDebug() << "[CRYPTO]  Error thread is not running";
     }
-}
-
-void window_crypto::on_backup_button_clicked()
-{
-    qDebug() << "Backup button pressed";
-    qDebug() << "backup dir";
 }
 
 void window_crypto::on_refresh_button_clicked()

@@ -170,13 +170,6 @@ QCheckBox::indicator:checked{
        </property>
       </widget>
      </item>
-     <item>
-      <widget class="QPushButton" name="backup_button">
-       <property name="text">
-        <string>Backup</string>
-       </property>
-      </widget>
-     </item>
     </layout>
    </item>
    <item row="0" column="0">

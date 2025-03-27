@@ -2,6 +2,7 @@
 #include "ui_window_newvault.h"
 
 #include "src/crypto.hpp"
+#include "src/enviroment.hpp"
 
 #include <filesystem>
 
@@ -142,17 +143,15 @@ void window_newvault::on_confirm_input_lineedit_textEdited(const QString &arg1)
 
 void window_newvault::on_vault_create_clicked()
 {
-    directory = QDir(ui->directory_path_label->text());
-    if (!directory.exists()){
-        qDebug() << "[NEWVAULT] Directory not exists, creating director :" << directory.path();
-        QDir().mkdir(directory.path());
+    Vault vault(ui->directory_path_label->text(), Crypto::SHA256(ui->confirm_input_lineedit->text()), ENV_BACKUPDIR_LENGTH);
+
+    if (!vault.dir.exists()){
+        vault.dir.mkpath(vault.dir.path());
+    }
+    if (!vault.backupDir.exists()){
+        vault.backupDir.mkpath(vault.backupDir.path());
     }
 
-    Vault newVault;
-    newVault.displayName = directory.dirName();
-    newVault.dir = directory;
-    newVault.password = Crypto::SHA256(ui->confirm_input_lineedit->text());
-
     // create
-    emit signal_create_new_vault(newVault);
+    emit signal_create_new_vault(vault);
 }

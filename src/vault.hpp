@@ -130,7 +130,7 @@ public:
             files.clear();
             try{
                 for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
-                    if (std::string::npos == file.path().generic_wstring().find(this->backupDir.path().toStdWString())){
+                    if (std::string::npos != file.path().generic_wstring().find(this->backupDir.path().toStdWString())){
                         qDebug() << "backup file";
                         continue;
                     }

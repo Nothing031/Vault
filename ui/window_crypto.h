@@ -35,8 +35,6 @@ private slots:
 
     void on_suspend_button_clicked();
 
-    void on_backup_button_clicked();
-
     void on_vault_detach_button_clicked();
 
     void on_refresh_button_clicked();
