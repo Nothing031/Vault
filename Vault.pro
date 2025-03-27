@@ -15,7 +15,6 @@ SOURCES += \
     ui/window_newvault.cpp
 
 HEADERS += \
-    src/backup.hpp \
     src/crypto.hpp \
     src/enviroment.hpp \
     src/file_t.hpp \
