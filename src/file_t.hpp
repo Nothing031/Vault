@@ -17,4 +17,5 @@ typedef struct __file_t__{
     state state = PlainData;
 } file_t, *pfile_t;
 
+
 #endif // FILE_T_H

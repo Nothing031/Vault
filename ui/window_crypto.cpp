@@ -77,12 +77,11 @@ void window_crypto::on_request_page(Vault* pvault)
     ui->suspend_button->setEnabled(false);
     ui->progressBar->setValue(0);
 
+    ui->terminal_textedit->clear();
     ui->directory_path_label->setText(pVault->dir.path());
     ui->vault_name_label->setText(pVault->displayName);
     ui->password_input_lineedit->setText("");
 }
-
-
 
 void window_crypto::on_password_input_lineedit_returnPressed()
 {
@@ -192,6 +191,3 @@ void window_crypto::on_refresh_button_clicked()
     pVault->LoadFiles();
     model->loadVault(pVault);
 }
-
-
-

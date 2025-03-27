@@ -156,4 +156,3 @@ void window_newvault::on_vault_create_clicked()
     // create
     emit signal_create_new_vault(newVault);
 }
-

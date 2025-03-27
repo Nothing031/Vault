@@ -12,8 +12,6 @@
 #include "vault.hpp"
 #include "file_t.hpp"
 
-
-
 class FileListModel : public QAbstractListModel {
     Q_OBJECT
 
@@ -81,7 +79,5 @@ public:
         endInsertRows();
     }
 };
-
-
 
 #endif // FILELISTMODEL_HPP

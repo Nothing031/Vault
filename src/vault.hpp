@@ -98,6 +98,7 @@ public:
             qDebug() << "[VAULT]  ERROR Key generation failure";
         }
     }
+
     void UpdateIndex()
     {
         QElapsedTimer timer;
@@ -112,12 +113,13 @@ public:
             else
                 plainIndex.push_back(i);
         }
-        qDebug() << "[VAULT] Indexing done" << timer.elapsed() << "ms";
+        qDebug() << "[VAULT] Indexing done";
         qDebug() << "  Elapsed time    :" << timer.elapsed() << "ms";
         qDebug() << "  Encrypted files :" << cipherIndex.size();
         qDebug() << "  Decrypted files :" << plainIndex.size();
         qDebug() << "  Total           :" << files.size();
     }
+
     bool LoadFiles()
     {
         QElapsedTimer timer;
@@ -128,19 +130,27 @@ public:
             files.clear();
             try{
                 for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
-                    QFileInfo qinfo = QFileInfo(file.path());
-                    file_t filet;
-                    filet.displayPath = qinfo.fileName();
-                    filet.absolutepath = qinfo.absoluteFilePath();
-                    filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
-                    filet.state = (qinfo.path().endsWith(".enc") ? file_t::CipherData : file_t::PlainData);
-                    files.push_back(filet);
+                    if (std::string::npos == file.path().generic_wstring().find(this->backupDir.path().toStdWString())){
+                        qDebug() << "backup file";
+                        continue;
+                    }
+                    if (file.is_regular_file()){
+                        QFileInfo qinfo = QFileInfo(file.path());
+                        file_t filet;
+                        filet.displayPath = qinfo.fileName();
+                        filet.absolutepath = qinfo.absoluteFilePath();
+                        filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
+                        filet.state = (qinfo.fileName().endsWith(".enc", Qt::CaseInsensitive) ? file_t::CipherData : file_t::PlainData);
+                        if (filet.state == file_t::CipherData){
+                            filet.displayPath = filet.displayPath.left(filet.displayPath.size() - 4);
+                        }
+                        files.push_back(filet);
+                    }
                 }
             } catch(std::exception& e){
                 qDebug() << e.what();
                 return false;
             }
-
 
             std::sort(files.begin(), files.end(), [](const file_t& a, const file_t& b){
                 return a.relativePath < b.relativePath;

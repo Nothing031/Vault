@@ -160,7 +160,4 @@ private:
 };
 
 
-
-
-
 #endif // ENVIROMENT_HPP

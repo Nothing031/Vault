@@ -16,6 +16,7 @@ class window_crypto : public QWidget
     Q_OBJECT
 public:
     explicit window_crypto(QWidget *parent = nullptr);
+
     ~window_crypto();
 
     void on_request_page(Vault* pvault);
@@ -42,11 +43,12 @@ private slots:
 
 signals:
     void request_detachVault(Vault* pvault);
+
     void request_setEnable_ui(bool b);
+
     void request_terminal_message(const QStringList& messages);
 
 private:
-
     FileListModel *model;
     Ui::window_crypto *ui;
 

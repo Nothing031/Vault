@@ -138,6 +138,8 @@ private:
     }
 
 public:
+    bool flag_suspend = false;
+
     static void AES256_Encrypt_File(file_t* file, const QByteArray& key){
         QByteArray plainData;
         if (!ReadFile(file->absolutepath, plainData)){
@@ -183,17 +185,14 @@ public:
     void AES256_Encrypt_All(Vault* vault){
         emit signal_start();
         flag_suspend = false;
-
         int processorCount = std::thread::hardware_concurrency();
         int threadCount = vault->plainIndex.size() < processorCount ? vault->plainIndex.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
         std::atomic<int> success = 0;
         std::atomic<int> failed = 0;
-
         QStringList flushMessages;
         QStringList errorMessages;
-
         QMutex messages_m;
         QQueue<file_t*> files;
         QMutex files_m;
@@ -208,10 +207,8 @@ public:
             threads[i] = QThread::create([&](){
                 while(true){
                     if (flag_suspend){
-                        qDebug()  << "!!!!!!!!!!!!!!! suspending !!!!!!!!!!!!!!";
                         return;
                     }
-
                     files_m.lock();
                     if (files.empty()){
                         files_m.unlock();
@@ -222,9 +219,7 @@ public:
                     files_m.unlock();
 
                     try{
-                        QThread::msleep(500);
-                        qDebug() << file->displayPath;
-                        //AES256_Encrypt_File(file, vault.key);
+                        AES256_Encrypt_File(file, vault->key);
                         success++;
                     }catch(Error& e){
                         messages_m.lock();
@@ -258,7 +253,7 @@ public:
                 emit signal_progress(success + failed);
                 break;
             }
-            if  (flag_suspend){
+            if (flag_suspend){
                 files_m.unlock();
                 break;
             }
@@ -278,7 +273,6 @@ public:
             }
         }
 
-        flag_suspend = false;
         flushMessages.clear();
         emit signal_terminal_clear();
         if (success){
@@ -295,14 +289,15 @@ public:
     }
     void AES256_Decrypt_All(Vault* vault){
         emit signal_start();
-        flag_suspend = true;
-
+        flag_suspend = false;
         int processorCount = std::thread::hardware_concurrency();
         int threadCount = vault->cipherIndex.size() < processorCount ? vault->cipherIndex.size() : processorCount;
         QVector<QThread*> threads(threadCount);
 
-        std::atomic<int> progress = 0;
-        QStringList messages;
+        std::atomic<int> success = 0;
+        std::atomic<int> failed = 0;
+        QStringList flushMessages;
+        QStringList errorMessages;
         QMutex messages_m;
         QQueue<file_t*> files;
         QMutex files_m;
@@ -315,7 +310,10 @@ public:
         // work
         for (int i = 0; i < threadCount; i++){
             threads[i] = QThread::create([&](){
-                while(flag_suspend){
+                while(true){
+                    if (flag_suspend){
+                        return;
+                    }
                     files_m.lock();
                     if (files.empty()){
                         files_m.unlock();
@@ -326,25 +324,25 @@ public:
                     files_m.unlock();
 
                     try{
-                        QThread::msleep(500);
-                        qDebug() << file->displayPath;
-                        //AES256_Decrypt_File(file, vault.key);
-                        messages_m.lock();
-                        messages.append("<font color='green'>\"" + file->absolutepath + "\" decrypted</font>");
-                        messages_m.unlock();
+                        AES256_Decrypt_File(file, vault->key);
+                        success++;
                     }catch(Error& e){
                         messages_m.lock();
-                        messages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
-                        messages.append("<font color='red'>  \"" + e.what() + "\"");
+                        flushMessages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
+                        flushMessages.append("<font color='red'>  \"" + e.what() + "\"</font>");
+                        errorMessages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
+                        errorMessages.append("<font color='red'>  \"" + e.what() + "\"</font>");
                         messages_m.unlock();
+                        failed++;
                     }catch(std::exception& e){
                         messages_m.lock();
-                        messages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
-                        messages.append("<font color='red'>  \"" + QString::fromStdString(e.what()) + "\"");
+                        flushMessages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
+                        flushMessages.append("<font color='red'>  \"" + QString::fromStdString(e.what()) + "\"</font>");
+                        errorMessages.append("<font color='red'>\"" + file->absolutepath + "\" failed to decrypt</font>");
+                        errorMessages.append("<font color='red'>  \"" + QString::fromStdString(e.what()) + "\"</font>");
                         messages_m.unlock();
+                        failed++;
                     }
-
-                    progress++;
                 }
             });
             threads[i]->start();
@@ -352,18 +350,25 @@ public:
 
         // output
         while (flag_suspend){
-            Utils::Sleep(1000, 16, flag_suspend);
+            Utils::Sleep(500, 16, !flag_suspend);
             files_m.lock();
             if (files.empty()){
+                files_m.unlock();
+                emit signal_terminal_message(flushMessages);
+                emit signal_progress(success + failed);
+                break;
+            }
+            if (flag_suspend){
                 files_m.unlock();
                 break;
             }
             files_m.unlock();
+
             messages_m.lock();
-            emit signal_terminal_message(messages);
-            messages.clear();
+            emit signal_terminal_message(flushMessages);
+            flushMessages.clear();
             messages_m.unlock();
-            emit signal_progress(progress);
+            emit signal_progress(success + failed);
         }
 
         // wait
@@ -373,16 +378,25 @@ public:
             }
         }
 
-        flag_suspend = false;
+        flushMessages.clear();
+        emit signal_terminal_clear();
+        if (success){
+            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files decrypted</font>");
+        }
+        if (failed){
+            flushMessages.append("<font  color='green'>" + QString::number(success) + "Files failed to decrypt</font>");
+        }
+        emit signal_terminal_message(flushMessages);
+        if (failed){
+            emit signal_terminal_message(errorMessages);
+        }
         emit signal_done();
     }
 
-    bool flag_suspend = false;
     inline static QString SHA256(const QString& str)
     {
         return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
     }
-
 
 signals:
     void signal_terminal_clear();

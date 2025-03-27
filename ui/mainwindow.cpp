@@ -34,8 +34,6 @@ MainWindow::MainWindow(QWidget *parent):
     /////////////
     Enviroment::GetInstance().Init(ui->vault_select_comboBox);
 
-
-
     //# window new vault ###############################################################
     window_newvault *win_newvault = new window_newvault(this);
     ui->stackedWidget->addWidget(win_newvault);
@@ -76,13 +74,9 @@ MainWindow::MainWindow(QWidget *parent):
         ui->vault_createExisting_button->setEnabled(b);
         ui->vault_createNew_button->setEnabled(b);
     });
-
-
-
 }
+
 MainWindow::~MainWindow()
 {
     delete ui;
 }
-
-
