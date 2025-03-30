@@ -22,8 +22,31 @@ FrontendVault::FrontendVault(QWidget *parent)
     ui->setupUi(this);
     ui->FileListView->setModel(model);
 
+    connect(ui->PasswordLineedit, &QLineEdit::returnPressed, this, &FrontendVault::CheckPassword);
+    connect(ui->DetachVaultButton, &QPushButton::pressed, this, [this](){
+        emit request_detachVault(pVault);
+    });
+    connect(ui->PasswordVisibilityButton, &QPushButton::toggled, this, [this](bool b){
+        ui->PasswordLineedit->setEchoMode(b ? QLineEdit::Normal : QLineEdit::Password);
+    });
 
+    // middle buttons
+    connect(ui->OpenFolderButton, &QPushButton::pressed, this, [this](){
+        if (pVault->directory.exists()){
+            QDesktopServices::openUrl(QUrl(pVault->directory.path()));
+        }else{
+            qDebug() << "Error directory not exists :" << pVault->directory.path();
+        }
+    });
+    connect(ui->RefreshButton, &QPushButton::pressed, this, [this](){
+        pVault->LoadFiles();
+        model->loadVault(pVault);
+    });
+    connect(ui->EncryptButton, &QPushButton::pressed, this, &FrontendVault::StartEncrypt);
+    connect(ui->DecryptButton, &QPushButton::pressed, this, &FrontendVault::StartDecrypt);
+    connect(ui->SuspendButton, &QPushButton::pressed, this, &FrontendVault::Suspend);
 
+    // child
     connect(&crypto, &Crypto::signal_start, this, [this](){
         ui->TerminalTextedit->clear();
         ui->TerminalTextedit->append("Starting...");
@@ -83,7 +106,7 @@ void FrontendVault::init(Vault* pvault)
     ui->PasswordLineedit->setText("");
 }
 
-void FrontendVault::on_PasswordLineedit_returnPressed()
+void FrontendVault::CheckPassword()
 {
     QString hashed_password = Crypto::SHA256(ui->PasswordLineedit->text());
     if (pVault->sha256Password == hashed_password){
@@ -98,32 +121,7 @@ void FrontendVault::on_PasswordLineedit_returnPressed()
     }
 }
 
-void FrontendVault::on_PasswordVisibilityButton_toggled(bool checked)
-{
-    if (checked){
-        ui->PasswordLineedit->setEchoMode(QLineEdit::Normal);
-    }else{
-        ui->PasswordLineedit->setEchoMode(QLineEdit::Password);
-    }
-}
-
-//# buttons ###############################################
-
-void FrontendVault::on_DetachVaultButton_clicked()
-{
-    emit request_detachVault(pVault);
-}
-
-void FrontendVault::on_OpenFolderButton_clicked()
-{
-    if (pVault->directory.exists()){
-        QDesktopServices::openUrl(QUrl(pVault->directory.path()));
-    }else{
-        qDebug() << "Error directory not exists :" << pVault->directory.path();
-    }
-}
-
-void FrontendVault::on_EncryptButton_clicked()
+void FrontendVault::StartEncrypt()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -146,7 +144,7 @@ void FrontendVault::on_EncryptButton_clicked()
     thread->start();
 }
 
-void FrontendVault::on_DecryptButton_clicked()
+void FrontendVault::StartDecrypt()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -169,7 +167,7 @@ void FrontendVault::on_DecryptButton_clicked()
     thread->start();
 }
 
-void FrontendVault::on_SuspendButton_clicked()
+void FrontendVault::Suspend()
 {
     if (thread && thread->isRunning()){
         qDebug() << "[CRYPTO]  Suspending";
@@ -180,11 +178,7 @@ void FrontendVault::on_SuspendButton_clicked()
     }
 }
 
-void FrontendVault::on_RefreshButton_clicked()
-{
-    pVault->LoadFiles();
-    model->loadVault(pVault);
-}
+
 
 
 

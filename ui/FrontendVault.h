@@ -23,21 +23,13 @@ public:
 
 private slots:
 
-    void on_PasswordLineedit_returnPressed();
+    void CheckPassword();
 
-    void on_PasswordVisibilityButton_toggled(bool checked);
+    void StartEncrypt();
 
-    void on_OpenFolderButton_clicked();
+    void StartDecrypt();
 
-    void on_EncryptButton_clicked();
-
-    void on_DecryptButton_clicked();
-
-    void on_SuspendButton_clicked();
-
-    void on_DetachVaultButton_clicked();
-
-    void on_RefreshButton_clicked();
+    void Suspend();
 
 signals:
     void request_detachVault(Vault* pvault);
