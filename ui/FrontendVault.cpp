@@ -86,7 +86,7 @@ void FrontendVault::on_request_page(Vault* pvault)
 void FrontendVault::on_password_input_lineedit_returnPressed()
 {
     QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
-    if (pVault->password == hashed_password){
+    if (pVault->sha256Password == hashed_password){
         ui->password_input_lineedit->setEnabled(false);
         qDebug() << "Correct password";
         pVault->CreateKey(ui->password_input_lineedit->text());
