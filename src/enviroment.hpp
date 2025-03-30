@@ -34,7 +34,6 @@ public:
             Load();
             box->blockSignals(true);
             for (int i = 0; i < vaults.size(); i++){
-                vaults[i].id = i;
                 box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
@@ -58,7 +57,6 @@ public:
             box->clear();
             vaults.push_back(vault);
             for (int i = 0; i < vaults.size(); i++){
-                vaults[i].id = i;
                 box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
@@ -88,7 +86,6 @@ public:
             box->clear();
             vaults.remove(index);
             for (int i = 0; i < vaults.size(); i++){
-                vaults[i].id = i;
                 box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
@@ -108,7 +105,7 @@ public:
         for (auto& vault : std::as_const(vaults)){
             QJsonObject jVault;
             jVault[KEY_DIRECTORY] = vault.directory.path();
-            jVault[KEY_PASSWORD] = vault.password;
+            jVault[KEY_PASSWORD] = vault.sha256Password;
             jVaults.push_back(jVault);
         }
         jObj[KEY_VAULTS] = jVaults;
