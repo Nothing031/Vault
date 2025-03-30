@@ -35,7 +35,7 @@ public:
             box->blockSignals(true);
             for (int i = 0; i < vaults.size(); i++){
                 vaults[i].id = i;
-                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
+                box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
             box->blockSignals(false);
@@ -59,11 +59,11 @@ public:
             vaults.push_back(vault);
             for (int i = 0; i < vaults.size(); i++){
                 vaults[i].id = i;
-                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
+                box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
             box->blockSignals(false);
-            qDebug() << "Vault Added, vault : " << vault.dir.path();
+            qDebug() << "Vault Added, vault : " << vault.directory.path();
         }else{
             qDebug() << "[ERROR] Failed to add vault";
             return;
@@ -79,7 +79,7 @@ public:
                 if (pvault == &vaults[index]){
                     break;
                 }else if (++index == vaults.size()){
-                    qDebug() << "[ERROR] Failed to detach vault : " << pvault->dir.path();
+                    qDebug() << "[ERROR] Failed to detach vault : " << pvault->directory.path();
                     return;
                 }
             }
@@ -89,7 +89,7 @@ public:
             vaults.remove(index);
             for (int i = 0; i < vaults.size(); i++){
                 vaults[i].id = i;
-                box->addItem(vaults[i].displayName, QVariant::fromValue(static_cast<void*>(&vaults[i])));
+                box->addItem(vaults[i].name, QVariant::fromValue(static_cast<void*>(&vaults[i])));
             }
             box->setCurrentIndex(-1);
             box->blockSignals(false);
@@ -107,7 +107,7 @@ public:
 
         for (auto& vault : std::as_const(vaults)){
             QJsonObject jVault;
-            jVault[KEY_DIRECTORY] = vault.dir.path();
+            jVault[KEY_DIRECTORY] = vault.directory.path();
             jVault[KEY_PASSWORD] = vault.password;
             jVaults.push_back(jVault);
         }

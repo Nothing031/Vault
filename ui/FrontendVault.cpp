@@ -78,8 +78,8 @@ void FrontendVault::on_request_page(Vault* pvault)
     ui->progressBar->setValue(0);
 
     ui->terminal_textedit->clear();
-    ui->directory_path_label->setText(pVault->dir.path());
-    ui->vault_name_label->setText(pVault->displayName);
+    ui->directory_path_label->setText(pVault->directory.path());
+    ui->vault_name_label->setText(pVault->name);
     ui->password_input_lineedit->setText("");
 }
 
@@ -116,10 +116,10 @@ void FrontendVault::on_vault_detach_button_clicked()
 
 void FrontendVault::on_openFolder_button_clicked()
 {
-    if (pVault->dir.exists()){
-        QDesktopServices::openUrl(QUrl(pVault->dir.path()));
+    if (pVault->directory.exists()){
+        QDesktopServices::openUrl(QUrl(pVault->directory.path()));
     }else{
-        qDebug() << "Error directory not exists :" << pVault->dir.path();
+        qDebug() << "Error directory not exists :" << pVault->directory.path();
     }
 }
 
