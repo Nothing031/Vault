@@ -22,8 +22,9 @@
 
 class Vault{
 public:
-    QDir dir;
+    QDir directory;
     QDir backupDir;
+    QString encryptionExtension;
     QString displayName;
     QString password;
     QByteArray key;
@@ -31,15 +32,14 @@ public:
     QVector<file_t> files;
     QVector<int> cipherIndex;
     QVector<int> plainIndex;
-    int id = -1;
 
     Vault(){
 
     }
     Vault(const QString& directory, const QString& password, const int& backupLen){
-        this->dir =  QDir(directory);
+        this->directory =  QDir(directory);
         this->backupDir = QDir(directory + "/" + password.left(backupLen));
-        this->displayName =  dir.dirName();
+        this->displayName =  directory.dirName();
         this->password = password;
         this->key = {};
 
@@ -52,7 +52,7 @@ public:
     Vault(const Vault& other)
     {
         backupDir = other.backupDir;
-        dir = other.dir;
+        directory = other.directory;
         displayName = other.displayName;
         password = other.password;
         files = other.files;
@@ -64,7 +64,7 @@ public:
         if (this == &other)
             return *this;
         backupDir = other.backupDir;
-        dir = other.dir;
+        directory = other.directory;
         displayName = other.displayName;
         password = other.password;
         files = other.files;
@@ -126,10 +126,10 @@ public:
         timer.start();
         qDebug() << "[VAULT] loading files...";
         QApplication::processEvents();
-        if (dir.exists()){
+        if (directory.exists()){
             files.clear();
             try{
-                for (const auto& file : std::filesystem::recursive_directory_iterator(dir.path().toStdWString())){
+                for (const auto& file : std::filesystem::recursive_directory_iterator(directory.path().toStdWString())){
                     if (std::string::npos != file.path().generic_wstring().find(this->backupDir.path().toStdWString())){
                         qDebug() << "backup file";
                         continue;
@@ -139,7 +139,7 @@ public:
                         file_t filet;
                         filet.displayPath = qinfo.fileName();
                         filet.absolutepath = qinfo.absoluteFilePath();
-                        filet.relativePath = dir.relativeFilePath(qinfo.absoluteFilePath());
+                        filet.relativePath = directory.relativeFilePath(qinfo.absoluteFilePath());
                         filet.state = (qinfo.fileName().endsWith(".enc", Qt::CaseInsensitive) ? file_t::CipherData : file_t::PlainData);
                         if (filet.state == file_t::CipherData){
                             filet.displayPath = filet.displayPath.left(filet.displayPath.size() - 4);
