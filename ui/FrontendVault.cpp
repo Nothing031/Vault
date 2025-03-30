@@ -20,40 +20,40 @@ FrontendVault::FrontendVault(QWidget *parent)
     , thread(nullptr)
 {
     ui->setupUi(this);
-    ui->files_listview->setModel(model);
+    ui->FileListView->setModel(model);
 
 
 
     connect(&crypto, &Crypto::signal_start, this, [this](){
-        ui->terminal_textedit->clear();
-        ui->terminal_textedit->append("Starting...");
+        ui->TerminalTextedit->clear();
+        ui->TerminalTextedit->append("Starting...");
         emit request_setEnable_ui(false);
-        ui->encrypt_button->setEnabled(false);
-        ui->decrypt_button->setEnabled(false);
-        ui->refresh_button->setEnabled(false);
-        ui->suspend_button->setEnabled(true);
+        ui->EncryptButton->setEnabled(false);
+        ui->DecryptButton->setEnabled(false);
+        ui->RefreshButton->setEnabled(false);
+        ui->SuspendButton->setEnabled(true);
     });
     connect(&crypto, &Crypto::signal_done, this, [this](){
         emit request_setEnable_ui(true);
-        ui->encrypt_button->setEnabled(true);
-        ui->decrypt_button->setEnabled(true);
-        ui->refresh_button->setEnabled(true);
-        ui->suspend_button->setEnabled(false);
+        ui->EncryptButton->setEnabled(true);
+        ui->DecryptButton->setEnabled(true);
+        ui->RefreshButton->setEnabled(true);
+        ui->SuspendButton->setEnabled(false);
         model->update();
         QTimer::singleShot(1000, [this]{
-            ui->progressBar->setValue(0);
+            ui->ProgressBar->setValue(0);
         });
     });
     connect(&crypto, &Crypto::signal_progress, this, [this](int value){
-        ui->progressBar->setValue(value);
+        ui->ProgressBar->setValue(value);
     });
     connect(&crypto, &Crypto::signal_terminal_message, this, [this](QStringList messages){
         for (auto& message : std::as_const(messages)){
-            ui->terminal_textedit->append(message);
+            ui->TerminalTextedit->append(message);
         }        
     });
     connect(&crypto, &Crypto::signal_terminal_clear, this, [this](){
-        ui->terminal_textedit->clear();
+        ui->TerminalTextedit->clear();
     });
 }
 
@@ -62,59 +62,59 @@ FrontendVault::~FrontendVault()
     delete ui;
 }
 
-void FrontendVault::on_request_page(Vault* pvault)
+void FrontendVault::init(Vault* pvault)
 {
     this->pVault = pvault;
     this->pVault->LoadFiles();
 
     model->loadVault(pvault);
 
-    ui->password_input_lineedit->setEnabled(true);
+    ui->PasswordLineedit->setEnabled(true);
 
-    ui->openFolder_button->setEnabled(true);
-    ui->encrypt_button->setEnabled(false);
-    ui->decrypt_button->setEnabled(false);
-    ui->suspend_button->setEnabled(false);
-    ui->progressBar->setValue(0);
+    ui->OpenFolderButton->setEnabled(true);
+    ui->EncryptButton->setEnabled(false);
+    ui->DecryptButton->setEnabled(false);
+    ui->SuspendButton->setEnabled(false);
+    ui->ProgressBar->setValue(0);
 
-    ui->terminal_textedit->clear();
-    ui->directory_path_label->setText(pVault->directory.path());
-    ui->vault_name_label->setText(pVault->name);
-    ui->password_input_lineedit->setText("");
+    ui->TerminalTextedit->clear();
+    ui->FolderLabel->setText(pVault->directory.path());
+    ui->VaultNameLabel->setText(pVault->name);
+    ui->PasswordLineedit->setText("");
 }
 
-void FrontendVault::on_password_input_lineedit_returnPressed()
+void FrontendVault::on_PasswordLineedit_returnPressed()
 {
-    QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
+    QString hashed_password = Crypto::SHA256(ui->PasswordLineedit->text());
     if (pVault->sha256Password == hashed_password){
-        ui->password_input_lineedit->setEnabled(false);
+        ui->PasswordLineedit->setEnabled(false);
         qDebug() << "Correct password";
-        pVault->CreateKey(ui->password_input_lineedit->text());
-        ui->decrypt_button->setEnabled(true);
-        ui->encrypt_button->setEnabled(true);
+        pVault->CreateKey(ui->PasswordLineedit->text());
+        ui->DecryptButton->setEnabled(true);
+        ui->EncryptButton->setEnabled(true);
     }
     else{
         qDebug() << "Wrong password";
     }
 }
 
-void FrontendVault::on_password_visibility_button_toggled(bool checked)
+void FrontendVault::on_PasswordVisibilityButton_toggled(bool checked)
 {
     if (checked){
-        ui->password_input_lineedit->setEchoMode(QLineEdit::Normal);
+        ui->PasswordLineedit->setEchoMode(QLineEdit::Normal);
     }else{
-        ui->password_input_lineedit->setEchoMode(QLineEdit::Password);
+        ui->PasswordLineedit->setEchoMode(QLineEdit::Password);
     }
 }
 
 //# buttons ###############################################
 
-void FrontendVault::on_vault_detach_button_clicked()
+void FrontendVault::on_DetachVaultButton_clicked()
 {
     emit request_detachVault(pVault);
 }
 
-void FrontendVault::on_openFolder_button_clicked()
+void FrontendVault::on_OpenFolderButton_clicked()
 {
     if (pVault->directory.exists()){
         QDesktopServices::openUrl(QUrl(pVault->directory.path()));
@@ -123,7 +123,7 @@ void FrontendVault::on_openFolder_button_clicked()
     }
 }
 
-void FrontendVault::on_encrypt_button_clicked()
+void FrontendVault::on_EncryptButton_clicked()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -134,8 +134,8 @@ void FrontendVault::on_encrypt_button_clicked()
         qDebug() << "[ERROR] no any encryptable files";
         return;
     }
-    ui->progressBar->setRange(0, pVault->plainIndex.size());
-    ui->progressBar->setValue(0);
+    ui->ProgressBar->setRange(0, pVault->plainIndex.size());
+    ui->ProgressBar->setValue(0);
 
     if (thread) thread->deleteLater();
 
@@ -146,7 +146,7 @@ void FrontendVault::on_encrypt_button_clicked()
     thread->start();
 }
 
-void FrontendVault::on_decrypt_button_clicked()
+void FrontendVault::on_DecryptButton_clicked()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -157,8 +157,8 @@ void FrontendVault::on_decrypt_button_clicked()
         qDebug() << "[ERROR] no any decryptable files";
         return;
     }
-    ui->progressBar->setRange(0, pVault->cipherIndex.size());
-    ui->progressBar->setValue(0);
+    ui->ProgressBar->setRange(0, pVault->cipherIndex.size());
+    ui->ProgressBar->setValue(0);
 
     if (thread) thread->deleteLater();
 
@@ -169,7 +169,7 @@ void FrontendVault::on_decrypt_button_clicked()
     thread->start();
 }
 
-void FrontendVault::on_suspend_button_clicked()
+void FrontendVault::on_SuspendButton_clicked()
 {
     if (thread && thread->isRunning()){
         qDebug() << "[CRYPTO]  Suspending";
@@ -180,7 +180,7 @@ void FrontendVault::on_suspend_button_clicked()
     }
 }
 
-void FrontendVault::on_refresh_button_clicked()
+void FrontendVault::on_RefreshButton_clicked()
 {
     pVault->LoadFiles();
     model->loadVault(pVault);

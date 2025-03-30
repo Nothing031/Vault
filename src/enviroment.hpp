@@ -97,11 +97,11 @@ public:
         SaveLocalVaults();
     }
 
-    void SavePortable(const Vault& vault){
-        QString savePath = vault.directory.path() + "/" + ENV_VAULT_PORTABLE_PATH;
+    void SavePortableVault(const Vault* pVault){
+        QString savePath = pVault->directory.path() + "/" + ENV_VAULT_PORTABLE_PATH;
         QJsonObject jObj;
-        jObj[KEY_DIRECTORY] = vault.directory.path();
-        jObj[KEY_PASSWORD] = vault.sha256Password;
+        jObj[KEY_DIRECTORY] = pVault->directory.path();
+        jObj[KEY_PASSWORD] = pVault->sha256Password;
         QJsonDocument jDoc(jObj);
         QFile file(savePath);
         if (!file.open(QFile::WriteOnly | QFile::Truncate)){
@@ -113,12 +113,12 @@ public:
         qDebug() << "json saved";
     }
 
-    Vault LoadPortable(const QString& path){
+    Vault* LoadPortableVault(const QString& path){
         QFile file(path);
 
         if (!file.exists() || !file.open(QFile::ReadOnly)){
             qDebug() << "failed to read json";
-            return Vault();
+            return nullptr;
         }
 
         QByteArray data = file.readAll();
@@ -126,7 +126,7 @@ public:
         QJsonObject jObj = jDoc.object();
         QString directory = jObj[KEY_DIRECTORY].toString();
         QString password  = jObj[KEY_PASSWORD].toString();
-        return Vault(directory, password, Mode::Portable);
+        return new Vault(directory, password, Mode::Portable);
     }
 
     void SaveLocalVaults(){
@@ -176,7 +176,7 @@ public:
             QJsonObject jVaultObj = jVault.toObject();
             QString directory = jVaultObj[KEY_DIRECTORY].toString();
             QString password = jVaultObj[KEY_PASSWORD].toString();
-            vaults.emplaceBack(directory, password);
+            vaults.emplaceBack(directory, password, Mode::Local);
         }
         file.close();
         qDebug() << "Json Loaded";

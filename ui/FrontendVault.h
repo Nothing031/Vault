@@ -19,25 +19,25 @@ public:
 
     ~FrontendVault();
 
-    void on_request_page(Vault* pvault);
+    void init(Vault* pvault);
 
 private slots:
 
-    void on_password_input_lineedit_returnPressed();
+    void on_PasswordLineedit_returnPressed();
 
-    void on_password_visibility_button_toggled(bool checked);
+    void on_PasswordVisibilityButton_toggled(bool checked);
 
-    void on_openFolder_button_clicked();
+    void on_OpenFolderButton_clicked();
 
-    void on_encrypt_button_clicked();
+    void on_EncryptButton_clicked();
 
-    void on_decrypt_button_clicked();
+    void on_DecryptButton_clicked();
 
-    void on_suspend_button_clicked();
+    void on_SuspendButton_clicked();
 
-    void on_vault_detach_button_clicked();
+    void on_DetachVaultButton_clicked();
 
-    void on_refresh_button_clicked();
+    void on_RefreshButton_clicked();
 
 signals:
     void request_detachVault(Vault* pvault);

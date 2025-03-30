@@ -133,7 +133,7 @@ QCheckBox::indicator:checked{
     <number>0</number>
    </property>
    <item row="9" column="0">
-    <widget class="QProgressBar" name="progressBar">
+    <widget class="QProgressBar" name="ProgressBar">
      <property name="minimumSize">
       <size>
        <width>0</width>
@@ -157,14 +157,14 @@ QCheckBox::indicator:checked{
    <item row="5" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
      <item>
-      <widget class="QPushButton" name="openFolder_button">
+      <widget class="QPushButton" name="OpenFolderButton">
        <property name="text">
         <string>Open Folder</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="refresh_button">
+      <widget class="QPushButton" name="RefreshButton">
        <property name="text">
         <string>Refresh</string>
        </property>
@@ -175,7 +175,7 @@ QCheckBox::indicator:checked{
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
      <item>
-      <widget class="QLabel" name="directory_l_label">
+      <widget class="QLabel" name="FolderLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -200,7 +200,7 @@ QCheckBox::indicator:checked{
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="directory_path_label">
+      <widget class="QLabel" name="FolderPathLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -227,7 +227,7 @@ QCheckBox::indicator:checked{
     </layout>
    </item>
    <item row="8" column="0">
-    <widget class="QTextEdit" name="terminal_textedit">
+    <widget class="QTextEdit" name="TerminalTextedit">
      <property name="sizePolicy">
       <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
        <horstretch>0</horstretch>
@@ -251,7 +251,7 @@ QCheckBox::indicator:checked{
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
      <item>
-      <widget class="QLabel" name="vault_l_label">
+      <widget class="QLabel" name="VaultLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -276,7 +276,7 @@ QCheckBox::indicator:checked{
       </widget>
      </item>
      <item>
-      <widget class="QLabel" name="vault_name_label">
+      <widget class="QLabel" name="VaultNameLabel">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -301,7 +301,7 @@ QCheckBox::indicator:checked{
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="vault_detach_button">
+      <widget class="QPushButton" name="DetachVaultButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -322,7 +322,7 @@ padding-right:5px;
     </layout>
    </item>
    <item row="7" column="0">
-    <widget class="QListView" name="files_listview">
+    <widget class="QListView" name="FileListView">
      <property name="sizePolicy">
       <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
        <horstretch>0</horstretch>
@@ -340,7 +340,7 @@ padding-right:5px;
    <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
      <item>
-      <widget class="QLabel" name="password_l_label">
+      <widget class="QLabel" name="PasswordLabel">
        <property name="minimumSize">
         <size>
          <width>70</width>
@@ -362,7 +362,7 @@ padding-right:5px;
       </widget>
      </item>
      <item>
-      <widget class="QLineEdit" name="password_input_lineedit">
+      <widget class="QLineEdit" name="PasswordLineedit">
        <property name="minimumSize">
         <size>
          <width>0</width>
@@ -384,7 +384,7 @@ padding-right:5px;
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="password_visibility_button">
+      <widget class="QPushButton" name="PasswordVisibilityButton">
        <property name="sizePolicy">
         <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
          <horstretch>0</horstretch>
@@ -421,21 +421,21 @@ padding-right:5px;
    <item row="6" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
      <item>
-      <widget class="QPushButton" name="encrypt_button">
+      <widget class="QPushButton" name="EncryptButton">
        <property name="text">
         <string>Encrypt</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="decrypt_button">
+      <widget class="QPushButton" name="DecryptButton">
        <property name="text">
         <string>Decrypt</string>
        </property>
       </widget>
      </item>
      <item>
-      <widget class="QPushButton" name="suspend_button">
+      <widget class="QPushButton" name="SuspendButton">
        <property name="text">
         <string>Suspend</string>
        </property>

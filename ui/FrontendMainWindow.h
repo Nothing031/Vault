@@ -25,12 +25,7 @@ private slots:
 
 
 private:
-    enum class page : int{
-        Empty = 0,
-        NewVault = 1,
-        Crypto = 2
-    };
-
     Ui::FrontendMainWindow *ui;
+
 };
 #endif // FRONTENDMAINWINDOW_H

@@ -140,17 +140,6 @@ QCheckBox::indicator:checked{
       </property>
      </widget>
     </item>
-    <item row="1" column="0" colspan="4">
-     <layout class="QGridLayout" name="layout_output"/>
-    </item>
-    <item row="0" column="2" colspan="2">
-     <widget class="QStackedWidget" name="stackedWidget">
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="empty_page"/>
-     </widget>
-    </item>
     <item row="0" column="0">
      <widget class="QWidget" name="widget" native="true">
       <property name="minimumSize">
@@ -292,6 +281,16 @@ QCheckBox::indicator:checked{
         </widget>
        </item>
       </layout>
+     </widget>
+    </item>
+    <item row="1" column="0" colspan="4">
+     <layout class="QGridLayout" name="layout_output"/>
+    </item>
+    <item row="0" column="2" colspan="2">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
      </widget>
     </item>
    </layout>
