@@ -1,5 +1,5 @@
-#include "window_crypto.h"
-#include "ui_window_crypto.h"
+#include "FrontendVault.h"
+#include "ui_FrontendVault.h"
 #include "src/crypto.hpp"
 
 #include <QProcess>
@@ -13,10 +13,10 @@
 
 #include "src/filelistmodel.hpp"
 
-window_crypto::window_crypto(QWidget *parent)
+FrontendVault::FrontendVault(QWidget *parent)
     : QWidget(parent)
     , model(new FileListModel(this))
-    , ui(new Ui::window_crypto)
+    , ui(new Ui::FrontendVault)
     , thread(nullptr)
 {
     ui->setupUi(this);
@@ -57,12 +57,12 @@ window_crypto::window_crypto(QWidget *parent)
     });
 }
 
-window_crypto::~window_crypto()
+FrontendVault::~FrontendVault()
 {
     delete ui;
 }
 
-void window_crypto::on_request_page(Vault* pvault)
+void FrontendVault::on_request_page(Vault* pvault)
 {
     this->pVault = pvault;
     this->pVault->LoadFiles();
@@ -83,7 +83,7 @@ void window_crypto::on_request_page(Vault* pvault)
     ui->password_input_lineedit->setText("");
 }
 
-void window_crypto::on_password_input_lineedit_returnPressed()
+void FrontendVault::on_password_input_lineedit_returnPressed()
 {
     QString hashed_password = Crypto::SHA256(ui->password_input_lineedit->text());
     if (pVault->password == hashed_password){
@@ -98,7 +98,7 @@ void window_crypto::on_password_input_lineedit_returnPressed()
     }
 }
 
-void window_crypto::on_password_visibility_button_toggled(bool checked)
+void FrontendVault::on_password_visibility_button_toggled(bool checked)
 {
     if (checked){
         ui->password_input_lineedit->setEchoMode(QLineEdit::Normal);
@@ -109,12 +109,12 @@ void window_crypto::on_password_visibility_button_toggled(bool checked)
 
 //# buttons ###############################################
 
-void window_crypto::on_vault_detach_button_clicked()
+void FrontendVault::on_vault_detach_button_clicked()
 {
     emit request_detachVault(pVault);
 }
 
-void window_crypto::on_openFolder_button_clicked()
+void FrontendVault::on_openFolder_button_clicked()
 {
     if (pVault->dir.exists()){
         QDesktopServices::openUrl(QUrl(pVault->dir.path()));
@@ -123,7 +123,7 @@ void window_crypto::on_openFolder_button_clicked()
     }
 }
 
-void window_crypto::on_encrypt_button_clicked()
+void FrontendVault::on_encrypt_button_clicked()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -146,7 +146,7 @@ void window_crypto::on_encrypt_button_clicked()
     thread->start();
 }
 
-void window_crypto::on_decrypt_button_clicked()
+void FrontendVault::on_decrypt_button_clicked()
 {
     pVault->UpdateIndex();
     if (thread && thread->isRunning()){
@@ -169,7 +169,7 @@ void window_crypto::on_decrypt_button_clicked()
     thread->start();
 }
 
-void window_crypto::on_suspend_button_clicked()
+void FrontendVault::on_suspend_button_clicked()
 {
     if (thread && thread->isRunning()){
         qDebug() << "[CRYPTO]  Suspending";
@@ -180,7 +180,7 @@ void window_crypto::on_suspend_button_clicked()
     }
 }
 
-void window_crypto::on_refresh_button_clicked()
+void FrontendVault::on_refresh_button_clicked()
 {
     pVault->LoadFiles();
     model->loadVault(pVault);
