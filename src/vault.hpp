@@ -12,6 +12,7 @@
 #include <QDirListing>
 #include <QMutex>
 #include <QDirIterator>
+#include <QCryptographicHash>
 
 #include <filesystem>
 
@@ -28,7 +29,7 @@ public:
     QDir backupDir;
     QString encryptionExtension;
     QString name;
-    QString password;
+    QString sha256Password;
     QByteArray key;
 
     QVector<file_t> files;
@@ -38,12 +39,13 @@ public:
     Vault(){
 
     }
+
     Vault(const QString& directory, const QString& password){
         this->encryptionExtension = password.left(EXTENSION_LEN);
         this->directory = QDir(directory);
         this->backupDir = QDir(directory + "/" + encryptionExtension);
         this->name =  this->directory.dirName();
-        this->password = password;
+        this->sha256Password = password;
         this->key = {};
         this->files = {};
         this->cipherIndex = {};
@@ -56,12 +58,13 @@ public:
         directory = other.directory;
         backupDir = other.backupDir;
         name = other.name;
-        password = other.password;
+        sha256Password = other.sha256Password;
         key = other.key;
         files = other.files;
         cipherIndex = other.cipherIndex;
         plainIndex = other.plainIndex;
     }
+
     Vault& operator=(const Vault& other)
     {
         if (this == &other)
@@ -70,7 +73,7 @@ public:
         directory = other.directory;
         backupDir = other.backupDir;
         name = other.name;
-        password = other.password;
+        sha256Password = other.sha256Password;
         key = other.key;
         files = other.files;
         cipherIndex = other.cipherIndex;
@@ -78,18 +81,16 @@ public:
         return *this;
     }
 
-    void CreateKey(const QString& input)
+    void CreateKey(const QString& password)
     {
-        qDebug() << "[VAULT]  Generating key";
-        QApplication::processEvents();
         QElapsedTimer timer;
         timer.start();
 
         key.resize(32);
 
         if(PKCS5_PBKDF2_HMAC_SHA1(
-            (const char*)input.constData(),
-            input.size(),
+            (const char*)password.constData(),
+            password.size(),
             nullptr,
             0,
             100000,
