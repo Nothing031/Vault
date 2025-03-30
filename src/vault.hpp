@@ -19,13 +19,15 @@
 
 #include "file_t.hpp"
 
+#define EXTENSION_LEN 8
+
 
 class Vault{
 public:
     QDir directory;
     QDir backupDir;
     QString encryptionExtension;
-    QString displayName;
+    QString name;
     QString password;
     QByteArray key;
 
@@ -36,25 +38,26 @@ public:
     Vault(){
 
     }
-    Vault(const QString& directory, const QString& password, const int& backupLen){
-        this->directory =  QDir(directory);
-        this->backupDir = QDir(directory + "/" + password.left(backupLen));
-        this->displayName =  directory.dirName();
+    Vault(const QString& directory, const QString& password){
+        this->encryptionExtension = password.left(EXTENSION_LEN);
+        this->directory = QDir(directory);
+        this->backupDir = QDir(directory + "/" + encryptionExtension);
+        this->name =  this->directory.dirName();
         this->password = password;
         this->key = {};
-
         this->files = {};
         this->cipherIndex = {};
         this->plainIndex = {};
-        this->id = -1;
     }
 
     Vault(const Vault& other)
     {
-        backupDir = other.backupDir;
+        encryptionExtension = other.encryptionExtension;
         directory = other.directory;
-        displayName = other.displayName;
+        backupDir = other.backupDir;
+        name = other.name;
         password = other.password;
+        key = other.key;
         files = other.files;
         cipherIndex = other.cipherIndex;
         plainIndex = other.plainIndex;
@@ -63,10 +66,12 @@ public:
     {
         if (this == &other)
             return *this;
-        backupDir = other.backupDir;
+        encryptionExtension = other.encryptionExtension;
         directory = other.directory;
-        displayName = other.displayName;
+        backupDir = other.backupDir;
+        name = other.name;
         password = other.password;
+        key = other.key;
         files = other.files;
         cipherIndex = other.cipherIndex;
         plainIndex = other.plainIndex;
