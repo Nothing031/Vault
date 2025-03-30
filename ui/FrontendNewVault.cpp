@@ -65,7 +65,7 @@ void FrontendNewVault::init(const Mode &mode)
 void FrontendNewVault::ConditionCheck()
 {
     QString styleSheet;
-    if (NewVaultMode == NewVault::CreateNew){
+    if (mode == Mode::Local){
         QString styleSheet = "QLabel{color:rgb";
         styleSheet += (conditionPath ? "(55, 255, 55);}" : "(255, 55, 55);}");
         ui->VaultLabel->setStyleSheet(styleSheet);

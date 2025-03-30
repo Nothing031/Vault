@@ -22,6 +22,10 @@
 
 #define EXTENSION_LEN 8
 
+enum class Mode{
+    Local,
+    Portable,
+};
 
 class Vault{
 public:
@@ -31,6 +35,7 @@ public:
     QString name;
     QString sha256Password;
     QByteArray key;
+    Mode mode;
 
     QVector<file_t> files;
     QVector<int> cipherIndex;
@@ -40,7 +45,8 @@ public:
 
     }
 
-    Vault(const QString& directory, const QString& password){
+    Vault(const QString& directory, const QString& password, const Mode& mode){
+        this->mode = mode;
         this->encryptionExtension = password.left(EXTENSION_LEN);
         this->directory = QDir(directory);
         this->backupDir = QDir(directory + "/" + encryptionExtension);
@@ -54,6 +60,7 @@ public:
 
     Vault(const Vault& other)
     {
+        mode = other.mode;
         encryptionExtension = other.encryptionExtension;
         directory = other.directory;
         backupDir = other.backupDir;
@@ -69,6 +76,7 @@ public:
     {
         if (this == &other)
             return *this;
+        mode = other.mode;
         encryptionExtension = other.encryptionExtension;
         directory = other.directory;
         backupDir = other.backupDir;

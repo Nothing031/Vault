@@ -18,6 +18,7 @@
 #include <QStandardItemModel>
 #include <QListView>
 #include <QThread>
+#include <QFileDialog>
 
 #include "FrontendVault.h"
 #include "FrontendNewVault.h"
@@ -48,8 +49,9 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
         ui->stackedWidget->setCurrentWidget(win_newvault);
     });
     connect(ui->OpenPortableButton, &QPushButton::pressed, win_newvault, [this, win_newvault](){
-        // idk
-
+        QString vaultJson = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
+        if (dir.isEmpty()) return;
+        directory = QDir(dir);
 
 
 

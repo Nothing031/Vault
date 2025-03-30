@@ -5,11 +5,6 @@
 #include <QDir>
 #include "src/vault.hpp"
 
-enum class Mode{
-    Local,
-    Portable
-};
-
 namespace Ui {
 class FrontendNewVault;
 }
