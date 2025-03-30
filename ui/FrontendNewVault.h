@@ -18,22 +18,16 @@ public:
 
     ~FrontendNewVault();
 
-    void init(const Mode& mode);
+    void init(const Mode mode);
 
 private slots:
-    void on_VaultNameLineedit_textEdited(const QString &arg1);
+    void CheckVaultPath(const QString &arg1);
 
-    void on_PasswordLineedit_textEdited(const QString &arg1);
+    void CheckPassword(const QString &arg1);
 
-    void on_PwConfirmLineedit_textEdited(const QString &arg1);
+    void CheckPwConfirm(const QString &arg1);
 
-    void on_PasswordVisibilityButton_toggled(bool checked);
-
-    void on_DirectoryOpenButton_clicked();
-
-    void on_PwConfirmVisibilityButton_toggled(bool checked);
-
-    void on_CreateVaultButton_clicked();
+    void GetDirectory();
 
 signals:
     void signal_create_vault(const Vault& vault);

@@ -144,6 +144,10 @@ public:
             files.clear();
             try{
                 for (const auto& file : std::filesystem::recursive_directory_iterator(directory.path().toStdWString())){
+                    if (mode == Mode::Portable && file.path().filename().string() == "vault.json"){
+                        qDebug() << "vault json file";
+                        continue;
+                    }
                     if (std::string::npos != file.path().generic_wstring().find(this->backupDir.path().toStdWString())){
                         qDebug() << "backup file";
                         continue;

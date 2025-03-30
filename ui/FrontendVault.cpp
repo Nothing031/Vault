@@ -1,6 +1,5 @@
 #include "FrontendVault.h"
 #include "ui_FrontendVault.h"
-#include "src/crypto.hpp"
 
 #include <QProcess>
 #include <QDebug>
@@ -11,6 +10,7 @@
 #include <QPropertyAnimation>
 #include <QTimer>
 
+#include "src/crypto.hpp"
 #include "src/filelistmodel.hpp"
 
 FrontendVault::FrontendVault(QWidget *parent)
@@ -78,7 +78,7 @@ void FrontendVault::init(Vault* pvault)
     ui->ProgressBar->setValue(0);
 
     ui->TerminalTextedit->clear();
-    ui->FolderLabel->setText(pVault->directory.path());
+    ui->FolderPathLabel->setText(pVault->directory.path());
     ui->VaultNameLabel->setText(pVault->name);
     ui->PasswordLineedit->setText("");
 }
@@ -185,3 +185,6 @@ void FrontendVault::on_RefreshButton_clicked()
     pVault->LoadFiles();
     model->loadVault(pVault);
 }
+
+
+

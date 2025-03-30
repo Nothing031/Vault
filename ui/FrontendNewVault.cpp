@@ -2,7 +2,6 @@
 #include "ui_FrontendNewVault.h"
 
 #include "src/crypto.hpp"
-#include "src/enviroment.hpp"
 
 #include <filesystem>
 
@@ -13,11 +12,10 @@
 
 namespace fs = std::filesystem;
 
-static const QString GreenStyleSheet = "QLabel{ border: 0px; color: rgb(0, 255, 0);}";
-static const QString RedStyleSheet = "QLabel{ border: 0px; color: rgb(255, 0, 0);}";
-static const QString DisabledStyleSheet = "QLabel{ border: 0px; color: rgb(100, 100, 100);}";
-static const QString EnabledStyleSheet = "QLabel{ border: 0px; color: rgb(255, 255, 255);}";
-
+inline QString GreenStyleSheet = "QLabel{ border: 0px; color: rgb(0, 255, 0);}";
+inline QString RedStyleSheet = "QLabel{ border: 0px; color: rgb(255, 0, 0);}";
+inline QString DisabledStyleSheet = "QLabel{ border: 0px; color: rgb(100, 100, 100);}";
+inline QString EnabledStyleSheet = QStringLiteral("QLabel{ border: 0px; color: rgb(255, 255, 255);}");
 
 FrontendNewVault::FrontendNewVault(QWidget *parent)
     : QWidget(parent)
@@ -34,6 +32,35 @@ FrontendNewVault::FrontendNewVault(QWidget *parent)
     ui->VaultNameLineedit->setValidator(path_validator);
     ui->PasswordLineedit->setValidator(password_validator);
     ui->PwConfirmLineedit->setValidator(password_validator);
+
+    // connect
+    connect(ui->DirectoryOpenButton, &QPushButton::pressed, this, &FrontendNewVault::GetDirectory);
+
+    connect(ui->VaultNameLineedit, &QLineEdit::textEdited, this, &FrontendNewVault::CheckVaultPath);
+
+    connect(ui->PasswordLineedit, &QLineEdit::textEdited, this, &FrontendNewVault::CheckPassword);
+    connect(ui->PasswordVisibilityButton, &QPushButton::toggled, this, [this](bool b){
+        ui->PasswordLineedit->setEchoMode(b ? QLineEdit::Normal : QLineEdit::Password);
+    });
+
+    connect(ui->PwConfirmLineedit, &QLineEdit::textEdited, this, &FrontendNewVault::CheckPwConfirm);
+    connect(ui->PwConfirmVisibilityButton, &QPushButton::toggled, this, [this](bool b){
+        ui->PwConfirmLineedit->setEchoMode(b ? QLineEdit::Normal : QLineEdit::Password);
+    });
+
+    connect(ui->CreateVaultButton, &QPushButton::clicked, this, [this](){
+        Vault vault(ui->DirectoryPathLabel->text(), Crypto::SHA256(ui->PwConfirmLineedit->text()), mode);
+
+        if (!vault.directory.exists()){
+            vault.directory.mkpath(vault.directory.path());
+        }
+        if (!vault.backupDir.exists()){
+            vault.backupDir.mkpath(vault.backupDir.path());
+        }
+
+        // create
+        emit signal_create_vault(vault);
+    });
 }
 
 FrontendNewVault::~FrontendNewVault()
@@ -41,10 +68,11 @@ FrontendNewVault::~FrontendNewVault()
     delete ui;
 }
 
-
-void FrontendNewVault::init(const Mode &mode)
+void FrontendNewVault::init(const Mode mode)
 {
     this->mode = mode;
+
+    ui->ModeLabel->setText(mode == Mode::Local ? "Local" : "Portable");
 
     ui->DirectoryPathLabel->setText("");
 
@@ -53,7 +81,7 @@ void FrontendNewVault::init(const Mode &mode)
     ui->VaultNameLineedit->setText("");
     ui->VaultNameLineedit->setEnabled(false);
 
-    ui->VaultAditionalInfoLabel->setText("the Vault will be created at the selected directory path");
+    ui->VaultAditionalInfoLabel->setText("Vault will be connected to the selected folder");
 
     ui->PasswordLabel->setStyleSheet(DisabledStyleSheet);
     ui->PasswordLabel->setEnabled(false);
@@ -69,7 +97,7 @@ void FrontendNewVault::init(const Mode &mode)
 
     ui->CreateVaultButton->setEnabled(false);
 
-    conditionPath = false;
+    conditionPath = true;
     conditionPassword = false;
     conditionConfirm = false;
 }
@@ -87,7 +115,7 @@ void FrontendNewVault::ConditionCheck()
     }
 }
 
-void FrontendNewVault::on_DirectoryOpenButton_clicked()
+void FrontendNewVault::GetDirectory()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
     if (dir.isEmpty()) return;
@@ -111,23 +139,23 @@ void FrontendNewVault::on_DirectoryOpenButton_clicked()
     ConditionCheck();
 }
 
-void FrontendNewVault::on_VaultNameLineedit_textEdited(const QString &arg1)
+void FrontendNewVault::CheckVaultPath(const QString &arg1)
 {
     //the Vault will be created at the selected directory path
     //the Vault will be created under the selected folder
     if (arg1.isEmpty()){
         ui->DirectoryPathLabel->setText(directory.path());
-        ui->VaultAditionalInfoLabel->setText("the Vault will be created at the selected directory path");
+        ui->VaultAditionalInfoLabel->setText("Vault will be connected to the selected folder");
         conditionPath = true;
     }else{
         ui->DirectoryPathLabel->setText(directory.path() + "/" + arg1);
-        ui->VaultAditionalInfoLabel->setText("the Vault will be created under the selected folder");
+        ui->VaultAditionalInfoLabel->setText("Vault will be created at the selected folder");
         conditionPath =  fs::exists(ui->DirectoryPathLabel->text().toStdWString()) ? false : true;
     }
     ConditionCheck();
 }
 
-void FrontendNewVault::on_PasswordLineedit_textEdited(const QString &arg1)
+void FrontendNewVault::CheckPassword(const QString &arg1)
 {
     conditionPassword = !(arg1.size() < 4);
     if (conditionPassword && arg1 == ui->PwConfirmLineedit->text()){
@@ -138,12 +166,7 @@ void FrontendNewVault::on_PasswordLineedit_textEdited(const QString &arg1)
     ConditionCheck();
 }
 
-void FrontendNewVault::on_PasswordVisibilityButton_toggled(bool checked)
-{
-    ui->PasswordLineedit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
-}
-
-void FrontendNewVault::on_PwConfirmLineedit_textEdited(const QString &arg1)
+void FrontendNewVault::CheckPwConfirm(const QString &arg1)
 {
     if (arg1 == ui->PasswordLineedit->text() && !(arg1.size() < 4)){
         conditionConfirm = true;
@@ -153,22 +176,4 @@ void FrontendNewVault::on_PwConfirmLineedit_textEdited(const QString &arg1)
     ConditionCheck();
 }
 
-void FrontendNewVault::on_PwConfirmVisibilityButton_toggled(bool checked)
-{
-    ui->PwConfirmLineedit->setEchoMode(checked ? QLineEdit::Normal : QLineEdit::Password);
-}
 
-void FrontendNewVault::on_CreateVaultButton_clicked()
-{
-    Vault vault(ui->DirectoryPathLabel->text(), Crypto::SHA256(ui->PwConfirmLineedit->text()), mode);
-
-    if (!vault.directory.exists()){
-        vault.directory.mkpath(vault.directory.path());
-    }
-    if (!vault.backupDir.exists()){
-        vault.backupDir.mkpath(vault.backupDir.path());
-    }
-
-    // create
-    emit signal_create_vault(vault);
-}

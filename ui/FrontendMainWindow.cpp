@@ -44,32 +44,32 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
     ui->stackedWidget->addWidget(frontendVault);
 
     // MAINWINDOW ###############################################################
-    connect(ui->OpenVaultComboBox, &QComboBox::currentIndexChanged, frontendVault, [&](const int index){
+    connect(ui->OpenVaultComboBox, &QComboBox::currentIndexChanged, this, [this, frontendVault](const int index){
         if (index == -1) return;
         frontendVault->init(Enviroment::GetInstance().getVault(index));
         ui->stackedWidget->setCurrentWidget(frontendVault);
     });
-    connect(ui->OpenPortableButton, &QPushButton::pressed, frontendVault, [&](){
-        QString jsonPath = QFileDialog::getOpenFileName(this, "Select Vault File", "", "JSON Files (*.json)");
+    connect(ui->OpenPortableButton, &QPushButton::pressed, this, [this, frontendVault](){
+        QString jsonPath = QFileDialog::getOpenFileName(this, "Select Vault File", "", "JSON File (*.json)");
         if (jsonPath.isEmpty() || !QFile::exists(jsonPath)) return;
         Vault* pVault = Enviroment::GetInstance().LoadPortableVault(jsonPath);
         frontendVault->init(pVault);
         ui->OpenVaultComboBox->setCurrentIndex(-1);
         ui->stackedWidget->setCurrentWidget(frontendVault);
     });
-    connect(ui->CreateLocalButton, &QPushButton::pressed, frontendNewVault, [&](){
+    connect(ui->CreateLocalButton, &QPushButton::pressed, this, [this, frontendNewVault](){
         ui->OpenVaultComboBox->setCurrentIndex(-1);
         frontendNewVault->init(Mode::Local);
         ui->stackedWidget->setCurrentWidget(frontendNewVault);
     });
-    connect(ui->CreatePortableButton, &QPushButton::pressed, frontendNewVault, [&](){
+    connect(ui->CreatePortableButton, &QPushButton::pressed, this, [this, frontendNewVault](){
         ui->OpenVaultComboBox->setCurrentIndex(-1);
         frontendNewVault->init(Mode::Portable);
         ui->stackedWidget->setCurrentWidget(frontendNewVault);
     });
 
     //# NEW VAULT ###############################################################
-    connect(frontendNewVault, &FrontendNewVault::signal_create_vault, this, [&](const Vault vault){
+    connect(frontendNewVault, &FrontendNewVault::signal_create_vault, this, [this, emptyWidget](const Vault vault){
         if (vault.mode == Mode::Local){
             Enviroment::GetInstance().AddNewVault(vault, ui->OpenVaultComboBox);
         }
@@ -80,15 +80,15 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
     });
 
     //# VAULT ####################################################################
-    connect(frontendVault, &FrontendVault::request_detachVault, this, [&](Vault* pVault){
+    connect(frontendVault, &FrontendVault::request_detachVault, this, [this, emptyWidget](Vault* pVault){
         if (!pVault){
             qDebug() << "Error nullptr";
             return;
         }
         Enviroment::GetInstance().DetachVault(pVault, ui->OpenVaultComboBox);
-        ui->stackedWidget->setCurrentIndex(0);
+        ui->stackedWidget->setCurrentWidget(emptyWidget);
     });
-    connect(frontendVault, &FrontendVault::request_setEnable_ui, this, [&](const bool b){
+    connect(frontendVault, &FrontendVault::request_setEnable_ui, this, [this](const bool b){
         ui->OpenVaultComboBox->setEnabled(b);
         ui->CreateLocalButton->setEnabled(b);
         ui->OpenPortableButton->setEnabled(b);

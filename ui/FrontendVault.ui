@@ -220,7 +220,7 @@ QCheckBox::indicator:checked{
         </size>
        </property>
        <property name="text">
-        <string>C:/Path/to/wherever</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -296,7 +296,7 @@ QCheckBox::indicator:checked{
         </size>
        </property>
        <property name="text">
-        <string>Documents</string>
+        <string/>
        </property>
       </widget>
      </item>
@@ -376,7 +376,7 @@ padding-right:5px;
         </size>
        </property>
        <property name="text">
-        <string>asdf</string>
+        <string/>
        </property>
        <property name="echoMode">
         <enum>QLineEdit::EchoMode::Password</enum>
