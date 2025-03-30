@@ -20,7 +20,7 @@ private:
 
 public:
     FileListModel(QObject *parent = nullptr) : QAbstractListModel(parent) {
-        //qRegisterMetaType<file_t*>("file_t*");
+
     }
 
     void update(){
