@@ -17,8 +17,9 @@ SOURCES += \
 HEADERS += \
     src/crypto.hpp \
     src/enviroment.hpp \
-    src/file_t.hpp \
+    src/fileheader.hpp \
     src/filelistmodel.hpp \
+    src/filemetadata.hpp \
     src/vault.hpp \
     ui/FrontendMainWindow.h \
     ui/FrontendNewVault.h \

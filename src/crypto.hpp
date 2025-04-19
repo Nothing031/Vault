@@ -21,7 +21,7 @@
 #include <openssl/sha.h>
 
 #include "vault.hpp"
-#include "file_t.hpp"
+#include "filemetadata.hpp"
 #include "utils.hpp"
 
 

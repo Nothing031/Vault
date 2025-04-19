@@ -18,7 +18,7 @@
 
 #include <openssl/evp.h>
 
-#include "file_t.hpp"
+#include "filemetadata.hpp"
 
 #define EXTENSION_LEN 8
 

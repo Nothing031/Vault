@@ -10,7 +10,7 @@
 #include <QFileInfo>
 
 #include "vault.hpp"
-#include "file_t.hpp"
+#include "filemetadata.hpp"
 
 class FileListModel : public QAbstractListModel {
     Q_OBJECT
