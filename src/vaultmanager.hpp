@@ -33,6 +33,10 @@ public:
         return vaults[index];
     }
 
+    Vault* GetEmptyVault(){
+        return &emptyVault;
+    }
+
     void DetachVault(Vault* pVault){
         for (int i = 0; i < vaults.size(); i++){
             if (vaults[i] == pVault){
@@ -49,6 +53,7 @@ public:
     }
 
 private:
+    Vault emptyVault;
     QVector<Vault*> vaults;
 };
 

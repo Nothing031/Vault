@@ -15,7 +15,7 @@ namespace fs = std::filesystem;
 inline QString GreenStyleSheet = "QLabel{ border: 0px; color: rgb(0, 255, 0);}";
 inline QString RedStyleSheet = "QLabel{ border: 0px; color: rgb(255, 0, 0);}";
 inline QString DisabledStyleSheet = "QLabel{ border: 0px; color: rgb(100, 100, 100);}";
-inline QString EnabledStyleSheet = QStringLiteral("QLabel{ border: 0px; color: rgb(255, 255, 255);}");
+inline QString EnabledStyleSheet = "QLabel{ border: 0px; color: rgb(255, 255, 255);}";
 
 FrontendNewVault::FrontendNewVault(QWidget *parent)
     : QWidget(parent)

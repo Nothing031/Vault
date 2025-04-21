@@ -31,8 +31,8 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
     ui(new Ui::FrontendMainWindow)
 {
     ui->setupUi(this);
+    ui->VersionLabel->setText(ENV_VERSION);
 
-    Enviroment::GetInstance().Init(ui->OpenVaultComboBox);
 
     QWidget *emptyWidget = new QWidget(this);
     ui->stackedWidget->addWidget(emptyWidget);

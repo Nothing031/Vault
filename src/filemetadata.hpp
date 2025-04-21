@@ -73,7 +73,7 @@ struct FileMetadata{
             return header;
         }
     };
-    struct Info{
+    struct Path{
         QString absolutepath;
         QString relativePath;
         QString displayPath;
@@ -81,7 +81,7 @@ struct FileMetadata{
     };
 
     Header header;
-    Info info;
+    Path path;
 };
 
 

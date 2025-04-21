@@ -52,7 +52,7 @@ public:
             return QVariant();
 
         if (role == Qt::DisplayRole) {
-            return pVault->files.at(index.row())->info.displayPath;
+            return pVault->files.at(index.row())->path.displayPath;
         }
         else if (role == Qt::ForegroundRole){
             const FileMetadata* file = pVault->files.at(index.row());
@@ -60,9 +60,9 @@ public:
                 qDebug() << "nullptr";
                 return QVariant();
             }
-            if (file->info.state == FileMetadata::PlainData){
+            if (file->path.state == FileMetadata::PlainData){
                 return QBrush(QColor(200, 200, 200));
-            }else if (file->info.state == FileMetadata::CipherData){
+            }else if (file->path.state == FileMetadata::CipherData){
                 return QBrush(QColor(55, 255, 55));
             }
         }

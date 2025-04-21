@@ -201,12 +201,12 @@ public:
                         QFileInfo qinfo = QFileInfo(it->path());
                         FileMetadata* file = new FileMetadata;
 
-                        file->info.displayPath = qinfo.fileName();
-                        file->info.absolutepath = qinfo.absoluteFilePath();
-                        file->info.relativePath = directory.relativeFilePath(qinfo.absoluteFilePath());
-                        file->info.state = (qinfo.fileName().endsWith(".enc", Qt::CaseInsensitive) ? FileMetadata::CipherData : FileMetadata::PlainData);
-                        if (file->info.state == FileMetadata::CipherData){
-                            file->info.displayPath = file->info.displayPath.left(file->info.displayPath.size() - 4);
+                        file->path.displayPath = qinfo.fileName();
+                        file->path.absolutepath = qinfo.absoluteFilePath();
+                        file->path.relativePath = directory.relativeFilePath(qinfo.absoluteFilePath());
+                        file->path.state = (qinfo.fileName().endsWith(".enc", Qt::CaseInsensitive) ? FileMetadata::CipherData : FileMetadata::PlainData);
+                        if (file->path.state == FileMetadata::CipherData){
+                            file->path.displayPath = file->path.displayPath.left(file->path.displayPath.size() - 4);
                         }
                         files.push_back(file);
                     }
@@ -217,7 +217,7 @@ public:
             }
 
             std::sort(files.begin(), files.end(), [](const FileMetadata* a, const FileMetadata* b){
-                return a->info.relativePath < b->info.relativePath;
+                return a->path.relativePath < b->path.relativePath;
             });
 
             qDebug() << "[VAULT] Loading done";
