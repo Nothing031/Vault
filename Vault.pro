@@ -53,5 +53,3 @@ DISTFILES += \
     LICENSE \
     README.md \
     changelog.txt
-
-
