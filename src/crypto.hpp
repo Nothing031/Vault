@@ -23,6 +23,7 @@
 #include "vault.hpp"
 #include "filemetadata.hpp"
 #include "utils.hpp"
+#include "enviroment.hpp"
 
 
 enum CRYPTIONMODE{
@@ -38,6 +39,7 @@ public:
         enum eError{
             Unknown,
             FileNotExists,
+            HeaderNotMatch,
             FailedToRead,
             FailedToSave,
             Encryption,
@@ -60,6 +62,8 @@ public:
         eError e_type;
         QString e_what;
     };
+
+
 
 private:
     inline static bool ReadFile(const QString& path, QByteArray& out)
@@ -87,7 +91,7 @@ private:
         }
     }
 
-    static void AES256_Encrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
+    static void __AES256_Encrypt__(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
         // init
@@ -110,7 +114,7 @@ private:
         out.resize(finalLen);
         EVP_CIPHER_CTX_free(ctx);
     }
-    static void AES256_Decrypt(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
+    static void __AES256_Decrypt__(const QByteArray& input, const QByteArray& key, const QByteArray& iv, QByteArray& out)
     {
         EVP_CIPHER_CTX* ctx = EVP_CIPHER_CTX_new();
 
@@ -138,88 +142,236 @@ private:
     }
 
 public:
+    inline static QString SHA256(const QString& str)
+    {
+        return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
+    }
+
+    static void Aes256EncryptFile(FileMetadata* file, const QByteArray& key){
+        // read file
+        QByteArray plainData;
+        if (!ReadFile(file->info.absolutepath, plainData))
+            throw Error(Error::FailedToRead, "Failed to read : " + file->info.absolutepath);
+
+        // reset iv
+        file->header.iv.resize(16, 0);
+        RAND_bytes(reinterpret_cast<unsigned char*>(file->header.iv.data()), 16);
+
+        // encrypt
+        QByteArray cipherData;
+        __AES256_Encrypt__(plainData, key, file->header.iv, cipherData);
+
+        // insert header
+        cipherData.insert(0, file->header.Get());
+
+        // save
+        if (!WriteFile(file->info.absolutepath + ".enc", cipherData))
+            throw Error(Error::FailedToSave, "Failed to save to: " + file->info.absolutepath);
+
+        // delete
+        QFile::remove(file->info.absolutepath);
+
+        // set data
+        file->info.absolutepath+= ".enc";
+        file->info.relativePath+= ".enc";
+        file->info.state = FileMetadata::CipherData;
+    }
+
+    static void Aes256DecryptFile(FileMetadata* file, const QByteArray& key){
+        // read file
+        QByteArray cipherData;
+        if (!ReadFile(file->info.absolutepath, cipherData))
+            throw Error(Error::FailedToRead, "Failed to read : " + file->info.absolutepath);
+
+        // read header
+        file->header.Set(cipherData.mid(0, FileMetadata::Header::sizes::total));
+        cipherData.erase(cipherData.begin(), cipherData.begin() + FileMetadata::Header::sizes::total);
+
+        // decrypt
+        QByteArray plainData;
+        __AES256_Decrypt__(cipherData, key, file->header.iv, plainData);
+
+        // save
+        if (!WriteFile(file->info.absolutepath.left(file->info.absolutepath.size() - 4), plainData))
+            throw Error(Error::FailedToSave, "Failed to save to: " + file->info.absolutepath);
+
+        // delete
+        QFile::remove(file->info.absolutepath);
+
+        // set data
+        file->info.absolutepath = file->info.absolutepath.left(file->info.absolutepath.size() - 4);
+        file->info.relativePath = file->info.relativePath.left(file->info.relativePath.size() - 4);
+        file->info.state = FileMetadata::PlainData;
+    }
+
+    //--------------------------------------------------------------
+
     bool flag_suspend = false;
 
-    static void AES256_Encrypt_File(file_t* file, const QByteArray& key){
-        QByteArray plainData;
-        if (!ReadFile(file->absolutepath, plainData)){
-            throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
-        }
-        QByteArray iv;
-        iv.resize(16);
-        RAND_bytes(reinterpret_cast<unsigned char*>(iv.data()), 16);
-
-        QByteArray cipherData;
-        AES256_Encrypt(plainData, key, iv, cipherData);
-
-        cipherData.insert(0, iv);
-        if (!WriteFile(file->absolutepath + ".enc", cipherData)){
-            throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
-        }
-        QFile::remove(file->absolutepath);
-
-        file->absolutepath+= ".enc";
-        file->relativePath+= ".enc";
-        file->state = file_t::CipherData;
-    }
-    static void AES256_Decrypt_File(file_t* file, const QByteArray& key){
-        QByteArray cipherData;
-        if (!ReadFile(file->absolutepath, cipherData)){
-            throw Error(Error::FailedToRead, "Failed to read : " + file->absolutepath);
-        }
-        QByteArray iv = cipherData.mid(0, 16);
-        cipherData.erase(cipherData.begin(), cipherData.begin() + 16);
-
-        QByteArray plainData;
-        AES256_Decrypt(cipherData, key, iv, plainData);
-
-        if (!WriteFile(file->absolutepath.left(file->absolutepath.size() - 4), plainData)){
-            throw Error(Error::FailedToSave, "Failed to save to: " + file->absolutepath);
-        }
-        QFile::remove(file->absolutepath);
-        file->absolutepath = file->absolutepath.left(file->absolutepath.size() - 4);
-        file->relativePath = file->relativePath.left(file->relativePath.size() - 4);
-        file->state = file_t::PlainData;
-    }
-
-    void AES256_Encrypt_All(Vault* vault){
+    void ProcessAll(Vault* vault, CRYPTIONMODE mode){
         emit signal_start();
         flag_suspend = false;
-        int processorCount = std::thread::hardware_concurrency();
-        int threadCount = vault->plainIndex.size() < processorCount ? vault->plainIndex.size() : processorCount;
-        QVector<QThread*> threads(threadCount);
-
+        // --- progress ---
         std::atomic<int> success = 0;
         std::atomic<int> failed = 0;
+        // --- message ---
         QStringList flushMessages;
         QStringList errorMessages;
         QMutex messages_m;
-        QQueue<file_t*> files;
+        // --- files ---
+        QQueue<FileMetadata*> files;
         QMutex files_m;
-        for (int i = 0; i < vault->files.size(); i++){
-            if (vault->files[i].state == file_t::PlainData){
-                files.push_back(&vault->files[i]);
+        for (auto& f : vault->files){
+            if (mode == ENCRYPTION && f->info.state == FileMetadata::PlainData)
+                files.push_back(f);
+            else if (mode == DECRYPTION && f->info.state == FileMetadata::CipherData)
+                files.push_back(f);
+        }
+        // --- thread ---
+        int processorCount = Enviroment::GetInstance().ThreadCount();
+        int threadCount = files.size() < processorCount ? files.size() : processorCount;
+        QVector<QThread*> threads(threadCount);
+
+        // --- Process ---
+        auto AppendToMessageQueue = [&messages_m, &flushMessages, &errorMessages](const QString& message1, const QString& message2){
+            messages_m.lock();
+            flushMessages.append(message1);
+            flushMessages.append(message2);
+            errorMessages.append(message1);
+            errorMessages.append(message2);
+            messages_m.unlock();
+        };
+        auto Process = [&](){
+            while (true){
+                // --- flag check ---
+                if (flag_suspend)
+                    return;
+                // --- get file ---
+                files_m.lock();
+                if (files.empty()){
+                    files_m.unlock();
+                    return;
+                }
+                FileMetadata* file = files.front();
+                files.pop_front();
+                files_m.unlock();
+                // --- encrypt ---
+                try{
+                    // check header
+                    if (file->header.iteration != vault->iteration ||
+                        file->header.hmac != vault->hmac ||
+                        file->header.salt != vault->globalSalt
+                        ){
+                        throw Error(Error::HeaderNotMatch, "Header does not match");
+                    }
+                    // encrypt
+                    if (mode == ENCRYPTION){
+                        Aes256EncryptFile(file, vault->aesKey);
+                    }else{
+                        Aes256DecryptFile(file, vault->aesKey);
+                    }
+                    success++;
+                }catch(Error& e){
+                    QString message1 = "<font color='red'>\"" + file->info.absolutepath + "\" failed to " + (mode == ENCRYPTION ? "encrypt" :"decrypt") + "</font>";
+                    QString message2 = "<font color='red'>  \"" + e.what() + "\"</font>";
+                    AppendToMessageQueue(message1, message2);
+                    failed++;
+                }catch(std::exception& e){
+                    QString message1 = "<font color='red'>\"" + file->info.absolutepath + "\" failed to " + (mode == ENCRYPTION ? "encrypt" :"decrypt") + "</font>";
+                    QString message2 = "<font color='red'>  \"" + QString::fromStdString(e.what()) + "\"</font>";
+                    AppendToMessageQueue(message1, message2);
+                    failed++;
+                }
             }
+        };
+        for (auto& thread : threads){
+            thread = QThread::create([&](){
+                Process();
+            });
+            thread->start();
         }
 
-        // work
+        // --- Process Message ---
+        while (true){
+            Utils::Sleep(500, 16, !flag_suspend);
+            // --- Check queue ---
+            files_m.lock();
+            if (files.empty()){
+                files_m.unlock();
+                break;
+            }
+            files_m.unlock();
+
+            messages_m.lock();
+            if (flushMessages.size()){
+                qDebug() << "emitting message";
+                emit signal_terminal_message(flushMessages);
+                flushMessages.clear();
+            }
+            messages_m.unlock();
+            emit signal_progress(success + failed);
+            qDebug() << "emitting progress : " << success + failed;
+        }
+
+
+        emit signal_terminal_message(flushMessages);
+        emit signal_progress(success + failed);
+
+    }
+
+    void AES256_Encrypt_All(Vault* vault)
+    {
+        emit signal_start();
+        flag_suspend = false;
+
+        // --- progress ---
+        std::atomic<int> success = 0;
+        std::atomic<int> failed = 0;
+
+        // --- message ---
+        QStringList flushMessages;
+        QStringList errorMessages;
+        QMutex messages_m;
+
+        // --- files ---
+        QQueue<FileMetadata*> files;
+        QMutex files_m;
+        for (auto& f : vault->files){
+            if (f->info.state == FileMetadata::PlainData)
+                files.push_back(f);
+        }
+
+        // --- thread ---
+        int processorCount = Enviroment::GetInstance().ThreadCount();
+        int threadCount = files.size() < processorCount ? files.size() : processorCount;
+        QVector<QThread*> threads(threadCount);
+
+        // --- encrypt ---
         for (int i = 0; i < threadCount; i++){
             threads[i] = QThread::create([&](){
                 while(true){
-                    if (flag_suspend){
+                    // --- flag check ---
+                    if (flag_suspend)
                         return;
-                    }
+                    // --- get file ---
                     files_m.lock();
                     if (files.empty()){
                         files_m.unlock();
                         return;
                     }
-                    file_t* file = files.front();
+                    FileMetadata* file = files.front();
                     files.pop_front();
                     files_m.unlock();
-
+                    // --- encrypt ---
                     try{
-                        AES256_Encrypt_File(file, vault->key);
+                        // check header
+                        if (file->header.iteration != vault->iteration ||
+                            file->header.hmac != vault->hmac ||
+                            file->header.salt != vault->globalSalt){
+                            throw Error(Error::HeaderNotMatch, "Header does not matching");
+                        }
+                        // encrypt
+                        Aes256EncryptFile(file, vault->aesKey);
                         success++;
                     }catch(Error& e){
                         messages_m.lock();
@@ -291,6 +443,7 @@ public:
         }
         emit signal_done();
     }
+
     void AES256_Decrypt_All(Vault* vault){
         emit signal_start();
         flag_suspend = false;
@@ -402,10 +555,6 @@ public:
         emit signal_done();
     }
 
-    inline static QString SHA256(const QString& str)
-    {
-        return QCryptographicHash::hash(str.toUtf8(), QCryptographicHash::Algorithm::Sha256).toHex();
-    }
 
 signals:
     void signal_terminal_clear();
@@ -414,6 +563,8 @@ signals:
     void signal_start();
     void signal_done();
 };
+
+
 
 
 #endif // CRYPTO_HPP

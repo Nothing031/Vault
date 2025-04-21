@@ -12,24 +12,27 @@ SOURCES += \
     src/main.cpp \
     ui/FrontendMainWindow.cpp \
     ui/FrontendNewVault.cpp \
-    ui/FrontendVault.cpp
+    ui/FrontendVault.cpp \
+    ui/VaultSettingsWindow.cpp
 
 HEADERS += \
     src/crypto.hpp \
     src/enviroment.hpp \
-    src/fileheader.hpp \
     src/filelistmodel.hpp \
     src/filemetadata.hpp \
     src/vault.hpp \
+    src/vaultmanager.hpp \
     ui/FrontendMainWindow.h \
     ui/FrontendNewVault.h \
     src/utils.hpp \
-    ui/FrontendVault.h
+    ui/FrontendVault.h \
+    ui/VaultSettingsWindow.h
 
 FORMS += \
     ui/FrontendMainWindow.ui \
     ui/FrontendNewVault.ui \
-    ui/FrontendVault.ui
+    ui/FrontendVault.ui \
+    ui/VaultSettingsWindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl
@@ -44,5 +47,11 @@ else: unix:!android: target.path = /opt/$${TARGET}/bin
 
 RESOURCES += \
     asset/resource.qrc
+
+DISTFILES += \
+    .gitignore \
+    LICENSE \
+    README.md \
+    changelog.txt
 
 

@@ -16,7 +16,15 @@ class FileListModel : public QAbstractListModel {
     Q_OBJECT
 
 private:
-    QVector<file_t*> items;
+    Vault __EmptyVault;
+    Vault* pVault = &__EmptyVault;
+
+public slots:
+    void reset(){
+        beginResetModel();
+        this->pVault = &__EmptyVault;
+        endResetModel();
+    }
 
 public:
     FileListModel(QObject *parent = nullptr) : QAbstractListModel(parent) {
@@ -28,55 +36,37 @@ public:
         endResetModel();
     }
 
-    void loadVault(Vault* vault){
+    void loadVault(Vault* pVault){
         beginResetModel();
-        items.clear();
-        for (int i = 0; i < vault->files.size(); i++){
-            items.append(&vault->files[i]);
-        }
+        this->pVault = pVault;
         endResetModel();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return items.size();
+        return pVault->files.size();
     }
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= items.size())
+        if (!index.isValid() || index.row() >= pVault->files.size())
             return QVariant();
 
         if (role == Qt::DisplayRole) {
-            return items.at(index.row())->displayPath;
+            return pVault->files.at(index.row())->info.displayPath;
         }
         else if (role == Qt::ForegroundRole){
-            const file_t* file = items.at(index.row());
+            const FileMetadata* file = pVault->files.at(index.row());
             if (file == nullptr){
                 qDebug() << "nullptr";
                 return QVariant();
             }
-            if (file->state == file_t::PlainData){
-                return QBrush(QColor(255, 55 ,55));
-            }else if (file->state == file_t::CipherData){
-                return QBrush(QColor(55, 255 ,55));
+            if (file->info.state == FileMetadata::PlainData){
+                return QBrush(QColor(200, 200, 200));
+            }else if (file->info.state == FileMetadata::CipherData){
+                return QBrush(QColor(55, 255, 55));
             }
         }
-        else if (role == Qt::UserRole){
-            QVariant::fromValue(&items.at(index.row()));
-        }
         return QVariant();
-    }
-
-    void clearitems(){
-        beginResetModel();
-        items.clear();
-        endResetModel();
-    }
-
-    void addItem(file_t* item) {
-        beginInsertRows(QModelIndex(), items.count(), items.count());
-        items.append(item);
-        endInsertRows();
     }
 };
 

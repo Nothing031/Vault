@@ -170,8 +170,14 @@ QCheckBox::indicator:checked{
    <property name="bottomMargin">
     <number>0</number>
    </property>
+   <property name="spacing">
+    <number>5</number>
+   </property>
    <item row="4" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <widget class="QLabel" name="PasswordLabel">
        <property name="minimumSize">
@@ -253,6 +259,9 @@ QCheckBox::indicator:checked{
    </item>
    <item row="1" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <widget class="QLabel" name="VaultLabel">
        <property name="sizePolicy">
@@ -326,6 +335,9 @@ padding-right:5px;
    </item>
    <item row="0" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <widget class="QLabel" name="FolderLabel">
        <property name="sizePolicy">
@@ -380,6 +392,9 @@ padding-right:5px;
    </item>
    <item row="5" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <widget class="QPushButton" name="OpenFolderButton">
        <property name="text">
@@ -391,6 +406,13 @@ padding-right:5px;
       <widget class="QPushButton" name="RefreshButton">
        <property name="text">
         <string>Refresh</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="SettingsButton">
+       <property name="text">
+        <string>Settings</string>
        </property>
       </widget>
      </item>
@@ -464,6 +486,9 @@ padding-right:5px;
    </item>
    <item row="6" column="0">
     <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="spacing">
+      <number>5</number>
+     </property>
      <item>
       <widget class="QPushButton" name="EncryptButton">
        <property name="text">
