@@ -10,29 +10,29 @@ CONFIG += c++17
 
 SOURCES += \
     src/main.cpp \
-    ui/FrontendMainWindow.cpp \
-    ui/FrontendNewVault.cpp \
-    ui/FrontendVault.cpp \
-    ui/VaultSettingsWindow.cpp
+    src/widgets/FrontendMainWindow.cpp \
+    src/widgets/FrontendNewVault.cpp \
+    src/widgets/FrontendVault.cpp \
+    src/widgets/VaultSettingsWindow.cpp
 
 HEADERS += \
-    src/crypto.hpp \
-    src/enviroment.hpp \
-    src/filelistmodel.hpp \
-    src/filemetadata.hpp \
-    src/vault.hpp \
-    src/vaultmanager.hpp \
-    ui/FrontendMainWindow.h \
-    ui/FrontendNewVault.h \
-    src/utils.hpp \
-    ui/FrontendVault.h \
-    ui/VaultSettingsWindow.h
+    src/core/Crypto.hpp \
+    src/core/Enviroment.hpp \
+    src/core/FileMetadata.hpp \
+    src/core/Utils.hpp \
+    src/core/Vault.hpp \
+    src/core/VaultManager.hpp \
+    src/models/FileListModel.hpp \
+    src/widgets/FrontendMainWindow.hpp \
+    src/widgets/FrontendNewVault.hpp \
+    src/widgets/FrontendVault.hpp \
+    src/widgets/VaultSettingsWindow.hpp
 
 FORMS += \
-    ui/FrontendMainWindow.ui \
-    ui/FrontendNewVault.ui \
-    ui/FrontendVault.ui \
-    ui/VaultSettingsWindow.ui
+    src/forms/FrontendMainWindow.ui \
+    src/forms/FrontendNewVault.ui \
+    src/forms/FrontendVault.ui \
+    src/forms/VaultSettingsWindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl

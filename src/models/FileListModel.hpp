@@ -16,13 +16,12 @@ class FileListModel : public QAbstractListModel {
     Q_OBJECT
 
 private:
-    Vault __EmptyVault;
-    Vault* pVault = &__EmptyVault;
+    Vault* pVault = nullptr;
 
 public slots:
     void reset(){
         beginResetModel();
-        this->pVault = &__EmptyVault;
+        this->pVault = nullptr;
         endResetModel();
     }
 
@@ -36,7 +35,7 @@ public:
         endResetModel();
     }
 
-    void loadVault(Vault* pVault){
+    void setVault(Vault* pVault){
         beginResetModel();
         this->pVault = pVault;
         endResetModel();
@@ -44,16 +43,17 @@ public:
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return pVault->files.size();
+        return pVault ? pVault->files.size() : 0;
     }
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= pVault->files.size())
+        if (!index.isValid() || index.row() >= pVault->files.size() || !pVault)
             return QVariant();
 
         if (role == Qt::DisplayRole) {
             return pVault->files.at(index.row())->path.displayPath;
         }
+
         else if (role == Qt::ForegroundRole){
             const FileMetadata* file = pVault->files.at(index.row());
             if (file == nullptr){
@@ -66,6 +66,7 @@ public:
                 return QBrush(QColor(55, 255, 55));
             }
         }
+
         return QVariant();
     }
 };

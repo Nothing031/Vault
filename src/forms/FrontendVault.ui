@@ -1,0 +1,521 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>FrontendVault</class>
+ <widget class="QWidget" name="FrontendVault">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>541</width>
+    <height>536</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	font: 100 11pt &quot;Noto Sans&quot;;
+	color: rgb(255, 255, 255);
+	background-color: rgb(30, 30, 30);
+}
+QWidget:disabled{
+	color: rgb(100, 100, 100);
+}
+
+/* ToolTip */
+QToolTip {
+	color: rgb(255, 255, 255); 
+	background: rgb(55, 55, 55);
+	border: 1px solid rgb(70, 70, 70); 
+	border-radius: 5px;
+}
+
+/* ProgressBar */
+QProgressBar{
+ 	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	padding-left: 0px;
+	color: rgb(0, 65, 74);
+	text-align: center;
+}
+QProgressBar::chunk{
+	border-radius: 5px;
+ 	background-color: rgb(44, 222, 133);
+}
+
+/* Label */
+QLabel{
+border: 0px;
+}
+
+/* TextEdit */
+QTextEdit{
+font: 9pt;
+border: 1px solid rgb(55, 55, 55);
+border-radius: 5px;
+}
+/* LineEdit */
+QLineEdit{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+}
+
+/* ListView */
+QListView{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	font: 11pt;
+	gridline-color: rgb(0, 0, 0);
+}
+
+QScrollBar:vertical {
+    border: none;
+    background: rgb(30, 30, 30);
+    width: 12px;
+}
+QScrollBar:horizontal{
+	border: none;
+    background: rgb(30, 30, 30);
+    height: 12px;
+}
+QScrollBar::handle:horizontal{
+    background: rgb(40, 40, 40);
+    min-width: 20px;
+	border-radius: 5px;
+}
+QScrollBar::handle:vertical {
+    background: rgb(40, 40, 40);
+    min-height: 20px;
+	border-radius: 5px;
+}
+
+QScrollBar::handle:hover {
+    background: rgb(55, 55, 55);
+}
+
+QScrollBar::add-line, 
+QScrollBar::sub-line {
+	height:0px;
+	width:0px;
+    background: none;
+}
+QScrollBar::add-page, 
+QScrollBar::sub-page {
+    height:0px;
+	width:0px;
+    background: none;
+}
+
+/* ComboBox */
+QComboBox{
+	background-color: rgb(40, 40, 40);
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	padding-left: 3px;
+}
+QComboBox::drop-down {
+    width: 20px;
+    border-left: 1px solid rgb(55, 55, 55);
+    border-top-right-radius: 5px; 
+    border-bottom-right-radius: 5px;
+    subcontrol-origin: padding;
+    subcontrol-position: top right;
+    width: 15px;
+}
+QComboBox::down-arrow {
+    image: url(:/icons/arrow_down.png);
+}
+
+/* PushButton */
+QPushButton{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+	background-color: rgb(40, 40, 40);
+}
+QPushButton:pressed{
+	background-color: rgb(30, 30, 30);
+}
+
+/* CheckBox */
+QCheckBox{
+	border: 1px solid rgb(55, 55, 55);
+	border-radius: 5px;
+}
+QCheckBox::indicator{
+	margin-left: 2px;
+	margin-right: -2px;
+}
+QCheckBox::indicator:unchecked{
+	border: 1px solid rgb(0, 0, 0);
+	background-color: rgb(200, 40 ,40);
+}
+QCheckBox::indicator:checked{
+	border: 1px solid rgb(0, 0, 0);
+	background-color: rgb(40, 200 ,40);
+}
+
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout">
+   <property name="leftMargin">
+    <number>0</number>
+   </property>
+   <property name="topMargin">
+    <number>0</number>
+   </property>
+   <property name="rightMargin">
+    <number>0</number>
+   </property>
+   <property name="bottomMargin">
+    <number>0</number>
+   </property>
+   <property name="spacing">
+    <number>5</number>
+   </property>
+   <item row="4" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_3">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="PasswordLabel">
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="styleSheet">
+        <string notr="true"/>
+       </property>
+       <property name="text">
+        <string>Password</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLineEdit" name="PasswordLineedit">
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="PasswordVisibilityButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>22</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../asset/resource.qrc">
+         <normaloff>:/icons/visibility_off.png</normaloff>
+         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_2">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="VaultLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Vault</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="VaultNameLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="DetachVaultButton">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Minimum" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="styleSheet">
+        <string notr="true">QPushButton{
+padding-left : 5px;
+padding-right:5px;
+}</string>
+       </property>
+       <property name="text">
+        <string>Detech Vault</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="0" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QLabel" name="FolderLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>70</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string>Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QLabel" name="FolderPathLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="minimumSize">
+        <size>
+         <width>0</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="maximumSize">
+        <size>
+         <width>16777215</width>
+         <height>22</height>
+        </size>
+       </property>
+       <property name="text">
+        <string/>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="5" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_5">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="OpenFolderButton">
+       <property name="text">
+        <string>Open Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="RefreshButton">
+       <property name="text">
+        <string>Refresh</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="SettingsButton">
+       <property name="text">
+        <string>Settings</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="8" column="0">
+    <widget class="QTextEdit" name="TerminalTextedit">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>100</height>
+      </size>
+     </property>
+    </widget>
+   </item>
+   <item row="9" column="0">
+    <widget class="QProgressBar" name="ProgressBar">
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>22</height>
+      </size>
+     </property>
+     <property name="maximumSize">
+      <size>
+       <width>16777215</width>
+       <height>22</height>
+      </size>
+     </property>
+     <property name="value">
+      <number>24</number>
+     </property>
+     <property name="textVisible">
+      <bool>false</bool>
+     </property>
+    </widget>
+   </item>
+   <item row="7" column="0">
+    <widget class="QListView" name="FileListView">
+     <property name="sizePolicy">
+      <sizepolicy hsizetype="MinimumExpanding" vsizetype="Expanding">
+       <horstretch>0</horstretch>
+       <verstretch>0</verstretch>
+      </sizepolicy>
+     </property>
+     <property name="minimumSize">
+      <size>
+       <width>0</width>
+       <height>100</height>
+      </size>
+     </property>
+     <property name="verticalScrollBarPolicy">
+      <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
+     </property>
+     <property name="horizontalScrollBarPolicy">
+      <enum>Qt::ScrollBarPolicy::ScrollBarAsNeeded</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="6" column="0">
+    <layout class="QHBoxLayout" name="horizontalLayout_4">
+     <property name="spacing">
+      <number>5</number>
+     </property>
+     <item>
+      <widget class="QPushButton" name="EncryptButton">
+       <property name="text">
+        <string>Encrypt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="DecryptButton">
+       <property name="text">
+        <string>Decrypt</string>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="SuspendButton">
+       <property name="text">
+        <string>Suspend</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../asset/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

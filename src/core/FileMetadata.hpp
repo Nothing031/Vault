@@ -5,11 +5,14 @@
 #include <QByteArray>
 #include <QDebug>
 
+
 struct FileMetadata{
     enum State{
         PlainData,
         CipherData
     };
+    struct a;
+
     struct Header{
         struct sizes{
             static constexpr int signature = 0x16;
@@ -84,5 +87,8 @@ struct FileMetadata{
     Path path;
 };
 
+struct FileMetadata::a{
+
+};
 
 #endif // FILEMETADATA_H
