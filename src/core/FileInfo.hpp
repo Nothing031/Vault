@@ -15,7 +15,7 @@ class FileInfo{
 public:
     struct Sizes{
         static constexpr int signature = 0x16;
-        static constexpr int version = 0x10;
+        static constexpr int version = 0x04;
         static constexpr int salt = 0x20;
         static constexpr int iteration = 0x04;
         static constexpr int hmac = 0x20;
