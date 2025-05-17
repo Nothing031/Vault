@@ -1,9 +1,9 @@
-#ifndef FRONTENDNEWVAULT_H
-#define FRONTENDNEWVAULT_H
+#pragma once
+
 
 #include <QWidget>
 #include <QDir>
-#include "src/vault.hpp"
+#include "src/core/Vault.hpp"
 
 namespace Ui {
 class FrontendNewVault;
@@ -44,4 +44,3 @@ private:
     Ui::FrontendNewVault *ui;
 };
 
-#endif // FRONTENDNEWVAULT_H

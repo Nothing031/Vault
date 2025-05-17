@@ -1,22 +1,24 @@
-#ifndef VAULTMANAGER_HPP
-#define VAULTMANAGER_HPP
+#pragma once
 
 
 #include <QObject>
 #include <QVector>
+#include <QJsonObject>
+#include <QJsonDocument>
+#include <QJsonArray>
+
 #include "vault.hpp"
 
-class VaultManager : QObject{
+class VaultManager : public QObject{
     Q_OBJECT
 
 public:
-
     VaultManager(){
 
     }
 
     ~VaultManager(){
-        for (int i = 0; i < vaults.size(); i++){
+        for (int i = 0; i < vaults.size(); ++i){
             delete vaults[i];
         }
     }
@@ -33,28 +35,75 @@ public:
         return vaults[index];
     }
 
-    Vault* GetEmptyVault(){
-        return &emptyVault;
-    }
-
-    void DetachVault(Vault* pVault){
-        for (int i = 0; i < vaults.size(); i++){
-            if (vaults[i] == pVault){
-                vaults.remove(i, 1);
-                delete pVault;
-            }
+public slots:
+    void DetachVault(int index){
+        if (index < 0 || index >= vaults.size()){
+            qDebug() << "Error failed to detach vault";
+            return;
         }
-        emit OnDetachVault(pVault);
+
+        Vault* pVault = vaults[index];
+        vaults.remove(index, 1);
+        delete pVault;
     }
 
-    void AddVault(Vault* pVault){
+    void AttachVault(Vault* pVault){
         vaults.append(pVault);
-        emit AddVault(pVault);
+        emit AttachVault(pVault);
     }
+
+signals:
+    void onDetachVault(int index);
+
+    void onAttachVault(Vault* pVault);
 
 private:
-    Vault emptyVault;
+    void LoadVaults(){
+        QFile file("vaults.json");
+        if (!file.exists() || !file.open(QFile::ReadOnly | QFile::ExistingOnly))
+            return;
+
+        QByteArray data = file.readAll();
+        QJsonDocument jDoc = QJsonDocument::fromJson(data);
+        QJsonObject jObj = jDoc.object();
+
+        QJsonArray vaultArr = jObj["vaults"].toArray();
+        for (auto& vaultVal : std::as_const(vaultArr)){
+            auto vaultObj = vaultVal.toObject();
+            QString vaultDir = vaultObj["directory"].toString("");
+            Vault* vault = Vault::Load(vaultDir);
+            if (vault){
+                vaults.append(vault);
+                emit onAttachVault(vault);
+            }
+            else{
+                qDebug() << "Failed to load vault : " << vaultDir;
+                continue;
+            }
+        }
+    }
+
+    void SaveVaults(){
+        QFile file("vaults.json");
+        if (!file.open(QFile::WriteOnly | QFile::Truncate))
+            return;
+
+        QJsonObject jObj;
+
+        // vaults
+        QJsonArray vaultArr;
+        for (auto& vault : std::as_const(vaults)){
+            QJsonObject vaultObj;
+            vaultObj["directory"] = vault->directory.path();
+            vaultArr.append(vaultObj);
+        }
+        jObj["vaults"] = vaultArr;
+
+        QJsonDocument jDoc(jObj);
+        file.write(jDoc.toJson());
+        file.close();
+    }
+
     QVector<Vault*> vaults;
 };
 
-#endif // VAULTMANAGER_HPP

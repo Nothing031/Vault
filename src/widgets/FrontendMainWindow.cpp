@@ -1,6 +1,6 @@
-#include "FrontendMainWindow.h"
-#include "FrontendVault.h"
+#include "FrontendMainWindow.hpp"
 #include "ui_FrontendMainWindow.h"
+#include "FrontendVault.hpp"
 
 #include <QDebug>
 #include <QFileDialog>
@@ -19,11 +19,12 @@
 #include <QListView>
 #include <QThread>
 #include <QFileDialog>
+#include <QFrame>
 
 #include "FrontendVault.h"
 #include "FrontendNewVault.h"
 
-#include "src/enviroment.hpp"
+#include "src/core/Settings.hpp"
 
 
 FrontendMainWindow::FrontendMainWindow(QWidget *parent):
@@ -32,6 +33,7 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
 {
     ui->setupUi(this);
     ui->VersionLabel->setText(ENV_VERSION);
+
 
 
     QWidget *emptyWidget = new QWidget(this);
@@ -93,6 +95,9 @@ FrontendMainWindow::FrontendMainWindow(QWidget *parent):
         ui->CreateLocalButton->setEnabled(b);
         ui->OpenPortableButton->setEnabled(b);
     });
+
+
+
 }
 
 FrontendMainWindow::~FrontendMainWindow()

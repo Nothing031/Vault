@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>536</height>
+    <width>718</width>
+    <height>540</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -246,7 +246,7 @@ QCheckBox::indicator:checked{
         <string/>
        </property>
        <property name="icon">
-        <iconset resource="../asset/resource.qrc">
+        <iconset resource="../../asset/resource.qrc">
          <normaloff>:/icons/visibility_off.png</normaloff>
          <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
        </property>
@@ -515,7 +515,7 @@ padding-right:5px;
   </layout>
  </widget>
  <resources>
-  <include location="../asset/resource.qrc"/>
+  <include location="../../asset/resource.qrc"/>
  </resources>
  <connections/>
 </ui>

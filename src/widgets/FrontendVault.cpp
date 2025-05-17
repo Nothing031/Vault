@@ -10,8 +10,8 @@
 #include <QPropertyAnimation>
 #include <QTimer>
 
-#include "src/crypto.hpp"
-#include "src/filelistmodel.hpp"
+#include "src/core/Crypto.hpp"
+#include "src/models/FileListModel.hpp"
 
 FrontendVault::FrontendVault(QWidget *parent)
     : QWidget(parent)

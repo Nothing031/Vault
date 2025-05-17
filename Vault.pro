@@ -9,6 +9,8 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
+    src/core/Crypto.cpp \
+    src/core/Vault.cpp \
     src/main.cpp \
     src/widgets/FrontendMainWindow.cpp \
     src/widgets/FrontendNewVault.cpp \
@@ -16,9 +18,12 @@ SOURCES += \
     src/widgets/VaultSettingsWindow.cpp
 
 HEADERS += \
+    src/Manifest.hpp \
     src/core/Crypto.hpp \
-    src/core/Enviroment.hpp \
-    src/core/FileMetadata.hpp \
+    src/core/Error.hpp \
+    src/core/FileInfo.hpp \
+    src/core/FileMetadataLoader.hpp \
+    src/core/Settings.hpp \
     src/core/Utils.hpp \
     src/core/Vault.hpp \
     src/core/VaultManager.hpp \

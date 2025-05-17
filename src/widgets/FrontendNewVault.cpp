@@ -1,7 +1,7 @@
-#include "FrontendNewVault.h"
+#include "FrontendNewVault.hpp"
 #include "ui_FrontendNewVault.h"
 
-#include "src/crypto.hpp"
+#include "src/core/Crypto.hpp"
 
 #include <filesystem>
 

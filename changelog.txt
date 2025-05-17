@@ -1,5 +1,5 @@
 ### v0.3.0
 #### new features
-*
+* LTS(LGBT Table Safe) encryption
 #### bug fix
 *

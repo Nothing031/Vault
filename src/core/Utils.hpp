@@ -1,5 +1,5 @@
-#ifndef UTILS_HPP
-#define UTILS_HPP
+#pragma once
+
 #include <string>
 #include <Windows.h>
 #include <chrono>
@@ -41,5 +41,3 @@ namespace Utils{
 };
 
 
-
-#endif // UTILS_HPP

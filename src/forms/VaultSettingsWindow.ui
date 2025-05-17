@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>571</width>
-    <height>439</height>
+    <width>669</width>
+    <height>386</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -161,48 +161,20 @@ QCheckBox::indicator:checked{
     <property name="spacing">
      <number>5</number>
     </property>
-    <item row="1" column="0">
-     <widget class="QLabel" name="label_2">
-      <property name="text">
-       <string>Password</string>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="0">
-     <widget class="QLabel" name="label">
-      <property name="text">
-       <string>Vault name</string>
-      </property>
-     </widget>
-    </item>
-    <item row="7" column="0">
-     <widget class="QLabel" name="label_4">
-      <property name="text">
-       <string>Advanced Options</string>
-      </property>
-     </widget>
-    </item>
-    <item row="4" column="0" colspan="3">
-     <widget class="Line" name="line">
+    <item row="7" column="0" colspan="3">
+     <spacer name="verticalSpacer">
       <property name="orientation">
-       <enum>Qt::Orientation::Horizontal</enum>
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
-     </widget>
-    </item>
-    <item row="8" column="0">
-     <widget class="QLabel" name="label_6">
-      <property name="text">
-       <string>Iterations</string>
+      <property name="sizeHint" stdset="0">
+       <size>
+        <width>20</width>
+        <height>338</height>
+       </size>
       </property>
-     </widget>
+     </spacer>
     </item>
-    <item row="8" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEdit"/>
-    </item>
-    <item row="1" column="1" colspan="2">
-     <widget class="QLineEdit" name="lineEdit_4"/>
-    </item>
-    <item row="10" column="0" colspan="3">
+    <item row="8" column="0" colspan="3">
      <layout class="QHBoxLayout" name="horizontalLayout">
       <property name="spacing">
        <number>5</number>
@@ -236,21 +208,32 @@ QCheckBox::indicator:checked{
       </item>
      </layout>
     </item>
-    <item row="9" column="0" colspan="3">
-     <spacer name="verticalSpacer">
+    <item row="4" column="0" colspan="3">
+     <widget class="Line" name="line">
       <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
+       <enum>Qt::Orientation::Horizontal</enum>
       </property>
-      <property name="sizeHint" stdset="0">
-       <size>
-        <width>20</width>
-        <height>338</height>
-       </size>
+     </widget>
+    </item>
+    <item row="0" column="0">
+     <widget class="QLabel" name="label">
+      <property name="text">
+       <string>Vault name</string>
       </property>
-     </spacer>
+     </widget>
     </item>
     <item row="0" column="1" colspan="2">
      <widget class="QLineEdit" name="lineEdit_3"/>
+    </item>
+    <item row="1" column="1" colspan="2">
+     <widget class="QLineEdit" name="lineEdit_4"/>
+    </item>
+    <item row="1" column="0">
+     <widget class="QLabel" name="label_2">
+      <property name="text">
+       <string>Password</string>
+      </property>
+     </widget>
     </item>
    </layout>
   </widget>

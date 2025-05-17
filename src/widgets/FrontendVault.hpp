@@ -1,11 +1,11 @@
-#ifndef FRONTENDVAULT_H
-#define FRONTENDVAULT_H
+#pragma once
+
 
 #include <QWidget>
 
 #include "src/filelistmodel.hpp"
 #include "src/vault.hpp"
-#include "src/crypto.hpp"
+#include "src/core/Crypto.hpp"
 
 namespace Ui {
 class FrontendVault;
@@ -48,4 +48,4 @@ private:
     QThread *thread;
 };
 
-#endif // FRONTENDVAULT_H
+

@@ -1,5 +1,4 @@
-#ifndef FILELISTMODEL_HPP
-#define FILELISTMODEL_HPP
+#pragma once
 
 #include <QObject>
 #include <QAbstractListModel>
@@ -9,14 +8,18 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include "vault.hpp"
-#include "filemetadata.hpp"
+#include "src/core/Vault.hpp"
+#include "src/core/FileInfo.hpp"
 
 class FileListModel : public QAbstractListModel {
     Q_OBJECT
 
 private:
     Vault* pVault = nullptr;
+
+    inline static const QBrush m_brushRed = QBrush(QColor(255, 55, 55));
+    inline static const QBrush m_brushGray = QBrush(QColor(200, 200, 200));
+    inline static const QBrush m_brushGreen = QBrush(QColor(55, 255, 55));
 
 public slots:
     void reset(){
@@ -54,21 +57,15 @@ public:
             return pVault->files.at(index.row())->path.displayPath;
         }
 
-        else if (role == Qt::ForegroundRole){
-            const FileMetadata* file = pVault->files.at(index.row());
-            if (file == nullptr){
-                qDebug() << "nullptr";
-                return QVariant();
-            }
-            if (file->path.state == FileMetadata::PlainData){
-                return QBrush(QColor(200, 200, 200));
-            }else if (file->path.state == FileMetadata::CipherData){
-                return QBrush(QColor(55, 255, 55));
-            }
+        if (role == Qt::ForegroundRole){
+            const FileInfo* file = pVault->files.at(index.row());
+            if (!file)                                  return QVariant();
+            if (!file->isHeaderMatch)                   return m_brushRed;
+            if (file->state == FileInfo::PlainData)     return m_brushGray;
+            if (file->state == FileInfo::CipherData)    return m_brushGreen;
         }
 
         return QVariant();
     }
 };
 
-#endif // FILELISTMODEL_HPP

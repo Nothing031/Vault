@@ -1,5 +1,5 @@
-#ifndef VAULTSETTINGSWINDOW_H
-#define VAULTSETTINGSWINDOW_H
+#pragma once
+
 
 #include <QMainWindow>
 
@@ -19,4 +19,4 @@ private:
     Ui::VaultSettingsWindow *ui;
 };
 
-#endif // VAULTSETTINGSWINDOW_H
+
