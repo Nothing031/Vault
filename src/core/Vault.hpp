@@ -34,10 +34,7 @@ public:
     QByteArray      aesKey;
     bool            unlocked = false;
 
-    QString version;
-    QByteArray hmac;
-    QByteArray globalSalt;
-    int iteration;
+    FileInfo::FileHeader header;
 
     Vault();
     Vault(const Vault& other);

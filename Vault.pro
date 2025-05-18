@@ -11,6 +11,9 @@ CONFIG += c++17
 SOURCES += \
     src/core/Crypto.cpp \
     src/core/Vault.cpp \
+    src/core/crypto/CryptoEngine.cpp \
+    src/core/crypto/Error.cpp \
+    src/core/vault/Vault.cpp \
     src/main.cpp \
     src/widgets/FrontendMainWindow.cpp \
     src/widgets/FrontendNewVault.cpp \
@@ -20,13 +23,15 @@ SOURCES += \
 HEADERS += \
     src/Manifest.hpp \
     src/core/Crypto.hpp \
-    src/core/Error.hpp \
     src/core/FileInfo.hpp \
     src/core/FileMetadataLoader.hpp \
     src/core/Settings.hpp \
     src/core/Utils.hpp \
     src/core/Vault.hpp \
     src/core/VaultManager.hpp \
+    src/core/crypto/CryptoEngine.hpp \
+    src/core/crypto/Error.hpp \
+    src/core/vault/Vault.hpp \
     src/models/FileListModel.hpp \
     src/widgets/FrontendMainWindow.hpp \
     src/widgets/FrontendNewVault.hpp \

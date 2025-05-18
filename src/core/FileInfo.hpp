@@ -5,11 +5,9 @@
 #include <QDebug>
 
 #include <openssl/rand.h>
-
 #include "src/Manifest.hpp"
 
-
-
+#define CURRENT_FORMAT_VERSION "0002"
 
 class FileInfo{
 public:
@@ -32,7 +30,7 @@ public:
     };
     struct FileHeader {
     private:
-        inline static const QByteArray currentVersion = []{QByteArray data(Sizes::version, 0); memcpy(data.data(), VERSION, strlen(VERSION)); return data;}();
+        inline static const QByteArray currentVersion = []{QByteArray data(Sizes::version, 0); memcpy(data.data(), CURRENT_FORMAT_VERSION, Sizes::version); return data;}();
     public:
         inline static const QByteArray signature = []{QByteArray data(Sizes::signature, 0); memcpy(data.data(), SIGNATURE, strlen(SIGNATURE)); return data;}();
         QByteArray version = currentVersion;
