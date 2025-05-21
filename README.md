@@ -1,6 +1,7 @@
 # Vault
-File based encryption program
-## Supporting OS
+File based AES-256 encryption gui program
+
+## Supported OS
 | OS       |  support  |
 |----------|-----------|
 | Windows  | ✅       |
@@ -8,8 +9,9 @@ File based encryption program
 | Mac      | ❌       |
 
 ## Beware
+* does not support .enc extension
 * does not support over MAX_PATH(260 char) length path
-* does not support encrypted file via v0.2.1 and lower versions. decrypt before reinstal Vault
+* does not support encrypted file via v0.2.1 and lower versions. decrypt before reinstall Vault
 
 ## Encryption
 Generate a 64 bytes key with PBKDF2 HMAC SHA256. Use password and randomly generated 32 bytes salt with 100000 iterations for key.

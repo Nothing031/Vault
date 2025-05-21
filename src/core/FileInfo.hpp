@@ -89,6 +89,7 @@ public:
         CipherData
     };
 
+    bool integrity = true;
     bool isHeaderMatch = true;
     State state = PlainData;
     FileHeader header;

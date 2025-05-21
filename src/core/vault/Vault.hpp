@@ -13,9 +13,18 @@
 #include <QDirIterator>
 #include "src/core/FileInfo.hpp"
 
+#define EXTENSION ".enc"
+
 class Vault
 {
 public:
+    enum VaultMode{
+        Local,
+        Portable,
+        Folder,
+    };
+
+
     QDir                directory;
     QMutex              mutex;
     QVector<FileInfo*>  files;
@@ -25,7 +34,10 @@ public:
 
     FileInfo::FileHeader header;
 
-
     Vault();
+    ~Vault();
+
+    bool CheckPassword(const QString& password);
+    void LoadFiles();
 };
 

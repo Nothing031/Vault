@@ -1,0 +1,171 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VaultEntryWindow</class>
+ <widget class="QMainWindow" name="VaultEntryWindow">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>900</width>
+    <height>600</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>MainWindow</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QMainWindow{
+	background: rgb(30, 30, 30);
+}
+
+QWidget{
+	color: rgb(244, 244, 244);
+	font: 12pt &quot;Arial&quot;;
+}
+
+QListWidget{
+	background: rgb(40, 40, 40);
+	max-width: 300px;
+	min-width: 300px;
+	border:0px;
+}
+
+/* button */
+#CloseButton{
+	border: 0px;
+	border-radius: 4px;
+	background: rgb(50, 50, 50);
+	max-width: 60px;
+	min-width: 60px;
+	max-height: 24px;
+	min-height: 24px;
+}#CloseButton:hover{
+	background: rgb(255, 55, 55);
+}#CloseButton::pressed{
+	background: rgb(30, 30, 30);
+}
+
+#VersionLabel{
+	font: 10pt;
+	color: rgb(150, 150, 150);
+	padding-right: 2px;
+	padding-bottom: 2px;
+}
+
+#line{
+	background: rgb(70, 70, 70);
+	border: 0px;
+	max-width:1px;
+	min-width:1px;
+}#line_2{
+	background: rgb(70, 70, 70);
+	border: 0px;
+	max-height:1px;
+	min-height:1px;
+}
+
+#MainLabel{
+	font: 20pt;
+}
+
+
+</string>
+  </property>
+  <widget class="QWidget" name="centralwidget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="leftMargin">
+     <number>0</number>
+    </property>
+    <property name="topMargin">
+     <number>0</number>
+    </property>
+    <property name="rightMargin">
+     <number>0</number>
+    </property>
+    <property name="bottomMargin">
+     <number>0</number>
+    </property>
+    <property name="spacing">
+     <number>0</number>
+    </property>
+    <item row="1" column="3">
+     <layout class="QGridLayout" name="gridLayout_3">
+      <property name="leftMargin">
+       <number>4</number>
+      </property>
+      <property name="topMargin">
+       <number>4</number>
+      </property>
+      <property name="rightMargin">
+       <number>4</number>
+      </property>
+      <property name="bottomMargin">
+       <number>4</number>
+      </property>
+      <item row="0" column="1" alignment="Qt::AlignmentFlag::AlignRight">
+       <widget class="QPushButton" name="CloseButton">
+        <property name="text">
+         <string/>
+        </property>
+        <property name="icon">
+         <iconset resource="../../asset/resource.qrc">
+          <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
+        </property>
+        <property name="iconSize">
+         <size>
+          <width>16</width>
+          <height>16</height>
+         </size>
+        </property>
+       </widget>
+      </item>
+      <item row="0" column="0">
+       <spacer name="horizontalSpacer">
+        <property name="orientation">
+         <enum>Qt::Orientation::Horizontal</enum>
+        </property>
+        <property name="sizeHint" stdset="0">
+         <size>
+          <width>40</width>
+          <height>20</height>
+         </size>
+        </property>
+       </spacer>
+      </item>
+     </layout>
+    </item>
+    <item row="0" column="0" rowspan="3">
+     <widget class="QListWidget" name="VaultListWidget">
+      <property name="focusPolicy">
+       <enum>Qt::FocusPolicy::NoFocus</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" rowspan="3">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="2" column="3">
+     <widget class="QStackedWidget" name="stackedWidget">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="currentIndex">
+       <number>-1</number>
+      </property>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="../../asset/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>

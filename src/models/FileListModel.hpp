@@ -8,7 +8,7 @@
 #include <QFile>
 #include <QFileInfo>
 
-#include "src/core/Vault.hpp"
+#include "src/core/vault/Vault.hpp"
 #include "src/core/FileInfo.hpp"
 
 class FileListModel : public QAbstractListModel {
@@ -17,6 +17,7 @@ class FileListModel : public QAbstractListModel {
 private:
     Vault* pVault = nullptr;
 
+    inline static const QBrush m_brushDarkRed = QBrush(QColor(150, 0, 0));
     inline static const QBrush m_brushRed = QBrush(QColor(255, 55, 55));
     inline static const QBrush m_brushGray = QBrush(QColor(200, 200, 200));
     inline static const QBrush m_brushGreen = QBrush(QColor(55, 255, 55));
@@ -60,6 +61,7 @@ public:
         if (role == Qt::ForegroundRole){
             const FileInfo* file = pVault->files.at(index.row());
             if (!file)                                  return QVariant();
+            if (!file->integrity)                       return m_brushDarkRed;
             if (!file->isHeaderMatch)                   return m_brushRed;
             if (file->state == FileInfo::PlainData)     return m_brushGray;
             if (file->state == FileInfo::CipherData)    return m_brushGreen;

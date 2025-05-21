@@ -9,40 +9,37 @@ CONFIG += c++17
 #DEFINES += QT_DISABLE_DEPRECATED_BEFORE=0x060000    # disables all the APIs deprecated before Qt 6.0.0
 
 SOURCES += \
-    src/core/Crypto.cpp \
-    src/core/Vault.cpp \
-    src/core/crypto/CryptoEngine.cpp \
-    src/core/crypto/Error.cpp \
+    src/core/cryptography/CryptoEngine.cpp \
+    src/core/cryptography/Error.cpp \
     src/core/vault/Vault.cpp \
+    src/core/vault/VaultManager.cpp \
     src/main.cpp \
-    src/widgets/FrontendMainWindow.cpp \
-    src/widgets/FrontendNewVault.cpp \
-    src/widgets/FrontendVault.cpp \
-    src/widgets/VaultSettingsWindow.cpp
+    src/widgets/VaultCreateNew.cpp \
+    src/widgets/VaultEntryWindow.cpp \
+    src/widgets/VaultInfoButton.cpp \
+    src/widgets/VaultTitle.cpp
 
 HEADERS += \
     src/Manifest.hpp \
-    src/core/Crypto.hpp \
     src/core/FileInfo.hpp \
-    src/core/FileMetadataLoader.hpp \
     src/core/Settings.hpp \
     src/core/Utils.hpp \
-    src/core/Vault.hpp \
-    src/core/VaultManager.hpp \
-    src/core/crypto/CryptoEngine.hpp \
-    src/core/crypto/Error.hpp \
+    src/core/cryptography/CryptoEngine.hpp \
+    src/core/cryptography/Cryptography.hpp \
+    src/core/cryptography/Error.hpp \
     src/core/vault/Vault.hpp \
+    src/core/vault/VaultManager.hpp \
     src/models/FileListModel.hpp \
-    src/widgets/FrontendMainWindow.hpp \
-    src/widgets/FrontendNewVault.hpp \
-    src/widgets/FrontendVault.hpp \
-    src/widgets/VaultSettingsWindow.hpp
+    src/widgets/VaultCreateNew.hpp \
+    src/widgets/VaultEntryWindow.hpp \
+    src/widgets/VaultInfoButton.hpp \
+    src/widgets/VaultTitle.hpp \
+    src/widgets/WrapLabel.hpp
 
 FORMS += \
-    src/forms/FrontendMainWindow.ui \
-    src/forms/FrontendNewVault.ui \
-    src/forms/FrontendVault.ui \
-    src/forms/VaultSettingsWindow.ui
+    src/forms/VaultCreateNew.ui \
+    src/forms/VaultEntryWindow.ui \
+    src/forms/VaultTitle.ui
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl

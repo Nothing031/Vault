@@ -1,0 +1,378 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>VaultCreateNew</class>
+ <widget class="QWidget" name="VaultCreateNew">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>599</width>
+    <height>568</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="minimumSize">
+   <size>
+    <width>599</width>
+    <height>568</height>
+   </size>
+  </property>
+  <property name="maximumSize">
+   <size>
+    <width>599</width>
+    <height>568</height>
+   </size>
+  </property>
+  <property name="windowTitle">
+   <string>Form</string>
+  </property>
+  <property name="styleSheet">
+   <string notr="true">QWidget{
+	background: rgb(30, 30, 30);
+	color: rgb(244, 244, 244);
+	font: 12pt &quot;Arial&quot;;
+}
+QWidget:disabled{
+	color: rgb(100, 100, 100);
+}
+
+/* LABEL */
+QLabel{
+	max-width: 100px;
+	min-width: 100px;
+	max-height: 24px;
+	min-height: 24px;
+}#FolderPathLabel{
+	font: 9pt;
+	color: rgb(200, 200, 200);
+	max-width: 2000px;
+}#PasswordInfoLabel, #NameInfoLabel{
+	color: rgb(200, 200, 200);
+	max-width: 2000px;
+	min-height: 0px;
+	font: 9pt;
+	
+}
+
+
+QLineEdit{
+	font: 10pt;
+	border: 1px solid rgb(70, 70, 70);
+	border-radius: 4px;
+	min-height: 24px;
+	max-height: 24px;
+}
+
+QCheckBox{
+	background: transparent;
+	font: 10pt;
+	color: rgb(255, 255, 255);
+}QCheckBox::indicator{
+	background: rgb(50, 50, 50);
+	border: 1px solid rgb(70, 70, 70);
+}QCheckBox::indicator::checked{
+	background: rgb(55, 255, 55);
+}
+
+
+/* button */
+QPushButton{
+	font: 11pt;
+	min-width: 100px;
+	max-width: 100px;
+	min-height: 24px;
+	background: rgb(40, 40, 40);
+	border: 1px solid rgb(70, 70, 70);
+	border-radius: 4px;
+}QPushButton:hover{
+	background: rgb(60, 60, 60);
+}
+QPushButton::pressed{
+	background: rgb(40, 40, 40);
+}
+#CreateButton{
+	min-width: 200px;
+	max-width: 200px;
+}
+#AditionalEncryptionInfoButton{
+	color: rgb(0, 0, 255);
+	font: 11pt;
+	text-decoration: underline;
+	border: 0px;
+	max-width: 85px;
+	background: transparent;
+}AditionalEncryptionInfoButton:hover{
+	background: transparent;
+}#AditionalEncryptionInfoButton::pressed{
+	background: transparent;
+	color: rgb(0, 0, 100);
+}
+#BackButton{
+	max-height: 20px;
+	min-height: 20px;
+	font: 11pt;
+}
+
+
+
+#PasswordVisibilityButton, #ConfirmVisibilityButton{
+	max-height: 24px;
+	min-height: 24px;
+	max-width: 24px;
+	min-width: 24px;
+}
+
+
+
+#line, #line_2{
+	background: rgb(70, 70, 70);
+	border: 0px;
+	max-height:1px;
+	min-height:1px;
+	max-width: 2000px;
+	min-width: 0px;
+}
+</string>
+  </property>
+  <layout class="QGridLayout" name="gridLayout_5">
+   <property name="leftMargin">
+    <number>30</number>
+   </property>
+   <property name="topMargin">
+    <number>20</number>
+   </property>
+   <property name="rightMargin">
+    <number>30</number>
+   </property>
+   <property name="bottomMargin">
+    <number>20</number>
+   </property>
+   <property name="verticalSpacing">
+    <number>10</number>
+   </property>
+   <item row="12" column="0" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>436</width>
+       <height>179</height>
+      </size>
+     </property>
+    </spacer>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="UseEncryptionCheckbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Use AES-256 encryption</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="AditionalEncryptionInfoButton">
+       <property name="text">
+        <string>aditional info</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="1" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout">
+     <item row="1" column="0">
+      <widget class="QLabel" name="FolderLabel">
+       <property name="text">
+        <string>Folder</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="2">
+      <widget class="QPushButton" name="FolderBrowseButton">
+       <property name="text">
+        <string>Browse</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="1">
+      <widget class="QLabel" name="FolderPathLabel">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>C:\Users\Nothing\Documents\PassWord\GAME</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="6" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="ConfirmLineEdit">
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="ConfirmButton">
+       <property name="text">
+        <string>Confirm</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="ConfirmVisibilityButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../asset/resource.qrc">
+         <normaloff>:/icons/visibility_off.png</normaloff>
+         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="verticalSpacing">
+      <number>2</number>
+     </property>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="lineEdit"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="NameLabel">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="NameInfoLabel">
+       <property name="text">
+        <string>vault will be set to the selected folder / Vault will be created under the selected folder</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="5" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_3">
+     <property name="verticalSpacing">
+      <number>2</number>
+     </property>
+     <item row="2" column="2">
+      <widget class="QPushButton" name="PasswordVisibilityButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../asset/resource.qrc">
+         <normaloff>:/icons/visibility_off.png</normaloff>
+         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="1">
+      <widget class="QLineEdit" name="PasswordLineEdit">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+       <property name="clearButtonEnabled">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="2" column="0">
+      <widget class="QLabel" name="PasswordLabel">
+       <property name="text">
+        <string>Password</string>
+       </property>
+      </widget>
+     </item>
+     <item row="3" column="0" colspan="3">
+      <widget class="QLabel" name="PasswordInfoLabel">
+       <property name="text">
+        <string>password must be 4-32 characters. can include alphabets, numbers and symbols</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="7" column="0" colspan="2">
+    <widget class="Line" name="line_2">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="8" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignHCenter">
+    <widget class="QPushButton" name="CreateButton">
+     <property name="text">
+      <string>Create</string>
+     </property>
+    </widget>
+   </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QPushButton" name="BackButton">
+     <property name="text">
+      <string>Back</string>
+     </property>
+    </widget>
+   </item>
+  </layout>
+ </widget>
+ <resources>
+  <include location="../../asset/resource.qrc"/>
+ </resources>
+ <connections/>
+</ui>
