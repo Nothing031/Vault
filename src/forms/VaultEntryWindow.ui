@@ -57,11 +57,6 @@ QListWidget{
 	border: 0px;
 	max-width:1px;
 	min-width:1px;
-}#line_2{
-	background: rgb(70, 70, 70);
-	border: 0px;
-	max-height:1px;
-	min-height:1px;
 }
 
 #MainLabel{

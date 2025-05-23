@@ -51,7 +51,7 @@ QLabel{
 	font: 9pt;
 	color: rgb(200, 200, 200);
 	max-width: 2000px;
-}#PasswordInfoLabel, #NameInfoLabel{
+}#PasswordInfoLabel, #ConfirmInfoLabel, #NameInfoLabel{
 	color: rgb(200, 200, 200);
 	max-width: 2000px;
 	min-height: 0px;
@@ -152,49 +152,9 @@ QPushButton::pressed{
    <property name="bottomMargin">
     <number>20</number>
    </property>
-   <property name="verticalSpacing">
+   <property name="spacing">
     <number>10</number>
    </property>
-   <item row="12" column="0" colspan="2">
-    <spacer name="verticalSpacer">
-     <property name="orientation">
-      <enum>Qt::Orientation::Vertical</enum>
-     </property>
-     <property name="sizeHint" stdset="0">
-      <size>
-       <width>436</width>
-       <height>179</height>
-      </size>
-     </property>
-    </spacer>
-   </item>
-   <item row="4" column="0" colspan="2">
-    <layout class="QHBoxLayout" name="horizontalLayout">
-     <item>
-      <widget class="QCheckBox" name="UseEncryptionCheckbox">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="text">
-        <string>Use AES-256 encryption</string>
-       </property>
-       <property name="checked">
-        <bool>true</bool>
-       </property>
-      </widget>
-     </item>
-     <item>
-      <widget class="QPushButton" name="AditionalEncryptionInfoButton">
-       <property name="text">
-        <string>aditional info</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
    <item row="1" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout">
      <item row="1" column="0">
@@ -226,78 +186,11 @@ QPushButton::pressed{
      </item>
     </layout>
    </item>
-   <item row="6" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_4">
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="ConfirmLineEdit">
-       <property name="maxLength">
-        <number>32</number>
-       </property>
-       <property name="echoMode">
-        <enum>QLineEdit::EchoMode::Password</enum>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="ConfirmButton">
-       <property name="text">
-        <string>Confirm</string>
-       </property>
-      </widget>
-     </item>
-     <item row="0" column="2">
-      <widget class="QPushButton" name="ConfirmVisibilityButton">
-       <property name="text">
-        <string/>
-       </property>
-       <property name="icon">
-        <iconset resource="../../asset/resource.qrc">
-         <normaloff>:/icons/visibility_off.png</normaloff>
-         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
-       </property>
-       <property name="checkable">
-        <bool>true</bool>
-       </property>
-       <property name="flat">
-        <bool>false</bool>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="2" column="0" colspan="2">
-    <layout class="QGridLayout" name="gridLayout_2">
-     <property name="verticalSpacing">
-      <number>2</number>
-     </property>
-     <item row="0" column="1">
-      <widget class="QLineEdit" name="lineEdit"/>
-     </item>
-     <item row="0" column="0">
-      <widget class="QLabel" name="NameLabel">
-       <property name="text">
-        <string>Name</string>
-       </property>
-      </widget>
-     </item>
-     <item row="1" column="0" colspan="2">
-      <widget class="QLabel" name="NameInfoLabel">
-       <property name="text">
-        <string>vault will be set to the selected folder / Vault will be created under the selected folder</string>
-       </property>
-      </widget>
-     </item>
-    </layout>
-   </item>
-   <item row="3" column="0" colspan="2">
-    <widget class="Line" name="line">
-     <property name="orientation">
-      <enum>Qt::Orientation::Horizontal</enum>
-     </property>
-    </widget>
-   </item>
    <item row="5" column="0" colspan="2">
     <layout class="QGridLayout" name="gridLayout_3">
+     <property name="horizontalSpacing">
+      <number>6</number>
+     </property>
      <property name="verticalSpacing">
       <number>2</number>
      </property>
@@ -348,12 +241,63 @@ QPushButton::pressed{
      </item>
     </layout>
    </item>
+   <item row="0" column="0" colspan="2">
+    <widget class="QPushButton" name="BackButton">
+     <property name="text">
+      <string>Back</string>
+     </property>
+    </widget>
+   </item>
+   <item row="3" column="0" colspan="2">
+    <widget class="Line" name="line">
+     <property name="orientation">
+      <enum>Qt::Orientation::Horizontal</enum>
+     </property>
+    </widget>
+   </item>
+   <item row="2" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_2">
+     <property name="verticalSpacing">
+      <number>2</number>
+     </property>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="NameLineEdit"/>
+     </item>
+     <item row="0" column="0">
+      <widget class="QLabel" name="NameLabel">
+       <property name="text">
+        <string>Name</string>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="2">
+      <widget class="QLabel" name="NameInfoLabel">
+       <property name="text">
+        <string>vault will be set to the selected folder / Vault will be created under the selected folder</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
    <item row="7" column="0" colspan="2">
     <widget class="Line" name="line_2">
      <property name="orientation">
       <enum>Qt::Orientation::Horizontal</enum>
      </property>
     </widget>
+   </item>
+   <item row="12" column="0" colspan="2">
+    <spacer name="verticalSpacer">
+     <property name="orientation">
+      <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeHint" stdset="0">
+      <size>
+       <width>436</width>
+       <height>179</height>
+      </size>
+     </property>
+    </spacer>
    </item>
    <item row="8" column="0" colspan="2" alignment="Qt::AlignmentFlag::AlignHCenter">
     <widget class="QPushButton" name="CreateButton">
@@ -362,12 +306,84 @@ QPushButton::pressed{
      </property>
     </widget>
    </item>
-   <item row="0" column="0" colspan="2">
-    <widget class="QPushButton" name="BackButton">
-     <property name="text">
-      <string>Back</string>
+   <item row="6" column="0" colspan="2">
+    <layout class="QGridLayout" name="gridLayout_4">
+     <property name="horizontalSpacing">
+      <number>6</number>
      </property>
-    </widget>
+     <property name="verticalSpacing">
+      <number>2</number>
+     </property>
+     <item row="0" column="0">
+      <widget class="QLabel" name="ConfirmLabel">
+       <property name="text">
+        <string>Confirm</string>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="2">
+      <widget class="QPushButton" name="ConfirmVisibilityButton">
+       <property name="text">
+        <string/>
+       </property>
+       <property name="icon">
+        <iconset resource="../../asset/resource.qrc">
+         <normaloff>:/icons/visibility_off.png</normaloff>
+         <normalon>:/icons/visibility_on.png</normalon>:/icons/visibility_off.png</iconset>
+       </property>
+       <property name="checkable">
+        <bool>true</bool>
+       </property>
+       <property name="flat">
+        <bool>false</bool>
+       </property>
+      </widget>
+     </item>
+     <item row="0" column="1">
+      <widget class="QLineEdit" name="ConfirmLineEdit">
+       <property name="maxLength">
+        <number>32</number>
+       </property>
+       <property name="echoMode">
+        <enum>QLineEdit::EchoMode::Password</enum>
+       </property>
+      </widget>
+     </item>
+     <item row="1" column="0" colspan="3">
+      <widget class="QLabel" name="ConfirmInfoLabel">
+       <property name="text">
+        <string>password does not match. please try again.</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
+   </item>
+   <item row="4" column="0" colspan="2">
+    <layout class="QHBoxLayout" name="horizontalLayout">
+     <item>
+      <widget class="QCheckBox" name="EncryptionCheckbox">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Preferred" vsizetype="Fixed">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
+       </property>
+       <property name="text">
+        <string>Use AES-256 encryption</string>
+       </property>
+       <property name="checked">
+        <bool>true</bool>
+       </property>
+      </widget>
+     </item>
+     <item>
+      <widget class="QPushButton" name="AditionalEncryptionInfoButton">
+       <property name="text">
+        <string>aditional info</string>
+       </property>
+      </widget>
+     </item>
+    </layout>
    </item>
   </layout>
  </widget>

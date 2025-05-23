@@ -7,13 +7,13 @@
 
 #include <QListWidgetItem>
 
+#include <QFileDialog>
 #include "VaultInfoButton.hpp"
+#include "src/core/vault/VaultManager.hpp"
 
 #pragma comment(lib, "dwmapi")
 #pragma comment(lib, "User32.lib")
 
-static Vault vault = {};
-static Vault vault2 = {};
 
 VaultEntryWindow::VaultEntryWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -25,18 +25,27 @@ VaultEntryWindow::VaultEntryWindow(QWidget *parent)
     setWindowFlags(Qt::FramelessWindowHint);
     this->resize(900, 600);
 
+    VaultManager& manager = VaultManager::GetInstance();
+
+
     ui->stackedWidget->addWidget(vaultTitle);
     ui->stackedWidget->addWidget(vaultCreateNew);
     ui->stackedWidget->setCurrentIndex(0);
 
-
-    vault.directory = QDir("C:\\Users\\Nothing\\Documents\\PassWord\\.obsidian");
-    vault2.directory = QDir("C:\\Users\\Nothing\\source\\repos\\Vault\\build\\Desktop_Qt_6_9_0_MSVC2022_64bit-Debug\\.qtc_clangd\\.cache\\clangd\\index");
-    AddVault(&vault);
-    AddVault(&vault2);
-
-
     connect(ui->CloseButton, &QPushButton::clicked, this, &VaultEntryWindow::close);
+
+    connect(vaultTitle, &VaultTitle::createButtonPressed, this, &VaultEntryWindow::CreateNewVault);
+    connect(vaultTitle, &VaultTitle::openButtonPressed, this, &VaultEntryWindow::OpenFolder);
+
+    connect(vaultCreateNew, &VaultCreateNew::Back, this, [this](){ ui->stackedWidget->setCurrentWidget(vaultTitle); });
+
+    connect(&manager, &VaultManager::onAttachVault, this, &VaultEntryWindow::AddVault);
+    connect(&manager, &VaultManager::onDetachVault, this, &VaultEntryWindow::RemoveVault);
+
+
+
+    // load data
+    manager.LoadData();
 }
 
 VaultEntryWindow::~VaultEntryWindow()
@@ -65,8 +74,22 @@ void VaultEntryWindow::RemoveVault(int index)
 
 void VaultEntryWindow::OpenVault(Vault *vault)
 {
-    qDebug() << "try opening vault";
-    qDebug() << vault->directory;
+    qDebug() << "opening vault";
+}
+
+void VaultEntryWindow::CreateNewVault()
+{
+    vaultCreateNew->init();
+    ui->stackedWidget->setCurrentWidget(vaultCreateNew);
+}
+
+void VaultEntryWindow::OpenFolder()
+{
+    QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
+    qDebug() << dir;
+    if (dir.isEmpty() || !QDir(dir).exists()){
+        return;
+    }
 }
 
 void VaultEntryWindow::closeEvent(QCloseEvent *event)

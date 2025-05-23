@@ -16,6 +16,8 @@ public:
     ~VaultTitle();
 
 signals:
+    void openButtonPressed();
+    void createButtonPressed();
 
 private:
     Ui::VaultTitle *ui;

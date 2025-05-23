@@ -11,7 +11,10 @@ CONFIG += c++17
 SOURCES += \
     src/core/cryptography/CryptoEngine.cpp \
     src/core/cryptography/Error.cpp \
+    src/core/vault/AES256Settings.cpp \
+    src/core/vault/ExcludeChecker.cpp \
     src/core/vault/Vault.cpp \
+    src/core/vault/VaultLoader.cpp \
     src/core/vault/VaultManager.cpp \
     src/main.cpp \
     src/widgets/VaultCreateNew.cpp \
@@ -27,7 +30,10 @@ HEADERS += \
     src/core/cryptography/CryptoEngine.hpp \
     src/core/cryptography/Cryptography.hpp \
     src/core/cryptography/Error.hpp \
+    src/core/vault/AES256Settings.hpp \
+    src/core/vault/ExcludeChecker.hpp \
     src/core/vault/Vault.hpp \
+    src/core/vault/VaultLoader.hpp \
     src/core/vault/VaultManager.hpp \
     src/models/FileListModel.hpp \
     src/widgets/VaultCreateNew.hpp \

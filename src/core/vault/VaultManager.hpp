@@ -17,15 +17,13 @@ public:
 
     static VaultManager& GetInstance();
 
+    void LoadData();
+    void SaveData();
+
     Vault* GetVault(int index);
 
-
-    bool SaveVaultData(Vault* vault);
-    bool LoadVaultData(Vault* vault);
-
-
     void DetachVault(int index);
-    void CreateVault(const QString& dir, const QString& password);
+    void CreateVault(const bool& aesEnabled, const QString& dir, const QString& password);
 
 signals:
     void onAttachVault(Vault* pVault);
@@ -33,8 +31,6 @@ signals:
 
 private:
     VaultManager();
-    void LoadVaultManagerData();
-    void SaveVaultManagerData();
 
     static VaultManager instance;
     QVector<Vault*> vaults;

@@ -12,27 +12,22 @@
 #include <QMutex>
 #include <QDirIterator>
 #include "src/core/FileInfo.hpp"
+#include "AES256Settings.hpp"
+#include "ExcludeChecker.hpp"
 
 #define EXTENSION ".enc"
 
 class Vault
 {
 public:
-    enum VaultMode{
-        Local,
-        Portable,
-        Folder,
-    };
-
+    QString             appVersion;
 
     QDir                directory;
     QMutex              mutex;
     QVector<FileInfo*>  files;
 
-    QByteArray          aesKey;
-    bool                unlocked = false;
-
-    FileInfo::FileHeader header;
+    ExcludeChecker      excludeChecker;
+    AES256Settings      aesSettings;
 
     Vault();
     ~Vault();

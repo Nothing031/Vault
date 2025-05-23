@@ -21,12 +21,13 @@ public:
     explicit VaultEntryWindow(QWidget *parent = nullptr);
     ~VaultEntryWindow();
 
-
 private slots:
     void AddVault(Vault* vault);
     void RemoveVault(int index);
 
     void OpenVault(Vault* vault);
+    void CreateNewVault();
+    void OpenFolder();
 
 protected:
     void closeEvent(QCloseEvent *event) override;
