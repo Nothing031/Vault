@@ -11,23 +11,24 @@ public:
 
     AES256Settings();
 
-    bool GetEnabled() const;
+    bool IsEnabled() const;
     void SetEnabled(bool newEnabled);
-    QByteArray GetFormatVersion() const;
+    QByteArray FormatVersion() const;
     void SetFormatVersion(const QByteArray &newFormatVersion);
-    QByteArray GetGlobalSalt() const;
+    QByteArray GlobalSalt() const;
     void SetGlobalSalt(const QByteArray &newGlobalSalt);
-    int GetIteration() const;
+    int Iteration() const;
     void SetIteration(int newIteration);
-    QByteArray GetHmac() const;
+    QByteArray Hmac() const;
     void SetHmac(const QByteArray &newHmac);
-    bool GetIsUnlocked() const;
-    void SetIsUnlocked(bool newIsUnlocked);
-    QByteArray GetAesKey() const;
+    bool IsLocked() const;
+    void Unlock();
+    void Lock();
+    QByteArray AesKey() const;
     void SetAesKey(const QByteArray &newAesKey);
 
 private:
-    bool       isUnlocked;
+    bool       locked;
     QByteArray aesKey;
     bool       enabled;
     QByteArray formatVersion;

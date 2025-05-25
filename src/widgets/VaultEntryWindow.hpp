@@ -22,11 +22,8 @@ public:
     ~VaultEntryWindow();
 
 private slots:
-    void AddVault(Vault* vault);
-    void RemoveVault(int index);
-
     void OpenVault(Vault* vault);
-    void CreateNewVault();
+    void StartCreateNewVault();
     void OpenFolder();
 
 protected:

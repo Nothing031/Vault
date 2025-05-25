@@ -17,10 +17,15 @@ SOURCES += \
     src/core/vault/VaultLoader.cpp \
     src/core/vault/VaultManager.cpp \
     src/main.cpp \
+    src/widgets/FileListView.cpp \
+    src/widgets/Menu.cpp \
+    src/widgets/VaultButton.cpp \
     src/widgets/VaultCreateNew.cpp \
     src/widgets/VaultEntryWindow.cpp \
-    src/widgets/VaultInfoButton.cpp \
-    src/widgets/VaultTitle.cpp
+    src/widgets/VaultListWidget.cpp \
+    src/widgets/VaultTitle.cpp \
+    src/widgets/VaultViewWindow.cpp \
+    src/widgets/WrappedLabel.cpp
 
 HEADERS += \
     src/Manifest.hpp \
@@ -36,16 +41,21 @@ HEADERS += \
     src/core/vault/VaultLoader.hpp \
     src/core/vault/VaultManager.hpp \
     src/models/FileListModel.hpp \
+    src/widgets/FileListView.hpp \
+    src/widgets/Menu.hpp \
+    src/widgets/VaultButton.hpp \
     src/widgets/VaultCreateNew.hpp \
     src/widgets/VaultEntryWindow.hpp \
-    src/widgets/VaultInfoButton.hpp \
+    src/widgets/VaultListWidget.hpp \
     src/widgets/VaultTitle.hpp \
-    src/widgets/WrapLabel.hpp
+    src/widgets/VaultViewWindow.hpp \
+    src/widgets/WrappedLabel.hpp
 
 FORMS += \
     src/forms/VaultCreateNew.ui \
     src/forms/VaultEntryWindow.ui \
-    src/forms/VaultTitle.ui
+    src/forms/VaultTitle.ui \
+    src/forms/VaultViewWindow.ui
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl

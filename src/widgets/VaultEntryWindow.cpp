@@ -3,17 +3,12 @@
 #include <QCloseEvent>
 #include <QObject>
 #include <QVector>
-#include <dwmapi.h>
 
 #include <QListWidgetItem>
-
+#include <QAction>
 #include <QFileDialog>
-#include "VaultInfoButton.hpp"
 #include "src/core/vault/VaultManager.hpp"
-
-#pragma comment(lib, "dwmapi")
-#pragma comment(lib, "User32.lib")
-
+#include "VaultViewWindow.hpp"
 
 VaultEntryWindow::VaultEntryWindow(QWidget *parent)
     : QMainWindow(parent),
@@ -27,21 +22,18 @@ VaultEntryWindow::VaultEntryWindow(QWidget *parent)
 
     VaultManager& manager = VaultManager::GetInstance();
 
-
     ui->stackedWidget->addWidget(vaultTitle);
     ui->stackedWidget->addWidget(vaultCreateNew);
     ui->stackedWidget->setCurrentIndex(0);
 
     connect(ui->CloseButton, &QPushButton::clicked, this, &VaultEntryWindow::close);
 
-    connect(vaultTitle, &VaultTitle::createButtonPressed, this, &VaultEntryWindow::CreateNewVault);
+    connect(vaultTitle, &VaultTitle::createButtonPressed, this, &VaultEntryWindow::StartCreateNewVault);
     connect(vaultTitle, &VaultTitle::openButtonPressed, this, &VaultEntryWindow::OpenFolder);
 
     connect(vaultCreateNew, &VaultCreateNew::Back, this, [this](){ ui->stackedWidget->setCurrentWidget(vaultTitle); });
 
-    connect(&manager, &VaultManager::onAttachVault, this, &VaultEntryWindow::AddVault);
-    connect(&manager, &VaultManager::onDetachVault, this, &VaultEntryWindow::RemoveVault);
-
+    connect(qobject_cast<VaultListWidget*>(ui->vaultListWidget), &VaultListWidget::requestOpenVault, this, &VaultEntryWindow::OpenVault);
 
 
     // load data
@@ -53,31 +45,27 @@ VaultEntryWindow::~VaultEntryWindow()
     delete ui;
 }
 
-void VaultEntryWindow::AddVault(Vault *vault)
-{
-    if (!vault) return;
-    QListWidgetItem* item = new QListWidgetItem(ui->VaultListWidget);
-    VaultInfoButton* button = new VaultInfoButton(vault, ui->VaultListWidget);
-    item->setSizeHint(button->sizeHint());
-    ui->VaultListWidget->setItemWidget(item, button);
-
-    connect(button, &QPushButton::clicked, this, [button, this](){
-        OpenVault(button->getVault());
-    });
-}
-
-void VaultEntryWindow::RemoveVault(int index)
-{
-    QListWidgetItem* target = ui->VaultListWidget->item(index);
-    ui->VaultListWidget->removeItemWidget(target);
-}
-
 void VaultEntryWindow::OpenVault(Vault *vault)
 {
-    qDebug() << "opening vault";
+    qDebug() << "opening vault : " << vault->directory.path();
+    QMainWindow* window = new VaultViewWindow(vault);
+    childWindows.append(window);
+    connect(window, &QMainWindow::destroyed, this, [this, window](){
+        for (int i = 0; i < childWindows.size(); i++){
+            if (window == childWindows[i]){
+                childWindows.remove(i, 1);
+            }
+        }
+        if (childWindows.empty() && !this->isVisible()){
+            this->show();
+            this->close();
+        }
+    });
+    window->show();
+    this->hide();
 }
 
-void VaultEntryWindow::CreateNewVault()
+void VaultEntryWindow::StartCreateNewVault()
 {
     vaultCreateNew->init();
     ui->stackedWidget->setCurrentWidget(vaultCreateNew);
@@ -90,12 +78,14 @@ void VaultEntryWindow::OpenFolder()
     if (dir.isEmpty() || !QDir(dir).exists()){
         return;
     }
+    VaultManager::GetInstance().CreateVault(false, dir, "");
 }
 
 void VaultEntryWindow::closeEvent(QCloseEvent *event)
 {
     qDebug() << "closing Window";
     if (childWindows.size()){
+        qDebug() << "hidnig";
         event->ignore();
         this->hide();
     }

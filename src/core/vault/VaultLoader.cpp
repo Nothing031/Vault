@@ -25,12 +25,13 @@ void VaultLoader::LoadVault(Vault* vault)
         QJsonDocument jDoc = QJsonDocument::fromJson(data);
         QJsonObject jObj = jDoc.object();
 
+        QJsonObject excludeObj = jObj["ExcludeSettings"].toObject();
+        QJsonObject aesObj = jObj["EncryptionSettings"].toObject();
+        vault->appVersion = jObj["AppVersion"].toString("UNKNOWN");
+        vault->formatVersion = jObj["FormatVersion"].toString("UNKNOWN");
+        vault->aesSettings = AES256Settings::FromJsonObject(aesObj);
+        vault->excludeChecker = ExcludeChecker::FromJsonObject(excludeObj);
 
-
-        vault->header.version   = jObj["version"].toString(FORMAT_VERSION).toUtf8();
-        vault->header.salt      = QByteArray::fromBase64(jObj["globalSalt"].toString("").toUtf8());
-        vault->header.hmac      = QByteArray::fromBase64(jObj["hmac"].toString("").toUtf8());
-        vault->header.iteration = jObj["iteration"].toInt(ITERATION);
         lastError = LoadSucceeded;
         emit onEvent(LoadSucceeded);
         qDebug() << "Load Succeeded";
@@ -50,10 +51,11 @@ void VaultLoader::SaveVault(Vault* vault)
 
     if (file.open(QFile::WriteOnly | QFile::Truncate)){
         QJsonObject jObj;
-        jObj["version"]     = QString(vault->header.version);
-        jObj["globalSalt"]  = QString(vault->header.salt.toBase64());
-        jObj["hmac"]        = QString(vault->header.hmac.toBase64());
-        jObj["iteration"]   = vault->header.iteration;
+        jObj["AppVersion"] = vault->appVersion;
+        jObj["FormatVersion"] = vault->formatVersion;
+        jObj["EncryptionSettings"] = vault->aesSettings.ToJsonObject();
+        jObj["ExcludeSettings"] = vault->excludeChecker.ToJsonObject();
+
         QJsonDocument jDoc(jObj);
         file.write(jDoc.toJson());
         file.close();

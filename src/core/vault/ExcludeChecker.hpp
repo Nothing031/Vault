@@ -11,23 +11,23 @@ public:
 
     QJsonObject ToJsonObject();
 
-    bool GetEnabled() const;
+    bool Enabled() const;
     void SetEnabled(bool newEnabled);
-    QStringList GetExactlySameAs() const;
+    QStringList ExactlySameAs() const;
     void SetExactlySameAs(const QStringList &newExactlySameAs);
-    QStringList GetIncludes() const;
+    QStringList Includes() const;
     void SetIncludes(const QStringList &newIncludes);
-    QStringList GetStartsWith() const;
+    QStringList StartsWith() const;
     void SetStartsWith(const QStringList &newStartsWith);
-    QStringList GetEndsWith() const;
+    QStringList EndsWith() const;
     void SetEndsWith(const QStringList &newEndsWith);
 
 private:
     bool enabled;
-    QVector<std::wstring> ExactlySameAs;
-    QVector<std::wstring> Includes;
-    QVector<std::wstring> StartsWith;
-    QVector<std::wstring> EndsWith;
+    QVector<std::wstring> exactlySameAs;
+    QVector<std::wstring> includes;
+    QVector<std::wstring> startsWith;
+    QVector<std::wstring> endsWith;
 };
 
 

@@ -130,7 +130,7 @@ QListWidget{
      </layout>
     </item>
     <item row="0" column="0" rowspan="3">
-     <widget class="QListWidget" name="VaultListWidget">
+     <widget class="VaultListWidget" name="vaultListWidget">
       <property name="focusPolicy">
        <enum>Qt::FocusPolicy::NoFocus</enum>
       </property>
@@ -159,6 +159,13 @@ QListWidget{
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>VaultListWidget</class>
+   <extends>QListWidget</extends>
+   <header>src/widgets/VaultListWidget.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources>
   <include location="../../asset/resource.qrc"/>
  </resources>

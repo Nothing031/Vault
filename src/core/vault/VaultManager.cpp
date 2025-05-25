@@ -29,29 +29,30 @@ Vault* VaultManager::GetVault(int index)
         return nullptr;
 }
 
-void VaultManager::DetachVault(int index)
+
+void VaultManager::DetachVault(Vault* vault)
 {
-    if (0 > index || index >= vaults.size())
-        throw std::exception("out of range");
-
-    Vault* vault = vaults[index];
-    vaults.remove(index, 1);
-    delete vault;
-
-    emit onDetachVault(index);
+    for (int i = 0; i < vaults.size(); i++){
+        if (vaults[i] == vault){
+            vaults.remove(i, 1);
+            delete vault;
+            emit onVaultRemoved(vault);
+        }
+    }
 }
 
 void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const QString &password)
 {
     Vault* vault = new Vault;
     if (aesEnabled){
-        vault->AES256Enabled = true;
-        vault->header.salt.resize(FileInfo::Sizes::salt);
-        RAND_bytes((unsigned char*)vault->header.salt.data(), FileInfo::Sizes::salt);
-        QByteArray key = Cryptography::GenerateKey(password, vault->header.salt, vault->header.iteration);
-        vault->header.hmac = key.mid(0, 32);
+        vault->aesSettings.SetEnabled(true);
+        QByteArray salt(FileInfo::Sizes::salt, 0);
+        RAND_bytes((unsigned char*)salt.data(), FileInfo::Sizes::salt);
+        vault->aesSettings.SetGlobalSalt(salt);
+        QByteArray key = Cryptography::GenerateKey(password, vault->aesSettings.GlobalSalt(), vault->aesSettings.Iteration());
+        vault->aesSettings.SetHmac(key.mid(0, 32));
     }else{
-        vault->AES256Enabled = false;
+        vault->aesSettings.SetEnabled(false);
     }
 
     // create directory
@@ -69,7 +70,7 @@ void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const
     }
 
     vaults.append(vault);
-    emit onAttachVault(vault);
+    emit onVaultAdded(vault);
 }
 
 void VaultManager::LoadData()
@@ -97,7 +98,7 @@ void VaultManager::LoadData()
         }
         else{
             vaults.append(vault);
-            emit onAttachVault(vault);
+            emit onVaultAdded(vault);
         }
     }
 }

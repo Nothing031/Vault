@@ -21,10 +21,7 @@ CryptoEngine::CryptoEngine(QWidget *parent) : QObject(parent){
 
 };
 
-void CryptoEngine::EncryptFile(FileInfo *file, QByteArray &key, const FileInfo::FileHeader &header, Error& error){
-    file->SetHeader(header.version, header.salt, header.iteration, header.hmac);
-    file->ResetIv();
-
+void CryptoEngine::EncryptFile(FileInfo *file, QByteArray &key, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -140,10 +137,16 @@ void CryptoEngine::EncryptVault(Vault* vault){
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
 
+    QByteArray              version = vault->aesSettings.FormatVersion();
+    QByteArray              salt = vault->aesSettings.GlobalSalt();
+    int                     iteration = vault->aesSettings.Iteration();
+    QByteArray              hmac = vault->aesSettings.Hmac();
+    QByteArray              aesKey = vault->aesSettings.AesKey();
+
     // pre process file
     for (auto& file : vault->files){
         if (file->state == FileInfo::PlainData){
-            file->SetHeader(vault->header.version, vault->header.salt, vault->header.iteration, vault->header.hmac);
+            file->SetHeader(version, salt, iteration, hmac);
             file->ResetIv();
             fileQueue.enqueue(file);
         }
@@ -167,7 +170,7 @@ void CryptoEngine::EncryptVault(Vault* vault){
 
                 // Encrypt
                 Error e;
-                EncryptFile(file, vault->aesKey, vault->header, e);
+                EncryptFile(file, aesKey, e);
                 if (e.code() == Error::NO_ERROR){
                     ++success;
                 }else{
@@ -231,6 +234,9 @@ void CryptoEngine::DecryptVault(Vault* vault){
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
 
+    QByteArray              hmac = vault->aesSettings.Hmac();
+    QByteArray              aesKey = vault->aesSettings.AesKey();
+
     // pre process file
     for (auto& file : vault->files){
         if (file->state == FileInfo::CipherData){
@@ -256,7 +262,7 @@ void CryptoEngine::DecryptVault(Vault* vault){
 
                 // Decrypt
                 Error e;
-                DecryptFile(file, vault->aesKey, vault->header.hmac, e);
+                DecryptFile(file, aesKey, hmac, e);
                 if (e.code() == Error::NO_ERROR){
                     ++success;
                 }else{

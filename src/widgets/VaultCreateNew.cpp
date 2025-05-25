@@ -7,11 +7,10 @@
 #include <QApplication>
 #include <QFileDialog>
 #include <QThread>
+#include <QRegularExpressionValidator>
+#include <QRegularExpression>
 
-
-#include "src/core/vault/Vault.hpp"
 #include "src/core/vault/VaultManager.hpp"
-
 
 QString VaultCreateNew::m_styleRed      = R"(
     QWidget{ color: rgb(255, 55, 55); }
@@ -38,6 +37,14 @@ VaultCreateNew::VaultCreateNew(QWidget *parent)
 {
     ui->setupUi(this);
 
+    QRegularExpression pathReg(R"([^\\/:*?\"<>|]*)");
+    QRegularExpression passwordReg(R"(^[A-Za-z0-9!@#$%^&*()_+\-=\[\]{};':\"\\|,.<>\\/?]*$)");
+    QRegularExpressionValidator *pathValidator = new QRegularExpressionValidator(pathReg, this);
+    QRegularExpressionValidator *passwordValidator = new QRegularExpressionValidator(passwordReg, this);
+
+    ui->NameLineEdit->setValidator(pathValidator);
+    ui->PasswordLineEdit->setValidator(passwordValidator);
+    ui->ConfirmLineEdit->setValidator(passwordValidator);
 
     connect(ui->NameLineEdit, &QLineEdit::textEdited, this, &VaultCreateNew::UpdatePathCondition);
     connect(ui->PasswordLineEdit, &QLineEdit::textEdited, this, &VaultCreateNew::UpdatePasswordCondition);
@@ -76,7 +83,7 @@ void VaultCreateNew::init()
     ui->EncryptionCheckbox->setEnabled(true);
     ui->PasswordLineEdit->setEnabled(true);
     ui->ConfirmLineEdit->setEnabled(true);
-    ui->CreateButton->setEnabled(true);
+    ui->CreateButton->setEnabled(false);
 
     // state
     ui->EncryptionCheckbox->setChecked(true);
@@ -227,10 +234,11 @@ void VaultCreateNew::CreateVault()
 
     QString password = ui->PasswordLineEdit->text();
     QString dir  = rootDirectory + "/" + ui->NameLineEdit->text();
+    bool    enableEncryption = isAES256EncryptionEnabled;
 
-    QThread *thread = QThread::create([password, dir](){
+    QThread *thread = QThread::create([enableEncryption, password, dir](){
         VaultManager& manager = VaultManager::GetInstance();
-        manager.CreateVault(dir, password);
+        manager.CreateVault(enableEncryption, dir, password);
     });
     connect(thread, &QThread::finished, this, &VaultCreateNew::Back);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);

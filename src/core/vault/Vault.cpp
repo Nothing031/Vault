@@ -19,10 +19,10 @@ Vault::~Vault()
 
 bool Vault::CheckPassword(const QString& password)
 {
-    QByteArray key = Cryptography::GenerateKey(password, header.salt, header.iteration);
+    QByteArray key = Cryptography::GenerateKey(password, aesSettings.GlobalSalt(), aesSettings.Iteration());
     QByteArray hmac = key.mid(0, 32);
-    if (hmac == header.hmac){
-        aesKey = key.mid(32, 32);
+    if (hmac == aesSettings.Hmac()){
+        aesSettings.SetHmac(key.mid(32, 32));
         return true;
     }else{
         return false;
@@ -53,9 +53,9 @@ void Vault::LoadFiles()
                 QFileInfo qinfo = QFileInfo(it->path());
                 FileInfo* file = new FileInfo;
 
-                file->path.displayPath = qinfo.fileName();
                 file->path.absolutepath = qinfo.absoluteFilePath();
                 file->path.relativePath = directory.relativeFilePath(qinfo.absoluteFilePath());
+                file->path.displayPath = file->path.relativePath;
                 file->state = (qinfo.fileName().endsWith(EXTENSION, Qt::CaseInsensitive) ? FileInfo::CipherData : FileInfo::PlainData);
                 if (file->state == FileInfo::CipherData){
                     file->path.displayPath = file->path.displayPath.left(file->path.displayPath.size() - 4);

@@ -9,6 +9,7 @@
 #define FORMAT_VERSION "0002"
 #define SIGNATURE "VAULT BY NOTHING031"
 #define ITERATION 100000
+#define EXTENSION ".enc"
 
 class FileInfo{
 public:

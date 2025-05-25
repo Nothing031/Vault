@@ -23,7 +23,7 @@ public:
     };
 
 private:
-    void EncryptFile(FileInfo* file, QByteArray& key, const FileInfo::FileHeader& header, Error& error);
+    void EncryptFile(FileInfo* file, QByteArray& key, Error& error);
     void DecryptFile(FileInfo* file, QByteArray& key, const QByteArray& hmac, Error& error);
 
 signals:

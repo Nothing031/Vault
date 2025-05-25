@@ -21,7 +21,7 @@ The fist 32 bytes of the key are for verification and the last 32 bytes are used
 | Field          | offset |  Size (bytes) | Description            |
 |----------------|--------|---------------|------------------------|
 | Signature      | 0x00   | 20            | Format signature       |
-| Version        | 0x16   | 4             | Format version info    |
+| Version        | 0x16   | 4             | Format version         |
 | Salt           | 0x1A   | 32            | Global salt for each vault |
 | Iteration      | 0x3A   | 4             | PBKDF2 iteration count |
 | HMAC           | 0x3E   | 32            | HMAC check vaule |

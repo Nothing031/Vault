@@ -20,14 +20,15 @@ public:
     void LoadData();
     void SaveData();
 
+public slots:
     Vault* GetVault(int index);
 
-    void DetachVault(int index);
     void CreateVault(const bool& aesEnabled, const QString& dir, const QString& password);
+    void DetachVault(Vault *vault);
 
 signals:
-    void onAttachVault(Vault* pVault);
-    void onDetachVault(int index);
+    void onVaultAdded(Vault* pVault);
+    void onVaultRemoved(Vault* vault);
 
 private:
     VaultManager();

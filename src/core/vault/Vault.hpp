@@ -14,13 +14,13 @@
 #include "src/core/FileInfo.hpp"
 #include "AES256Settings.hpp"
 #include "ExcludeChecker.hpp"
-
-#define EXTENSION ".enc"
+#include "src/Manifest.hpp"
 
 class Vault
 {
 public:
-    QString             appVersion;
+    QString             appVersion = APPVERSION;
+    QString             formatVersion = FORMATVERSION;
 
     QDir                directory;
     QMutex              mutex;

@@ -16,10 +16,10 @@ ExcludeChecker ExcludeChecker::FromJsonObject(const QJsonObject& object)
 
     ExcludeChecker checker;
     checker.enabled = object["ExcludeEnabled"].toBool(false);
-    checker.ExactlySameAs = ParseArray(object["ExcludeExactlySameAs"].toArray());
-    checker.Includes = ParseArray(object["ExcludeIncludes"].toArray());
-    checker.StartsWith = ParseArray(object["ExcludeStartsWith"].toArray());
-    checker.EndsWith = ParseArray(object["ExcludeEndsWith"].toArray());
+    checker.exactlySameAs = ParseArray(object["ExcludeExactlySameAs"].toArray());
+    checker.includes = ParseArray(object["ExcludeIncludes"].toArray());
+    checker.startsWith = ParseArray(object["ExcludeStartsWith"].toArray());
+    checker.endsWith = ParseArray(object["ExcludeEndsWith"].toArray());
     return checker;
 }
 
@@ -35,73 +35,74 @@ QJsonObject ExcludeChecker::ToJsonObject()
     };
 
     QJsonObject object;
-    object["ExcludeExactlySameAs"] = StringListToArray(ExactlySameAs);
-    object["ExcludeIncludes"] = StringListToArray(Includes);
-    object["ExcludeStartsWith"] = StringListToArray(StartsWith);
-    object["ExcludeEndsWith"] = StringListToArray(EndsWith);
+    object["ExcludeExactlySameAs"] = StringListToArray(exactlySameAs);
+    object["ExcludeIncludes"] = StringListToArray(includes);
+    object["ExcludeStartsWith"] = StringListToArray(startsWith);
+    object["ExcludeEndsWith"] = StringListToArray(endsWith);
     return object;
 }
 
-bool ExcludeChecker::GetEnabled() const { return enabled; }
+bool ExcludeChecker::Enabled() const { return enabled; }
 void ExcludeChecker::SetEnabled(bool newEnabled) { enabled = newEnabled; }
-QStringList ExcludeChecker::GetExactlySameAs() const {
+QStringList ExcludeChecker::ExactlySameAs() const {
     QStringList list;
-    list.reserve(ExactlySameAs.size());
-    for (auto& str : std::as_const(ExactlySameAs)){
+    list.reserve(exactlySameAs.size());
+    for (auto& str : std::as_const(exactlySameAs)){
         list.append(QString::fromStdWString(str));
     }
+    return list;
 }
 void ExcludeChecker::SetExactlySameAs(const QStringList &newExactlySameAs)
 {
-    ExactlySameAs.clear();
-    ExactlySameAs.reserve(newExactlySameAs.size());
+    exactlySameAs.clear();
+    exactlySameAs.reserve(newExactlySameAs.size());
     for (auto& str : std::as_const(newExactlySameAs)){
-        ExactlySameAs.append(str.toStdWString());
+        exactlySameAs.append(str.toStdWString());
     }
 }
-QStringList ExcludeChecker::GetIncludes() const {
+QStringList ExcludeChecker::Includes() const {
     QStringList list;
-    list.reserve(Includes.size());
-    for (const auto& str : std::as_const(Includes)) {
+    list.reserve(includes.size());
+    for (const auto& str : std::as_const(includes)) {
         list.append(QString::fromStdWString(str));
     }
     return list;
 }
 void ExcludeChecker::SetIncludes(const QStringList &newIncludes) {
-    Includes.clear();
-    Includes.reserve(newIncludes.size());
+    includes.clear();
+    includes.reserve(newIncludes.size());
     for (const auto& str : std::as_const(newIncludes)) {
-        Includes.append(str.toStdWString());
+        includes.append(str.toStdWString());
     }
 }
-QStringList ExcludeChecker::GetStartsWith() const {
+QStringList ExcludeChecker::StartsWith() const {
     QStringList list;
-    list.reserve(StartsWith.size());
-    for (const auto& str : std::as_const(StartsWith)) {
+    list.reserve(startsWith.size());
+    for (const auto& str : std::as_const(startsWith)) {
         list.append(QString::fromStdWString(str));
     }
     return list;
 }
 void ExcludeChecker::SetStartsWith(const QStringList &newStartsWith) {
-    StartsWith.clear();
-    StartsWith.reserve(newStartsWith.size());
+    startsWith.clear();
+    startsWith.reserve(newStartsWith.size());
     for (const auto& str : std::as_const(newStartsWith)) {
-        StartsWith.append(str.toStdWString());
+        startsWith.append(str.toStdWString());
     }
 }
-QStringList ExcludeChecker::GetEndsWith() const {
+QStringList ExcludeChecker::EndsWith() const {
     QStringList list;
-    list.reserve(EndsWith.size());
-    for (const auto& str : std::as_const(EndsWith)) {
+    list.reserve(endsWith.size());
+    for (const auto& str : std::as_const(endsWith)) {
         list.append(QString::fromStdWString(str));
     }
     return list;
 }
 void ExcludeChecker::SetEndsWith(const QStringList &newEndsWith) {
-    EndsWith.clear();
-    EndsWith.reserve(newEndsWith.size());
+    endsWith.clear();
+    endsWith.reserve(newEndsWith.size());
     for (const auto& str : std::as_const(newEndsWith)) {
-        EndsWith.append(str.toStdWString());
+        endsWith.append(str.toStdWString());
     }
 }
 
