@@ -1,6 +1,7 @@
 #include "AES256Settings.hpp"
 
 #include "src/core/FileInfo.hpp"
+#include "src/core/cryptography/Cryptography.hpp"
 
 AES256Settings AES256Settings::FromJsonObject(const QJsonObject &object)
 {
@@ -42,8 +43,20 @@ void AES256Settings::SetIteration(int newIteration) { iteration = newIteration; 
 int AES256Settings::Iteration() const { return iteration; }
 void AES256Settings::SetHmac(const QByteArray &newHmac) { hmac = newHmac; }
 bool AES256Settings::IsLocked() const { return locked; }
-void AES256Settings::Unlock() { this->locked = false; }
-void AES256Settings::Lock() { this->locked = true; }
+bool AES256Settings::TryUnlock(const QString& input) {
+    QByteArray genKey = Cryptography::GenerateKey(input, globalSalt, iteration);
+    if (hmac == genKey.mid(0, 32)){
+        aesKey = genKey.mid(32, 32);
+        locked = false;
+        return true;
+    }else{
+        return false;
+    }
+}
+void AES256Settings::Lock() {
+    this->locked = true;
+    aesKey.clear();
+}
 QByteArray AES256Settings::AesKey() const { return aesKey; }
 void AES256Settings::SetAesKey(const QByteArray &newAesKey) { aesKey = newAesKey; }
 QByteArray AES256Settings::Hmac() const { return hmac; }

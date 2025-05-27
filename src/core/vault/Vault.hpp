@@ -11,7 +11,7 @@
 #include <QDirListing>
 #include <QMutex>
 #include <QDirIterator>
-#include "src/core/FileInfo.hpp"
+#include "src/core/fileinfo/FileInfo.hpp"
 #include "AES256Settings.hpp"
 #include "ExcludeChecker.hpp"
 #include "src/Manifest.hpp"
@@ -19,6 +19,7 @@
 class Vault
 {
 public:
+    void                *owner = nullptr;
     QString             appVersion = APPVERSION;
     QString             formatVersion = FORMATVERSION;
 
@@ -27,12 +28,11 @@ public:
     QVector<FileInfo*>  files;
 
     ExcludeChecker      excludeChecker;
-    AES256Settings      aesSettings;
+    AES256Settings      aes;
 
     Vault();
     ~Vault();
 
-    bool CheckPassword(const QString& password);
     void LoadFiles();
 };
 

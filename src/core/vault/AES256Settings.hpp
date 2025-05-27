@@ -22,7 +22,7 @@ public:
     QByteArray Hmac() const;
     void SetHmac(const QByteArray &newHmac);
     bool IsLocked() const;
-    void Unlock();
+    bool TryUnlock(const QString& input);
     void Lock();
     QByteArray AesKey() const;
     void SetAesKey(const QByteArray &newAesKey);

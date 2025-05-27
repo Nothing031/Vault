@@ -17,18 +17,6 @@ Vault::~Vault()
     for (auto& file : files){ delete file; }
 }
 
-bool Vault::CheckPassword(const QString& password)
-{
-    QByteArray key = Cryptography::GenerateKey(password, aesSettings.GlobalSalt(), aesSettings.Iteration());
-    QByteArray hmac = key.mid(0, 32);
-    if (hmac == aesSettings.Hmac()){
-        aesSettings.SetHmac(key.mid(32, 32));
-        return true;
-    }else{
-        return false;
-    }
-}
-
 void Vault::LoadFiles()
 {
     QElapsedTimer timer;

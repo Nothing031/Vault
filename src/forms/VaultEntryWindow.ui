@@ -14,11 +14,8 @@
    <string>MainWindow</string>
   </property>
   <property name="styleSheet">
-   <string notr="true">QMainWindow{
+   <string notr="true">QWidget{
 	background: rgb(30, 30, 30);
-}
-
-QWidget{
 	color: rgb(244, 244, 244);
 	font: 12pt &quot;Arial&quot;;
 }
@@ -84,66 +81,6 @@ QListWidget{
      <number>0</number>
     </property>
     <item row="1" column="3">
-     <layout class="QGridLayout" name="gridLayout_3">
-      <property name="leftMargin">
-       <number>4</number>
-      </property>
-      <property name="topMargin">
-       <number>4</number>
-      </property>
-      <property name="rightMargin">
-       <number>4</number>
-      </property>
-      <property name="bottomMargin">
-       <number>4</number>
-      </property>
-      <item row="0" column="1" alignment="Qt::AlignmentFlag::AlignRight">
-       <widget class="QPushButton" name="CloseButton">
-        <property name="text">
-         <string/>
-        </property>
-        <property name="icon">
-         <iconset resource="../../asset/resource.qrc">
-          <normaloff>:/icons/close.png</normaloff>:/icons/close.png</iconset>
-        </property>
-        <property name="iconSize">
-         <size>
-          <width>16</width>
-          <height>16</height>
-         </size>
-        </property>
-       </widget>
-      </item>
-      <item row="0" column="0">
-       <spacer name="horizontalSpacer">
-        <property name="orientation">
-         <enum>Qt::Orientation::Horizontal</enum>
-        </property>
-        <property name="sizeHint" stdset="0">
-         <size>
-          <width>40</width>
-          <height>20</height>
-         </size>
-        </property>
-       </spacer>
-      </item>
-     </layout>
-    </item>
-    <item row="0" column="0" rowspan="3">
-     <widget class="VaultListWidget" name="vaultListWidget">
-      <property name="focusPolicy">
-       <enum>Qt::FocusPolicy::NoFocus</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="0" column="1" rowspan="3">
-     <widget class="Line" name="line">
-      <property name="orientation">
-       <enum>Qt::Orientation::Vertical</enum>
-      </property>
-     </widget>
-    </item>
-    <item row="2" column="3">
      <widget class="QStackedWidget" name="stackedWidget">
       <property name="sizePolicy">
        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -153,6 +90,20 @@ QListWidget{
       </property>
       <property name="currentIndex">
        <number>-1</number>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="0" rowspan="2">
+     <widget class="VaultListWidget" name="vaultListWidget">
+      <property name="focusPolicy">
+       <enum>Qt::FocusPolicy::NoFocus</enum>
+      </property>
+     </widget>
+    </item>
+    <item row="0" column="1" rowspan="2">
+     <widget class="Line" name="line">
+      <property name="orientation">
+       <enum>Qt::Orientation::Vertical</enum>
       </property>
      </widget>
     </item>
@@ -166,8 +117,6 @@ QListWidget{
    <header>src/widgets/VaultListWidget.hpp</header>
   </customwidget>
  </customwidgets>
- <resources>
-  <include location="../../asset/resource.qrc"/>
- </resources>
+ <resources/>
  <connections/>
 </ui>

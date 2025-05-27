@@ -7,6 +7,13 @@
 #include <QListWidgetItem>
 #include <QAction>
 #include <QFileDialog>
+#include <QTimer>
+
+#pragma comment(lib,"dwmapi.lib")
+#pragma comment(lib, "user32.lib")
+#include <dwmapi.h>
+#include <Windows.h>
+
 #include "src/core/vault/VaultManager.hpp"
 #include "VaultViewWindow.hpp"
 
@@ -17,22 +24,30 @@ VaultEntryWindow::VaultEntryWindow(QWidget *parent)
     vaultCreateNew(new VaultCreateNew(this))
 {
     ui->setupUi(this);
-    setWindowFlags(Qt::FramelessWindowHint);
-    this->resize(900, 600);
+    resize(900, 550);
+    setWindowTitle("Vault");
 
-    VaultManager& manager = VaultManager::GetInstance();
+    HWND hWnd = (HWND)winId();
+    // disable maximize button
+    LONG style = GetWindowLong(hWnd, GWL_STYLE);
+    style &= ~WS_MAXIMIZEBOX;
+    style &= ~WS_THICKFRAME; // unresizable
+    SetWindowLong(hWnd, GWL_STYLE, style);
+    // dark caption
+    BOOL USE_DARK_MODE = true;
+    DwmSetWindowAttribute(hWnd, DWMWA_USE_IMMERSIVE_DARK_MODE, &USE_DARK_MODE, sizeof(USE_DARK_MODE));
+    // redraw
+    SetWindowPos(hWnd, nullptr, 0, 0, 0, 0, SWP_NOMOVE | SWP_NOSIZE | SWP_NOZORDER | SWP_FRAMECHANGED);
 
     ui->stackedWidget->addWidget(vaultTitle);
     ui->stackedWidget->addWidget(vaultCreateNew);
     ui->stackedWidget->setCurrentIndex(0);
 
-    connect(ui->CloseButton, &QPushButton::clicked, this, &VaultEntryWindow::close);
+    VaultManager& manager = VaultManager::GetInstance();
 
     connect(vaultTitle, &VaultTitle::createButtonPressed, this, &VaultEntryWindow::StartCreateNewVault);
     connect(vaultTitle, &VaultTitle::openButtonPressed, this, &VaultEntryWindow::OpenFolder);
-
     connect(vaultCreateNew, &VaultCreateNew::Back, this, [this](){ ui->stackedWidget->setCurrentWidget(vaultTitle); });
-
     connect(qobject_cast<VaultListWidget*>(ui->vaultListWidget), &VaultListWidget::requestOpenVault, this, &VaultEntryWindow::OpenVault);
 
 
@@ -47,12 +62,22 @@ VaultEntryWindow::~VaultEntryWindow()
 
 void VaultEntryWindow::OpenVault(Vault *vault)
 {
+    // check opened window
+    for (auto& wndVaultPair : std::as_const(childWindows)){
+        if (vault == wndVaultPair.second) {
+            wndVaultPair.first->raise();
+           return;
+        }
+    }
+
     qDebug() << "opening vault : " << vault->directory.path();
-    QMainWindow* window = new VaultViewWindow(vault);
-    childWindows.append(window);
-    connect(window, &QMainWindow::destroyed, this, [this, window](){
+    VaultViewWindow* window = new VaultViewWindow(vault);
+    childWindows.append(QPair<QMainWindow*, Vault*>(window, vault));
+    connect(window, &VaultViewWindow::requestShowEntryWindow, this, &VaultEntryWindow::show);
+    connect(window, &VaultViewWindow::requestShowEntryWindow, this, &VaultEntryWindow::raise);
+    connect(window, &VaultViewWindow::destroyed, this, [this, window](){
         for (int i = 0; i < childWindows.size(); i++){
-            if (window == childWindows[i]){
+            if (window == childWindows[i].first){
                 childWindows.remove(i, 1);
             }
         }

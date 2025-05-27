@@ -23,17 +23,19 @@ public:
     };
 
 private:
-    void EncryptFile(FileInfo* file, QByteArray& key, Error& error);
-    void DecryptFile(FileInfo* file, QByteArray& key, const QByteArray& hmac, Error& error);
+    void AES256EncryptFile(FileInfo* file, QByteArray& key, Error& error);
+    void AES256DecryptFile(FileInfo* file, QByteArray& key, const QByteArray& hmac, Error& error);
 
 signals:
     void onEvent(Event event, QVariant param);
 
 public slots:
-    void EncryptVault(Vault* vault);
-    void DecryptVault(Vault* vault);
+    void AES256EncryptFiles(QQueue<FileInfo*> files);
+    void AES256DecryptFiles(QQueue<FileInfo*> files);
     void SuspendProcess();
 
+    void EncryptVault(Vault* vault);
+    void DecryptVault(Vault* vault);
 private:
     bool run;
 };

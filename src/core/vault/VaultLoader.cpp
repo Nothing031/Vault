@@ -29,7 +29,7 @@ void VaultLoader::LoadVault(Vault* vault)
         QJsonObject aesObj = jObj["EncryptionSettings"].toObject();
         vault->appVersion = jObj["AppVersion"].toString("UNKNOWN");
         vault->formatVersion = jObj["FormatVersion"].toString("UNKNOWN");
-        vault->aesSettings = AES256Settings::FromJsonObject(aesObj);
+        vault->aes = AES256Settings::FromJsonObject(aesObj);
         vault->excludeChecker = ExcludeChecker::FromJsonObject(excludeObj);
 
         lastError = LoadSucceeded;
@@ -53,7 +53,7 @@ void VaultLoader::SaveVault(Vault* vault)
         QJsonObject jObj;
         jObj["AppVersion"] = vault->appVersion;
         jObj["FormatVersion"] = vault->formatVersion;
-        jObj["EncryptionSettings"] = vault->aesSettings.ToJsonObject();
+        jObj["EncryptionSettings"] = vault->aes.ToJsonObject();
         jObj["ExcludeSettings"] = vault->excludeChecker.ToJsonObject();
 
         QJsonDocument jDoc(jObj);

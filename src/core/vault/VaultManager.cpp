@@ -32,6 +32,11 @@ Vault* VaultManager::GetVault(int index)
 
 void VaultManager::DetachVault(Vault* vault)
 {
+    if (vault->owner != this){
+        qDebug() << "owner has been changed Failed to delete";
+        return;
+    }
+
     for (int i = 0; i < vaults.size(); i++){
         if (vaults[i] == vault){
             vaults.remove(i, 1);
@@ -44,15 +49,16 @@ void VaultManager::DetachVault(Vault* vault)
 void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const QString &password)
 {
     Vault* vault = new Vault;
+    vault->owner = this;
     if (aesEnabled){
-        vault->aesSettings.SetEnabled(true);
-        QByteArray salt(FileInfo::Sizes::salt, 0);
-        RAND_bytes((unsigned char*)salt.data(), FileInfo::Sizes::salt);
-        vault->aesSettings.SetGlobalSalt(salt);
-        QByteArray key = Cryptography::GenerateKey(password, vault->aesSettings.GlobalSalt(), vault->aesSettings.Iteration());
-        vault->aesSettings.SetHmac(key.mid(0, 32));
+        vault->aes.SetEnabled(true);
+        QByteArray salt(FileInfoHeader::Sizes::salt, 0);
+        RAND_bytes((unsigned char*)salt.data(), FileInfoHeader::Sizes::salt);
+        vault->aes.SetGlobalSalt(salt);
+        QByteArray key = Cryptography::GenerateKey(password, vault->aes.GlobalSalt(), vault->aes.Iteration());
+        vault->aes.SetHmac(key.mid(0, 32));
     }else{
-        vault->aesSettings.SetEnabled(false);
+        vault->aes.SetEnabled(false);
     }
 
     // create directory

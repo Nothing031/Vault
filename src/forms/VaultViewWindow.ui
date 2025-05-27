@@ -26,7 +26,7 @@
 
 QWidget{
 	background: rgb(30, 30, 30);
-	color: rgb(244, 244, 244);
+	color: rgb(240, 240, 240);
 	font: 12pt &quot;Arial&quot;;
 }QWidget::disabled{
 	color: rgb(150, 150, 150);
@@ -138,7 +138,7 @@ QScrollBar::sub-page {
       </property>
       <property name="maximumSize">
        <size>
-        <width>300</width>
+        <width>250</width>
         <height>16777215</height>
        </size>
       </property>
@@ -171,14 +171,14 @@ QProgressBar{
         <number>10</number>
        </property>
        <item>
-        <widget class="QPushButton" name="pushButton">
+        <widget class="QPushButton" name="openPathButton">
          <property name="text">
-          <string>Open Folder</string>
+          <string>Open path</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="pushButton_2">
+        <widget class="QPushButton" name="settingsButton">
          <property name="text">
           <string>Settings</string>
          </property>
@@ -205,14 +205,14 @@ QProgressBar{
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="UnlockButton">
+        <widget class="QPushButton" name="unlockButton">
          <property name="text">
           <string>Unlock</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="EncryptButton">
+        <widget class="QPushButton" name="encryptButton">
          <property name="enabled">
           <bool>true</bool>
          </property>
@@ -222,7 +222,7 @@ QProgressBar{
         </widget>
        </item>
        <item>
-        <widget class="QPushButton" name="DecryptButton">
+        <widget class="QPushButton" name="decryptButton">
          <property name="text">
           <string>Decrypt</string>
          </property>
@@ -242,14 +242,14 @@ QProgressBar{
         </spacer>
        </item>
        <item>
-        <widget class="QPushButton" name="SuspendButton">
+        <widget class="QPushButton" name="suspendButton">
          <property name="text">
           <string>Suspend</string>
          </property>
         </widget>
        </item>
        <item>
-        <widget class="QProgressBar" name="ProgressBar">
+        <widget class="QProgressBar" name="progressBar">
          <property name="value">
           <number>24</number>
          </property>
@@ -274,7 +274,7 @@ QProgressBar{
      </widget>
     </item>
     <item row="4" column="2">
-     <widget class="QTextBrowser" name="TerminalTextBrowser">
+     <widget class="QTextBrowser" name="terminalTextBrowser">
       <property name="styleSheet">
        <string notr="true">max-height: 100px;
 padding: 10px 10px;
@@ -304,7 +304,7 @@ li.checked::marker { content: &quot;\2612&quot;; }
      </widget>
     </item>
     <item row="2" column="2">
-     <widget class="QListView" name="FileListView">
+     <widget class="FileListView" name="fileListView">
       <property name="cursor" stdset="0">
        <cursorShape>ArrowCursor</cursorShape>
       </property>
@@ -337,20 +337,25 @@ QListView::item:selected:!active {
        <string notr="true">QWidget{
 	background: rgb(40, 40, 40);
 }
-
-#TitleLabel{
+QPushButton{
+	min-width: 0px;
+	font: 700 18pt &quot;Arial&quot;;
+	border: 0px;
+}QPushButton:hover{
+	color: rgb(44, 222, 133);
+}QPushButton::pressed{
+	color: rgb(240, 240, 240);
+}
+#titleLabel{
 	font: 700 18pt &quot;Arial&quot;;
 }
-#SubtitleLabel{
+#subtitleLabel{
 	font: 10pt;
 	color: rgb(200, 200, 200);
 }
 </string>
       </property>
-      <layout class="QVBoxLayout" name="verticalLayout">
-       <property name="spacing">
-        <number>4</number>
-       </property>
+      <layout class="QGridLayout" name="gridLayout_2">
        <property name="leftMargin">
         <number>0</number>
        </property>
@@ -363,20 +368,52 @@ QListView::item:selected:!active {
        <property name="bottomMargin">
         <number>10</number>
        </property>
-       <item>
-        <widget class="QLabel" name="TitleLabel">
-         <property name="text">
-          <string>Password</string>
+       <property name="spacing">
+        <number>4</number>
+       </property>
+       <item row="0" column="1">
+        <widget class="QPushButton" name="titleButton">
+         <property name="minimumSize">
+          <size>
+           <width>0</width>
+           <height>25</height>
+          </size>
          </property>
-         <property name="alignment">
-          <set>Qt::AlignmentFlag::AlignCenter</set>
+         <property name="text">
+          <string>TitleButton</string>
          </property>
         </widget>
        </item>
-       <item>
-        <widget class="QLabel" name="SubtitleLabel">
+       <item row="0" column="0">
+        <spacer name="horizontalSpacer">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="0" column="2">
+        <spacer name="horizontalSpacer_2">
+         <property name="orientation">
+          <enum>Qt::Orientation::Horizontal</enum>
+         </property>
+         <property name="sizeHint" stdset="0">
+          <size>
+           <width>40</width>
+           <height>20</height>
+          </size>
+         </property>
+        </spacer>
+       </item>
+       <item row="1" column="0" colspan="3">
+        <widget class="QLabel" name="subtitleLabel">
          <property name="text">
-          <string>C:/Users/Nothing/Documents/PassWord</string>
+          <string>SubtitleLabel</string>
          </property>
          <property name="alignment">
           <set>Qt::AlignmentFlag::AlignCenter</set>
@@ -405,6 +442,13 @@ QListView::item:selected:!active {
    </layout>
   </widget>
  </widget>
+ <customwidgets>
+  <customwidget>
+   <class>FileListView</class>
+   <extends>QListView</extends>
+   <header>src/widgets/FileListView.hpp</header>
+  </customwidget>
+ </customwidgets>
  <resources/>
  <connections/>
 </ui>

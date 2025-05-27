@@ -8,7 +8,7 @@
 #include <atomic>
 #include <QThread>
 
-#include "src/core/FileInfo.hpp"
+#include "src/core/fileinfo/FileInfo.hpp"
 #include "src/core/Settings.hpp"
 #include "Cryptography.hpp"
 
@@ -21,7 +21,7 @@ CryptoEngine::CryptoEngine(QWidget *parent) : QObject(parent){
 
 };
 
-void CryptoEngine::EncryptFile(FileInfo *file, QByteArray &key, Error& error){
+void CryptoEngine::AES256EncryptFile(FileInfo *file, QByteArray &key, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -42,7 +42,7 @@ void CryptoEngine::EncryptFile(FileInfo *file, QByteArray &key, Error& error){
         return;
 
     // insert header
-    cipherData.insert(0, file->GetHeader());
+    cipherData.insert(0, file->header.GetData());
 
     // save
     f.setFileName(file->path.absolutepath + ".enc");
@@ -63,7 +63,7 @@ void CryptoEngine::EncryptFile(FileInfo *file, QByteArray &key, Error& error){
     return;
 }
 
-void CryptoEngine::DecryptFile(FileInfo *file, QByteArray &key, const QByteArray &hmac, Error& error){
+void CryptoEngine::AES256DecryptFile(FileInfo *file, QByteArray &key, const QByteArray &hmac, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -137,11 +137,11 @@ void CryptoEngine::EncryptVault(Vault* vault){
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
 
-    QByteArray              version = vault->aesSettings.FormatVersion();
-    QByteArray              salt = vault->aesSettings.GlobalSalt();
-    int                     iteration = vault->aesSettings.Iteration();
-    QByteArray              hmac = vault->aesSettings.Hmac();
-    QByteArray              aesKey = vault->aesSettings.AesKey();
+    QByteArray              version = vault->aes.FormatVersion();
+    QByteArray              salt = vault->aes.GlobalSalt();
+    int                     iteration = vault->aes.Iteration();
+    QByteArray              hmac = vault->aes.Hmac();
+    QByteArray              aesKey = vault->aes.AesKey();
 
     // pre process file
     for (auto& file : vault->files){
@@ -170,7 +170,7 @@ void CryptoEngine::EncryptVault(Vault* vault){
 
                 // Encrypt
                 Error e;
-                EncryptFile(file, aesKey, e);
+                AES256EncryptFile(file, aesKey, e);
                 if (e.code() == Error::NO_ERROR){
                     ++success;
                 }else{
@@ -234,8 +234,8 @@ void CryptoEngine::DecryptVault(Vault* vault){
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
 
-    QByteArray              hmac = vault->aesSettings.Hmac();
-    QByteArray              aesKey = vault->aesSettings.AesKey();
+    QByteArray              hmac = vault->aes.Hmac();
+    QByteArray              aesKey = vault->aes.AesKey();
 
     // pre process file
     for (auto& file : vault->files){
@@ -262,7 +262,7 @@ void CryptoEngine::DecryptVault(Vault* vault){
 
                 // Decrypt
                 Error e;
-                DecryptFile(file, aesKey, hmac, e);
+                AES256DecryptFile(file, aesKey, hmac, e);
                 if (e.code() == Error::NO_ERROR){
                     ++success;
                 }else{

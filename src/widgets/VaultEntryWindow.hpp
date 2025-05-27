@@ -4,6 +4,7 @@
 #include <QMainWindow>
 #include <QVector>
 #include <QPoint>
+#include <QPair>
 
 #include "VaultCreateNew.hpp"
 #include "VaultTitle.hpp"
@@ -40,7 +41,7 @@ private:
     VaultCreateNew *vaultCreateNew;
 
 
-    QVector<QMainWindow*> childWindows;
+    QVector<QPair<QMainWindow*, Vault*>> childWindows;
 
     QPoint m_dragStartPos;
 };

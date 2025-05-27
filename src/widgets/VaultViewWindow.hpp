@@ -16,16 +16,24 @@ public:
     explicit VaultViewWindow(Vault *vault);
     ~VaultViewWindow();
 
+
+private slots:
+    void OpenSettings();
+
+    void TryUnlock();
+    void Decrypt();
+    void Encrypt();
+
+
 protected:
     void mousePressEvent(QMouseEvent *event) override;
 
 signals:
-
+    void requestShowEntryWindow();
 
 private:
     Ui::VaultViewWindow *ui;
     FileListModel *fileListModel;
     Vault* vault;
-
 };
 

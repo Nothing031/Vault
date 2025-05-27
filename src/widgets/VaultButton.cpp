@@ -1,6 +1,5 @@
 #include "VaultButton.hpp"
 
-#include <QStyleOptionButton>
 #include <QContextMenuEvent>
 #include <QGraphicsDropShadowEffect>
 #include <QMenu>
@@ -9,11 +8,8 @@
 #include <QRect>
 #include <QSpacerItem>
 #include <QVBoxLayout>
-#include <QTextBlock>
-#include <QTextStream>
-#include <QTextLayout>
-
 #include <QTimer>
+#include <QDesktopServices>
 
 #include "WrappedLabel.hpp"
 #include "Menu.hpp"
@@ -100,12 +96,17 @@ void VaultButton::contextMenuEvent(QContextMenuEvent *event)
     Menu menu;
     QAction* openAction = new QAction("open", &menu);
     QAction* deleteAction = new QAction("delete", &menu);
+    QAction* openPathAction = new QAction("open path", &menu);
     menu.addAction(openAction);
+    menu.addAction(openPathAction);
     menu.addSeparator();
     menu.addAction(deleteAction);
 
     connect(openAction, &QAction::triggered, this, [this](){
         emit requestOpenVault(m_vault);
+    });
+    connect(openPathAction, &QAction::triggered, this, [this](){
+        QDesktopServices::openUrl(QUrl(m_vault->directory.path()));
     });
     connect(deleteAction, &QAction::triggered, this, [this](){
         emit requestDetachVault(m_vault);
