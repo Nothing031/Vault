@@ -3,67 +3,71 @@
 #include <QLabel>
 #include <QTextBlock>
 #include <QTextLayout>
+#include <QTextOption>
 #include <QPainter>
+#include <QStyle>
 
 void WrappedLabel::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
     painter.setFont(font());
 
-    QString text = this->text();
-
-    QTextLayout textLayout(text, font());
+    QTextLayout layout(text(), font());
     QTextOption option;
     option.setWrapMode(QTextOption::WrapAnywhere);
-    textLayout.setTextOption(option);
-
-    textLayout.beginLayout();
+    layout.setTextOption(option);
+    layout.beginLayout();
 
     QVector<QTextLine> lines;
+    qreal totalHeight = 0;
+
     while (true) {
-        QTextLine line = textLayout.createLine();
-        if (!line.isValid())
-            break;
+        QTextLine line = layout.createLine();
+        if (!line.isValid()) break;
 
         line.setLineWidth(width());
         lines.append(line);
+        totalHeight += line.height();
     }
-    textLayout.endLayout();
+    layout.endLayout();
 
-    QPointF position(0, 0);
-    for (const QTextLine &line : lines) {
-        line.draw(&painter, position);
-        position.ry() += line.height();
+    qreal yOffset = 0;
+    if (alignment() & Qt::AlignVCenter) {
+        yOffset = (height() - totalHeight) / 2.0;
+    } else if (alignment() & Qt::AlignBottom) {
+        yOffset = height() - totalHeight;
+    }
+
+    qreal y = yOffset;
+    for (auto& line : std::as_const(lines)) {
+        QPointF pos;
+        pos.setY(y);
+
+        if (alignment() & Qt::AlignHCenter) {
+            pos.setX((width() - line.naturalTextWidth()) / 2.0);
+        } else if (alignment() & Qt::AlignRight) {
+            pos.setX(width() - line.naturalTextWidth());
+        } else {
+            pos.setX(0); // Qt::AlignLeft or default
+        }
+
+        line.draw(&painter, pos);
+        y += line.height();
     }
 }
 
 QSize WrappedLabel::sizeHint() const
 {
-    QString text = this->text();
-
-    QTextLayout textLayout(text, font());
-    QTextOption option;
-    option.setWrapMode(QTextOption::WrapAnywhere);
-    textLayout.setTextOption(option);
-
-    textLayout.beginLayout();
-    QVector<QTextLine> lines;
+    QTextLayout layout(text(), font());
+    layout.beginLayout();
+    qreal height = 0;
     while (true) {
-        QTextLine line = textLayout.createLine();
-        if (!line.isValid())
-            break;
-
+        QTextLine line = layout.createLine();
+        if (!line.isValid()) break;
         line.setLineWidth(width());
-        lines.append(line);
+        height += line.height();
     }
-    textLayout.endLayout();
-
-    QPointF position(0, 0);
-    int height = 0;
-    for (const QTextLine &line : lines) {
-        position.ry() += line.height();
-        height = position.ry();
-    }
-    return QSize(260, height);
+    layout.endLayout();
+    return QSize(width(), static_cast<int>(height));
 }
 

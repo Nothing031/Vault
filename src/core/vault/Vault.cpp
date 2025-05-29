@@ -42,10 +42,9 @@ void Vault::LoadFiles()
                 FileInfo* file = new FileInfo;
 
                 file->path.absolutepath = qinfo.absoluteFilePath();
-                file->path.relativePath = directory.relativeFilePath(qinfo.absoluteFilePath());
-                file->path.displayPath = file->path.relativePath;
-                file->state = (qinfo.fileName().endsWith(EXTENSION, Qt::CaseInsensitive) ? FileInfo::CipherData : FileInfo::PlainData);
-                if (file->state == FileInfo::CipherData){
+                file->path.displayPath = directory.relativeFilePath(qinfo.absoluteFilePath());
+                file->state = (qinfo.fileName().endsWith(".enc", Qt::CaseInsensitive) ? FileInfo::CIPHER_GOOD : FileInfo::PLAIN_GOOD);
+                if (file->state == FileInfo::CIPHER_GOOD){
                     file->path.displayPath = file->path.displayPath.left(file->path.displayPath.size() - 4);
                 }
                 files.push_back(file);
@@ -57,7 +56,7 @@ void Vault::LoadFiles()
     }
 
     std::sort(files.begin(), files.end(), [](const FileInfo* a, const FileInfo* b){
-        return a->path.relativePath < b->path.relativePath;
+        return a->path.displayPath < b->path.displayPath;
     });
 
     qDebug() << "[VAULT] Loading done";

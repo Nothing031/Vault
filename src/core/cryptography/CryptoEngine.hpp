@@ -7,37 +7,39 @@
 
 #include "src/core/vault/Vault.hpp"
 #include "Error.hpp"
+#include "src/core/vault/AES256Settings.hpp"
 
 class CryptoEngine : public QObject{
     Q_OBJECT
 public:
     explicit CryptoEngine(QWidget *parent = nullptr);
+    ~CryptoEngine();
     enum Event{
         START,
         END,
-        ABORT,
         PROGRESS_CURRENT,
         PROGRESS_MAX,
         MESSAGE_SINGLE,
         MESSAGE_LIST,
+        CLEAR_TERMINAL
     };
 
-private:
-    void AES256EncryptFile(FileInfo* file, QByteArray& key, Error& error);
-    void AES256DecryptFile(FileInfo* file, QByteArray& key, const QByteArray& hmac, Error& error);
 
+private:
+    void AES256EncryptFile(FileInfo* file, const AES256Settings &aes, Error& error);
+    void AES256DecryptFile(FileInfo* file, const AES256Settings &aes, Error& error);
+
+public:
+    void AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes);
+    void AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes);
 signals:
     void onEvent(Event event, QVariant param);
 
 public slots:
-    void AES256EncryptFiles(QQueue<FileInfo*> files);
-    void AES256DecryptFiles(QQueue<FileInfo*> files);
     void SuspendProcess();
 
-    void EncryptVault(Vault* vault);
-    void DecryptVault(Vault* vault);
 private:
-    bool run;
+    bool run = false;
 };
 
 

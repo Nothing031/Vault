@@ -4,6 +4,7 @@
 
 #include <src/core/vault/Vault.hpp>
 #include <src/models/FileListModel.hpp>
+#include "src/core/cryptography/CryptoEngine.hpp"
 
 namespace Ui{
 class VaultViewWindow;
@@ -18,12 +19,12 @@ public:
 
 
 private slots:
+    void UpdateButton(int plains, int ciphers);
     void OpenSettings();
-
     void TryUnlock();
-    void Decrypt();
     void Encrypt();
-
+    void Decrypt();
+    void ProcessCryptoEngineMessage(CryptoEngine::Event event, QVariant param);
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;
@@ -33,7 +34,6 @@ signals:
 
 private:
     Ui::VaultViewWindow *ui;
-    FileListModel *fileListModel;
     Vault* vault;
 };
 

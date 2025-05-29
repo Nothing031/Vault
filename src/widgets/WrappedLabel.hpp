@@ -14,4 +14,7 @@ protected:
 
 public:
     QSize sizeHint() const override;
+
+private:
+
 };

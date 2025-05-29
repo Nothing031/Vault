@@ -8,8 +8,10 @@
 #define ITERATION 100000
 #define EXTENSION ".enc"
 
+#include "FileInfo.hpp"
+#include "src/core/vault/AES256Settings.hpp"
 
-struct FileInfoHeader{
+struct FileHeader{
     struct Sizes{
         static constexpr int signature = 0x16;
         static constexpr int version = 0x04;
@@ -31,7 +33,7 @@ private:
     inline static const QByteArray currentVersion = []{QByteArray data(Sizes::version, 0); memcpy(data.data(), FORMAT_VERSION, Sizes::version); return data;}();
 public:
     inline static const QByteArray signature = []{QByteArray data(Sizes::signature, 0); memcpy(data.data(), SIGNATURE, strlen(SIGNATURE)); return data;}();
-    bool infoLoaded;
+
     QByteArray version = currentVersion;
     QByteArray salt = {};
     int iteration = ITERATION;
@@ -39,9 +41,10 @@ public:
     QByteArray iv = {};
 
     void RandIv();
-    bool TrySetData(const QByteArray& data);
-    QByteArray GetData() const;
-    void SetHeader(const QByteArray& version, const QByteArray& salt, const int& iteration, const QByteArray& hmac);
+    FileInfo::State Deserialize(const QByteArray& data);
+    FileInfo::State Deserialize(const QByteArray& data, const QByteArray& hmac);
+    QByteArray Serialize() const;
+    void SetData(const AES256Settings& aes);
 };
 
 

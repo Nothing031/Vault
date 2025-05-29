@@ -2,6 +2,9 @@
 
 #include "src/core/cryptography/Cryptography.hpp"
 #include "VaultLoader.hpp"
+#include "src/core/fileinfo/FileHeader.hpp"
+
+#include <openssl/rand.h>
 
 VaultManager VaultManager::instance;
 
@@ -52,8 +55,8 @@ void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const
     vault->owner = this;
     if (aesEnabled){
         vault->aes.SetEnabled(true);
-        QByteArray salt(FileInfoHeader::Sizes::salt, 0);
-        RAND_bytes((unsigned char*)salt.data(), FileInfoHeader::Sizes::salt);
+        QByteArray salt(FileHeader::Sizes::salt, 0);
+        RAND_bytes((unsigned char*)salt.data(), FileHeader::Sizes::salt);
         vault->aes.SetGlobalSalt(salt);
         QByteArray key = Cryptography::GenerateKey(password, vault->aes.GlobalSalt(), vault->aes.Iteration());
         vault->aes.SetHmac(key.mid(0, 32));
@@ -96,6 +99,7 @@ void VaultManager::LoadData()
         QString vaultDir = vaultObj["directory"].toString("");
 
         Vault* vault = new Vault;
+        vault->owner = this;
         vault->directory = vaultDir;
         loader.LoadVault(vault);
         VaultLoader::Event error = loader.GetLastError();

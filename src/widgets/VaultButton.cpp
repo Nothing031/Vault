@@ -39,7 +39,7 @@ QPushButton::pressed{
     vLayout->setContentsMargins(20, 20, 20, 20);
     vLayout->setSpacing(5);
 
-    titleLabel = new WrappedLabel(QUrl(vault->directory.path()).fileName() , this);
+    titleLabel = new QLabel(QUrl(vault->directory.path()).fileName() , this);
     titleLabel->setMaximumWidth(260);
     titleLabel->setMinimumWidth(260);
     titleLabel->setSizePolicy(QSizePolicy::Preferred, QSizePolicy::Preferred);
@@ -52,10 +52,10 @@ background: transparent;
     )");
 
 
-    subtitleLabel = new WrappedLabel(vault->directory.path(), this);
+    subtitleLabel = new QLabel(vault->directory.path(), this);
     subtitleLabel->setMaximumWidth(260);
     subtitleLabel->setMinimumWidth(260);
-    subtitleLabel->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    subtitleLabel->setAlignment(Qt::AlignLeft | Qt::AlignVCenter);
     subtitleLabel->setWordWrap(true);
     subtitleLabel->setSizePolicy(QSizePolicy::Expanding, QSizePolicy::Expanding);
     subtitleLabel->setStyleSheet(R"(
@@ -68,7 +68,6 @@ background: transparent;
     vLayout->addWidget(subtitleLabel);
     setLayout(vLayout);
 }
-
 
 QSize VaultButton::sizeHint() const
 {

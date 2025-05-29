@@ -1,24 +1,23 @@
 #pragma once
 #include <QObject>
 
-#include "FileInfo.hpp"
+#include "FileHeader.hpp"
 
 class FileInfoLoader : public QObject
 {
     Q_OBJECT
 public:
-    explicit FileInfoLoader(QObject *parent = nullptr);
     ~FileInfoLoader();
+    static FileInfoLoader& GetInstance();
 
-public slots:
-    void LoadInfoSingle(QString path);
-
+public:
+    void LoadInfoSingle(QString path, void* caller);
 
 signals:
-    void onInfoLoaded(FileInfo info);
-
+    void onSingleInfoLoaded(FileInfo::State state, FileHeader info, void* caller);
 
 private:
+    FileInfoLoader();
     static FileInfoLoader instance;
 };
 

@@ -1,6 +1,7 @@
 #include "AES256Settings.hpp"
 
-#include "src/core/FileInfo.hpp"
+#include "src/core/fileinfo/FileInfo.hpp"
+#include "src/core/fileinfo/FileHeader.hpp"
 #include "src/core/cryptography/Cryptography.hpp"
 
 AES256Settings AES256Settings::FromJsonObject(const QJsonObject &object)
@@ -26,7 +27,7 @@ QJsonObject AES256Settings::ToJsonObject()
 }
 
 AES256Settings::AES256Settings() {
-    FileInfo::FileHeader header;
+    FileHeader header;
     formatVersion = header.version;
     globalSalt = header.salt;
     iteration = header.iteration;

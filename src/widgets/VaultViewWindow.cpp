@@ -14,6 +14,8 @@
 #include <QDialog>
 #include <QLineEdit>
 #include <QHBoxLayout>
+#include <QQueue>
+
 #include <src/core/vault/Vault.hpp>
 #include <src/models/FileListModel.hpp>
 #include "src/widgets/FileListView.hpp"
@@ -22,7 +24,6 @@
 
 VaultViewWindow::VaultViewWindow(Vault *pVault)
     : ui(new Ui::VaultViewWindow),
-    fileListModel(new FileListModel(this)),
     vault(pVault)
 {
     vault->owner = this;
@@ -36,7 +37,6 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
     setAttribute(Qt::WA_DeleteOnClose);
 
     // widget
-    ui->fileListView->setModel(fileListModel);
     ui->fileListView->setHorizontalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->fileListView->setVerticalScrollMode(QAbstractItemView::ScrollPerPixel);
     ui->fileListView->setSelectionMode(QAbstractItemView::SelectionMode::ExtendedSelection);
@@ -56,30 +56,13 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
 
 
     // connect
-    connect(ui->fileListView, &FileListView::onSelectionChange, this, [this](FileListView::SelectionMode mode, int count){
-        QString countStr = QString::number(count);
-        switch (mode){
-            case FileListView::Single :
-                ui->encryptButton->setText("Encrypt");
-                ui->decryptButton->setText("Decrypt");
-                break;
-            case FileListView::Multi :
-                ui->encryptButton->setText("Encrypt " + countStr + " files");
-                ui->decryptButton->setText("Decrypt " + countStr + " files");
-                break;
-            case FileListView::None:
-                ui->encryptButton->setText("Encrypt all");
-                ui->decryptButton->setText("Decrypt all");
-                break;
-        }
-    });
-
+    connect(ui->fileListView, &FileListView::onSelectionChange, this, &VaultViewWindow::UpdateButton);
     connect(ui->titleButton, &QPushButton::clicked, this, &VaultViewWindow::requestShowEntryWindow);
-
-
     connect(ui->openPathButton, &QPushButton::clicked, this, [this](){ QDesktopServices::openUrl(QUrl(vault->directory.path())); });
     connect(ui->settingsButton, &QPushButton::clicked, this, &VaultViewWindow::OpenSettings);
     connect(ui->unlockButton, &QPushButton::clicked, this, &VaultViewWindow::TryUnlock);
+    connect(ui->encryptButton, &QPushButton::clicked, this, &VaultViewWindow::Encrypt);
+    connect(ui->decryptButton, &QPushButton::clicked, this, &VaultViewWindow::Decrypt);
 
 
     // load files
@@ -87,7 +70,7 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
         vault->LoadFiles();
     });
     connect(thread, &QThread::finished, this, [this](){
-        fileListModel->setVault(vault);
+        ui->fileListView->SetModelVault(vault);
         ui->terminalTextBrowser->clear();
     });
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
@@ -97,8 +80,52 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
 
 VaultViewWindow::~VaultViewWindow()
 {
+    vault->aes.Lock();
     vault->owner = &VaultManager::GetInstance();
     delete ui;
+}
+
+void VaultViewWindow::UpdateButton(int plains, int ciphers)
+{
+    if (plains == 0 && ciphers == 0){
+        ui->encryptButton->setText("Encrypt vault");
+        ui->decryptButton->setText("Decrypt vault");
+        // ui->encryptButton->setEnabled(true);
+        // ui->decryptButton->setEnabled(true);
+        return;
+    }
+
+    if (plains + ciphers == 1){
+        ui->encryptButton->setText("Encrypt file");
+        ui->decryptButton->setText("Decrypt file");
+    }else{
+        QString numStr = QString::number(plains + ciphers);
+        ui->encryptButton->setText("Encrypt selected files");
+        ui->decryptButton->setText("Decrypt selected files");
+    }
+
+
+    // if (plains){
+    //     ui->encryptButton->setEnabled(true);
+    //     if (plains == 1)
+    //         ui->encryptButton->setText("Encrypt file");
+    //     else
+    //         ui->encryptButton->setText("Encrypt " + QString::number(plains) + " files");
+    // }else{
+    //     ui->encryptButton->setEnabled(false);
+    //     ui->encryptButton->setText("Encrypt");
+    // }
+
+    // if (ciphers){
+    //     ui->decryptButton->setEnabled(true);
+    //     if (ciphers == 1)
+    //         ui->decryptButton->setText("Decrypt file");
+    //     else
+    //         ui->decryptButton->setText("Decrypt " + QString::number(ciphers) + " files");
+    // }else{
+    //     ui->decryptButton->setEnabled(false);
+    //     ui->decryptButton->setText("Decrypt");
+    // }
 }
 
 void VaultViewWindow::OpenSettings()
@@ -184,14 +211,97 @@ QPushButton::pressed{background: rgb(40, 40, 40);}
     dialog.exec();
 }
 
-void VaultViewWindow::Decrypt()
-{
-
-}
-
 void VaultViewWindow::Encrypt()
 {
+    CryptoEngine* engine = new CryptoEngine();
+    QVector<FileInfo*> files = ui->fileListView->GetSelectedFiles();
+    QThread* thread = QThread::create([engine, files, this](){
+        QQueue<FileInfo*> targets;
+        if (files.size()){
+            for (auto& file : files){
+                if (file->state == FileInfo::PLAIN_GOOD)
+                    targets.append(file);
+            }
+        }else{ // entire vault
+            for (auto& file : vault->files){
+                if (file->state == FileInfo::PLAIN_GOOD)
+                    targets.append(file);
+            }
+        }
+        engine->AES256EncryptFiles(targets, &vault->mutex, vault->aes);
+    });
+    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+    connect(engine, &CryptoEngine::onEvent, this, &VaultViewWindow::ProcessCryptoEngineMessage);
+    connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    thread->start();
+}
 
+void VaultViewWindow::Decrypt()
+{
+    QVector<FileInfo*> files = ui->fileListView->GetSelectedFiles();
+    CryptoEngine* engine = new CryptoEngine();
+    QThread* thread = QThread::create([engine, files, this](){
+        QQueue<FileInfo*> targets;
+        if (files.size()){
+            for (auto& file : files){
+                if (file->state == FileInfo::CIPHER_GOOD)
+                    targets.append(file);
+            }
+        }else{ // entire vault
+            for (auto& file : vault->files){
+                if (file->state == FileInfo::CIPHER_GOOD)
+                    targets.append(file);
+            }
+        }
+        engine->AES256DecryptFiles(targets, &vault->mutex, vault->aes);
+    });
+    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+    connect(engine, &CryptoEngine::onEvent, this, &VaultViewWindow::ProcessCryptoEngineMessage);
+    connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    thread->start();
+}
+
+void VaultViewWindow::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVariant param)
+{
+    using cEvent = CryptoEngine::Event;
+    switch (event){
+    case cEvent::START:
+        // set ui
+        ui->suspendButton->setEnabled(true);
+        ui->encryptButton->setEnabled(false);
+        ui->decryptButton->setEnabled(false);
+        ui->settingsButton->setEnabled(false);
+        ui->fileListView->setEnabled(false);
+        break;
+    case cEvent::END:
+        // set ui
+        ui->suspendButton->setEnabled(false);
+        ui->settingsButton->setEnabled(true);
+        ui->encryptButton->setEnabled(true);
+        ui->decryptButton->setEnabled(true);
+        ui->fileListView->setEnabled(true);
+        ui->fileListView->update();
+        break;
+    case cEvent::PROGRESS_CURRENT:
+        ui->progressBar->setValue(param.toInt());
+        break;
+    case cEvent::PROGRESS_MAX:
+        ui->progressBar->setMaximum(param.toInt());
+        break;
+    case cEvent::MESSAGE_SINGLE:
+        ui->terminalTextBrowser->append(param.toString());
+        break;
+    case cEvent::MESSAGE_LIST:
+        for (auto& msg : param.toStringList()){
+            ui->terminalTextBrowser->append(msg);
+        }
+        break;
+    case cEvent::CLEAR_TERMINAL:
+        ui->terminalTextBrowser->clear();
+        break;
+    }
 }
 
 void VaultViewWindow::mousePressEvent(QMouseEvent *event)

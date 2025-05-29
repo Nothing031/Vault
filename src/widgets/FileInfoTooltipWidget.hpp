@@ -1,15 +1,20 @@
 #pragma once
 
 #include <QWidget>
+#include <QHBoxLayout>
+
+#include "src/core/fileinfo/FileHeader.hpp"
 
 class FileInfoTooltipWidget : public QWidget
 {
     Q_OBJECT
 public:
-    explicit FileInfoTooltipWidget(QWidget *parent = nullptr);
+    explicit FileInfoTooltipWidget(QString path ,QWidget *parent = nullptr);
     ~FileInfoTooltipWidget();
 
 
+private slots:
+    void SetData(FileInfo::State state, FileHeader info, void* caller);
 
 
 protected:
@@ -17,10 +22,7 @@ protected:
 
 signals:
 
-
-
 private:
-    bool **flagPtr = nullptr;
-    QThread *thread = nullptr;
-    void loadInfoAsync();
+    QVBoxLayout *baseLayout = nullptr;
+    QHBoxLayout *headerTempLayout = nullptr;
 };

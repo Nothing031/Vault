@@ -11,7 +11,7 @@ CONFIG += c++17
 SOURCES += \
     src/core/cryptography/CryptoEngine.cpp \
     src/core/cryptography/Error.cpp \
-    src/core/fileinfo/FileInfoHeader.cpp \
+    src/core/fileinfo/FileHeader.cpp \
     src/core/fileinfo/FileInfoLoader.cpp \
     src/core/vault/AES256Settings.cpp \
     src/core/vault/ExcludeChecker.cpp \
@@ -22,6 +22,7 @@ SOURCES += \
     src/widgets/FileInfoTooltipWidget.cpp \
     src/widgets/FileListView.cpp \
     src/widgets/Menu.cpp \
+    src/widgets/SettingsWindow.cpp \
     src/widgets/VaultButton.cpp \
     src/widgets/VaultCreateNew.cpp \
     src/widgets/VaultEntryWindow.cpp \
@@ -37,8 +38,8 @@ HEADERS += \
     src/core/cryptography/CryptoEngine.hpp \
     src/core/cryptography/Cryptography.hpp \
     src/core/cryptography/Error.hpp \
+    src/core/fileinfo/FileHeader.hpp \
     src/core/fileinfo/FileInfo.hpp \
-    src/core/fileinfo/FileInfoHeader.hpp \
     src/core/fileinfo/FileInfoLoader.hpp \
     src/core/vault/AES256Settings.hpp \
     src/core/vault/ExcludeChecker.hpp \
@@ -49,6 +50,7 @@ HEADERS += \
     src/widgets/FileInfoTooltipWidget.hpp \
     src/widgets/FileListView.hpp \
     src/widgets/Menu.hpp \
+    src/widgets/SettingsWindow.hpp \
     src/widgets/VaultButton.hpp \
     src/widgets/VaultCreateNew.hpp \
     src/widgets/VaultEntryWindow.hpp \
@@ -59,6 +61,7 @@ HEADERS += \
 
 FORMS += \
     src/forms/PasswordInputDialog.ui \
+    src/forms/SettingsWindow.ui \
     src/forms/VaultCreateNew.ui \
     src/forms/VaultEntryWindow.ui \
     src/forms/VaultTitle.ui \

@@ -9,19 +9,25 @@
 #include <QThread>
 
 #include "src/core/fileinfo/FileInfo.hpp"
+#include "src/core/fileinfo/FileHeader.hpp"
 #include "src/core/Settings.hpp"
 #include "Cryptography.hpp"
 
-#define FONT_RED_PREFIX "<font color='red'>"
-#define FONT_GREEN_PREFIX "<font color='green'>"
-#define FONT_WHITE_PREFIX "<font color='white'>"
-#define FONT_END_SUBFIX "</font>"
+#define RED_PREFIX "<font color='red'>"
+#define GREEN_PREFIX "<font color='green'>"
+#define WHITE_PREFIX "<font color='white'>"
+#define END_SUBFIX "</font>"
 
 CryptoEngine::CryptoEngine(QWidget *parent) : QObject(parent){
 
-};
+}
 
-void CryptoEngine::AES256EncryptFile(FileInfo *file, QByteArray &key, Error& error){
+CryptoEngine::~CryptoEngine()
+{
+
+}
+
+void CryptoEngine::AES256EncryptFile(FileInfo* file, const AES256Settings &aes, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -36,13 +42,18 @@ void CryptoEngine::AES256EncryptFile(FileInfo *file, QByteArray &key, Error& err
     QByteArray cipherData;
     f.close();
 
+    // set header
+    FileHeader header;
+    header.SetData(aes);
+    header.RandIv();
+
     // encrypt
-    Cryptography::AES_256_Encrypt(plainData, key, file->header.iv, cipherData, error);
-    if (error.code() != Error::NO_ERROR)
+    Cryptography::AES_256_Encrypt(plainData, aes.AesKey(), header.iv, cipherData, error);
+    if (error.code() != Error::CLEAN)
         return;
 
     // insert header
-    cipherData.insert(0, file->header.GetData());
+    cipherData.insert(0, header.Serialize());
 
     // save
     f.setFileName(file->path.absolutepath + ".enc");
@@ -54,16 +65,19 @@ void CryptoEngine::AES256EncryptFile(FileInfo *file, QByteArray &key, Error& err
     f.close();
 
     // delete plain file
-    QFile::remove(file->path.absolutepath);
+    if (!QFile::remove(file->path.absolutepath)){
+        error.Set(Error::IO_DELETE_FAILURE, "Failed to delete origin file, file is open in unknown process", file->path.absolutepath);
+        QFile::remove(file->path.absolutepath + ".enc");
+        return;
+    }
 
     // set data
     file->path.absolutepath += ".enc";
-    file->path.relativePath += ".enc";
-    file->state = FileInfo::CipherData;
+    file->state = FileInfo::CIPHER_GOOD;
     return;
 }
 
-void CryptoEngine::AES256DecryptFile(FileInfo *file, QByteArray &key, const QByteArray &hmac, Error& error){
+void CryptoEngine::AES256DecryptFile(FileInfo* file, const AES256Settings &aes, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -78,24 +92,21 @@ void CryptoEngine::AES256DecryptFile(FileInfo *file, QByteArray &key, const QByt
     QByteArray plainData;
     f.close();
 
-    // load and check header
-    if (!file->SetHeader(cipherData)){
-        file->integrity = false;
-        error.Set(Error::HEADER_SIGNATURE_FAILURE, "File has been corrupted", file->path.absolutepath);
-        return;
-    }
-    if (file->header.hmac != hmac){
-        file->isHeaderMatch = false;
-        error.Set(Error::HEADER_HMAC_FAILURE, "Header hmac does not match", file->path.absolutepath);
+    // load header
+    FileHeader header;
+    FileInfo::State state = header.Deserialize(cipherData, aes.Hmac());
+    if (state != FileInfo::CIPHER_GOOD){
+        file->state = state;
+        error.Set(Error::HEADER_HMAC_FAILURE, "File hmac does not match or the file has been corrupted", file->path.absolutepath);
         return;
     }
 
     // remove header
-    cipherData.remove(0, FileInfo::Sizes::total);
+    cipherData.remove(0, FileHeader::Sizes::total);
 
     // decrypt
-    Cryptography::AES_256_Decrypt(plainData, key, file->header.iv, cipherData, error);
-    if (error.code() != Error::NO_ERROR)
+    Cryptography::AES_256_Decrypt(cipherData, aes.AesKey(), header.iv, plainData, error);
+    if (error.code() != Error::CLEAN)
         return;
 
     // save
@@ -108,70 +119,161 @@ void CryptoEngine::AES256DecryptFile(FileInfo *file, QByteArray &key, const QByt
     f.close();
 
     // delete
-    QFile::remove(file->path.absolutepath);
-
-    // set data
-    file->path.absolutepath = file->path.absolutepath.left(file->path.absolutepath.size() - 4);
-    file->path.relativePath = file->path.relativePath.left(file->path.relativePath.size() - 4);
-    file->state = FileInfo::PlainData;
-    return;
-}
-
-void CryptoEngine::EncryptVault(Vault* vault){
-    run = true;
-    // check vault and lock
-    if (!vault || !vault->mutex.tryLock()){
-        emit onEvent(MESSAGE_SINGLE, QVariant("cannot access vault"));
-        emit onEvent(ABORT, QVariant());
+    if (!QFile::remove(file->path.absolutepath)){
+        error.Set(Error::IO_DELETE_FAILURE, "Failed to delete origin file, file is open in unknown process", file->path.absolutepath);
+        QFile::remove(file->path.absolutepath.left(file->path.absolutepath.size() - 4));
         return;
     }
 
-    //
-    QQueue<FileInfo*>       fileQueue;
+    // set data
+    file->path.absolutepath = file->path.absolutepath.left(file->path.absolutepath.size() - 4);
+    file->state = FileInfo::PLAIN_GOOD;
+    return;
+}
+
+void CryptoEngine::AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes)
+{
+    run = true;
+    // check
+    if (files.empty()){
+        emit onEvent(MESSAGE_SINGLE, QVariant("No any file to encrypt"));
+        return;
+    }
+    if (!mutex->tryLock()){
+        emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start encryption" END_SUBFIX));
+        emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
+        return;
+    }
+    emit onEvent(CLEAR_TERMINAL, QVariant());
     QMutex                  queueMutex;
+
     QStringList             flushBuffer;
     QStringList             finalMessage;
     QMutex                  messageMutex;
+
     int                     threadCount = Settings::GetInstance().GetThreadCount();
     std::atomic<int>        failed = 0;
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
 
-    QByteArray              version = vault->aes.FormatVersion();
-    QByteArray              salt = vault->aes.GlobalSalt();
-    int                     iteration = vault->aes.Iteration();
-    QByteArray              hmac = vault->aes.Hmac();
-    QByteArray              aesKey = vault->aes.AesKey();
-
-    // pre process file
-    for (auto& file : vault->files){
-        if (file->state == FileInfo::PlainData){
-            file->SetHeader(version, salt, iteration, hmac);
-            file->ResetIv();
-            fileQueue.enqueue(file);
-        }
-    }
-
-    // Encrypt
-    emit onEvent(PROGRESS_MAX, QVariant(fileQueue.size()));
+    // emit messages
+    emit onEvent(PROGRESS_MAX, QVariant(files.size()));
     emit onEvent(PROGRESS_CURRENT, QVariant(0));
-    emit onEvent(MESSAGE_SINGLE, QVariant("Encrypting " FONT_GREEN_PREFIX + QString::number(fileQueue.size()) + FONT_END_SUBFIX " files"));
+    QString _startMessage = files.size() == 1 ? "Encrypting file" : "Encrypting " GREEN_PREFIX + QString::number(files.size()) + END_SUBFIX " files";
+    emit onEvent(MESSAGE_SINGLE, QVariant(_startMessage));
     emit onEvent(START, QVariant());
 
     for (int i = 0; i < threadCount; i++){
         QThread* thread = QThread::create([&](){
             while(true){
                 FileInfo* file;
-                {
+                {   // queue mutex scope
                     QMutexLocker<QMutex> lock(&queueMutex);
-                    if (fileQueue.isEmpty() || !run) goto final;
-                    file = fileQueue.dequeue();
+                    if (files.isEmpty() || !run) goto final;
+                    file = files.dequeue();
                 }
 
                 // Encrypt
                 Error e;
-                AES256EncryptFile(file, aesKey, e);
-                if (e.code() == Error::NO_ERROR){
+                AES256EncryptFile(file, aes, e);
+                if (e.code() == Error::CLEAN){
+                    ++success;
+                }else{
+                    QMutexLocker<QMutex> messageLock(&messageMutex);
+                    finalMessage.append(e.what() + " : " + e.path());
+                    flushBuffer.append(e.what() + " : " + e.path());
+                    ++failed;
+                }
+            }
+        final:
+            joinedThread++;
+            return;
+        });
+        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+        thread->start();
+    }
+    // emit events
+    bool flag = true;
+    while(flag){
+        {   // message mutex scope
+            QMutexLocker<QMutex> lock(&messageMutex);
+            if (flushBuffer.size() != 0){
+                emit onEvent(MESSAGE_LIST, QVariant(flushBuffer));
+                flushBuffer.clear();
+            }
+            emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
+        }
+        // 1 sec interval
+        for (int i = 0; i < 10; i++){
+            QThread::msleep(100);
+            if (threadCount == joinedThread){
+                flag = false;
+                break;
+            }
+        }
+    }
+
+    // done
+    if (success){
+        finalMessage.append(GREEN_PREFIX + QString::number(success) + END_SUBFIX " files has been successfully encrypted");
+    }
+    if (failed){
+        finalMessage.append("Failed to encrypt " RED_PREFIX + QString::number(failed) + END_SUBFIX " files");
+    }
+
+    emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
+    emit onEvent(END, QVariant());
+    emit onEvent(MESSAGE_LIST, QVariant(finalMessage));
+    mutex->unlock();
+}
+
+void CryptoEngine::AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes)
+{
+    run = true;
+    // check
+    if (files.empty()){
+        emit onEvent(MESSAGE_SINGLE, QVariant("No any file to decrypt"));
+        return;
+    }
+    if (!mutex->tryLock()){
+        emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start decryption" END_SUBFIX));
+        emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
+        return;
+    }
+    emit onEvent(CLEAR_TERMINAL, QVariant());
+    QMutex                  queueMutex;
+
+    QStringList             flushBuffer;
+    QStringList             finalMessage;
+    QMutex                  messageMutex;
+
+    int                     threadCount = Settings::GetInstance().GetThreadCount();
+    std::atomic<int>        failed = 0;
+    std::atomic<int>        success = 0;
+    std::atomic<int>        joinedThread = 0;
+
+    // emit messages
+    emit onEvent(PROGRESS_MAX, QVariant(files.size()));
+    emit onEvent(PROGRESS_CURRENT, QVariant(0));
+    QString _startMessage = files.size() == 1 ? "Decrypting file" : "Decrypting " GREEN_PREFIX + QString::number(files.size()) + END_SUBFIX " files";
+    emit onEvent(MESSAGE_SINGLE, QVariant(_startMessage));
+    emit onEvent(START, QVariant());
+
+    // encrypt
+    for (int i = 0; i < threadCount; i++){
+        QThread* thread = QThread::create([&](){
+            while(true){
+                FileInfo* file;
+                {   // queue mutex scope
+                    QMutexLocker<QMutex> lock(&queueMutex);
+                    if (files.isEmpty() || !run) goto final;
+                    file = files.dequeue();
+                }
+
+                // Encrypt
+                Error e;
+                AES256DecryptFile(file, aes, e);
+                if (e.code() == Error::CLEAN){
                     ++success;
                 }else{
                     QMutexLocker<QMutex> messageLock(&messageMutex);
@@ -188,10 +290,10 @@ void CryptoEngine::EncryptVault(Vault* vault){
         thread->start();
     }
 
-    // Wait for process and update progress
-    while (threadCount != joinedThread){
-        // flush message
-        {
+    // emit events
+    bool flag = true;
+    while(flag){
+        {   // message mutex scope
             QMutexLocker<QMutex> lock(&messageMutex);
             if (flushBuffer.size() != 0){
                 emit onEvent(MESSAGE_LIST, QVariant(flushBuffer));
@@ -199,111 +301,28 @@ void CryptoEngine::EncryptVault(Vault* vault){
             }
             emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
         }
-
-        // sleep for 10 times (1 sec)
+        // 1 sec interval
         for (int i = 0; i < 10; i++){
-            if (threadCount == joinedThread) break;
             QThread::msleep(100);
+            if (threadCount == joinedThread){
+                flag = false;
+                break;
+            }
         }
     }
 
-    // final
-    emit onEvent(MESSAGE_LIST, QVariant(finalMessage));
+    // done
+    if (success){
+        finalMessage.append(GREEN_PREFIX + QString::number(success) + END_SUBFIX " files has been successfully decrypted");
+    }
+    if (failed){
+        finalMessage.append("Failed to decrypt " RED_PREFIX + QString::number(failed) + END_SUBFIX " files");
+    }
+
     emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
     emit onEvent(END, QVariant());
-    return;
-}
-
-void CryptoEngine::DecryptVault(Vault* vault){
-    run = true;
-    // check vault and lock
-    if (!vault || !vault->mutex.tryLock()){
-        emit onEvent(MESSAGE_SINGLE, QVariant("cannot access vault"));
-        emit onEvent(ABORT, QVariant());
-        return;
-    }
-
-    //
-    QQueue<FileInfo*>       fileQueue;
-    QMutex                  queueMutex;
-    QStringList             flushBuffer;
-    QStringList             finalMessage;
-    QMutex                  messageMutex;
-    int                     threadCount = Settings::GetInstance().GetThreadCount();
-    std::atomic<int>        failed = 0;
-    std::atomic<int>        success = 0;
-    std::atomic<int>        joinedThread = 0;
-
-    QByteArray              hmac = vault->aes.Hmac();
-    QByteArray              aesKey = vault->aes.AesKey();
-
-    // pre process file
-    for (auto& file : vault->files){
-        if (file->state == FileInfo::CipherData){
-            fileQueue.enqueue(file);
-        }
-    }
-
-    // Decrypt
-    emit onEvent(PROGRESS_MAX, QVariant(fileQueue.size()));
-    emit onEvent(PROGRESS_CURRENT, QVariant(0));
-    emit onEvent(MESSAGE_SINGLE, QVariant("Decrypting " FONT_GREEN_PREFIX + QString::number(fileQueue.size()) + FONT_END_SUBFIX " files"));
-    emit onEvent(START, QVariant());
-
-    for (int i = 0; i < threadCount; i++){
-        QThread* thread = QThread::create([&](){
-            while(true){
-                FileInfo* file;
-                {
-                    QMutexLocker<QMutex> lock(&queueMutex);
-                    if (fileQueue.isEmpty() || !run) goto final;
-                    file = fileQueue.dequeue();
-                }
-
-                // Decrypt
-                Error e;
-                AES256DecryptFile(file, aesKey, hmac, e);
-                if (e.code() == Error::NO_ERROR){
-                    ++success;
-                }else{
-                    QMutexLocker<QMutex> messageLock(&messageMutex);
-                    finalMessage.append(e.what() + " : " + e.path());
-                    flushBuffer.append(e.what() + " : " + e.path());
-                    ++failed;
-                }
-            }
-        final:
-            ++joinedThread;
-            return;
-        });
-        connect(thread, &QThread::finished, thread, &QThread::deleteLater);
-        thread->start();
-    }
-
-    // Wait for process and update progress
-    while (threadCount != joinedThread){
-        // flush message
-        {
-            QMutexLocker<QMutex> lock(&messageMutex);
-            if (flushBuffer.size() != 0){
-                emit onEvent(MESSAGE_LIST, QVariant(flushBuffer));
-                flushBuffer.clear();
-            }
-            emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
-        }
-
-        // sleep for 10 times (1 sec)
-        for (int i = 0; i < 10; i++){
-            if (threadCount == joinedThread) break;
-            QThread::msleep(100);
-        }
-    }
-
-    // final
     emit onEvent(MESSAGE_LIST, QVariant(finalMessage));
-    emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
-    emit onEvent(END, QVariant());
-    return;
+    mutex->unlock();
 }
 
 void CryptoEngine::SuspendProcess()

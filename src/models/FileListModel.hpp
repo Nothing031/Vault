@@ -9,7 +9,7 @@
 #include <QFileInfo>
 
 #include "src/core/vault/Vault.hpp"
-#include "src/core/FileInfo.hpp"
+#include "src/core/fileinfo/FileInfo.hpp"
 
 class FileListModel : public QAbstractListModel {
     Q_OBJECT
@@ -60,11 +60,16 @@ public:
 
         if (role == Qt::ForegroundRole){
             const FileInfo* file = pVault->files.at(index.row());
-            if (!file)                                  return QVariant();
-            if (!file->integrity)                       return m_brushDarkRed;
-            if (!file->isHeaderMatch)                   return m_brushRed;
-            if (file->state == FileInfo::PlainData)     return m_brushGray;
-            if (file->state == FileInfo::CipherData)    return m_brushGreen;
+            if (!file)                                                  return QVariant();
+            if (file->state == FileInfo::UNKNOWN_SIGNATURENOTMATCH)     return m_brushDarkRed;
+            if (file->state == FileInfo::CIPHER_HEADERNOTMATCH)         return m_brushRed;
+            if (file->state == FileInfo::PLAIN_GOOD)                    return m_brushGray;
+            if (file->state == FileInfo::CIPHER_GOOD)                   return m_brushGreen;
+        }
+
+        if (role == Qt::UserRole){
+            const FileInfo* file = pVault->files.at(index.row());
+            return QVariant::fromValue((void*)file);
         }
 
         return QVariant();

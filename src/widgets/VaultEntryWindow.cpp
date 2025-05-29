@@ -48,8 +48,7 @@ VaultEntryWindow::VaultEntryWindow(QWidget *parent)
     connect(vaultTitle, &VaultTitle::createButtonPressed, this, &VaultEntryWindow::StartCreateNewVault);
     connect(vaultTitle, &VaultTitle::openButtonPressed, this, &VaultEntryWindow::OpenFolder);
     connect(vaultCreateNew, &VaultCreateNew::Back, this, [this](){ ui->stackedWidget->setCurrentWidget(vaultTitle); });
-    connect(qobject_cast<VaultListWidget*>(ui->vaultListWidget), &VaultListWidget::requestOpenVault, this, &VaultEntryWindow::OpenVault);
-
+    connect(ui->vaultListWidget, &VaultListWidget::requestOpenVault, this, &VaultEntryWindow::OpenVault);
 
     // load data
     manager.LoadData();
@@ -66,7 +65,7 @@ void VaultEntryWindow::OpenVault(Vault *vault)
     for (auto& wndVaultPair : std::as_const(childWindows)){
         if (vault == wndVaultPair.second) {
             wndVaultPair.first->raise();
-           return;
+            return;
         }
     }
 

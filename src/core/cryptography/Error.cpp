@@ -1,6 +1,6 @@
 #include "Error.hpp"
 
-Error::Error() : m_code(NO_ERROR), m_what(""), m_path(""){}
+Error::Error() : m_code(CLEAN), m_what(""), m_path(""){}
 
 Error::Error(const ErrorCode code, const QString what, const QString path) : m_code(code), m_what(what), m_path(path){}
 

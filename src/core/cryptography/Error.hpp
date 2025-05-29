@@ -6,7 +6,7 @@ class Error
 {
 public:
     enum ErrorCode{
-        NO_ERROR,
+        CLEAN,
         ERROR_UNKNOWN,
         CRYPTO_EVP_INIT_FAILURE,
         CRYPTO_EVP_UPDATE_FAILURE,
@@ -15,6 +15,7 @@ public:
         HEADER_SIGNATURE_FAILURE, // file has been corrupted
         IO_WRITE_FAILURE,
         IO_READ_FAILURE,
+        IO_DELETE_FAILURE,
         IO_NOT_EXISTS,
     };
 
@@ -27,7 +28,7 @@ public:
     const QString& path();
 
 private:
-    ErrorCode m_code = NO_ERROR;
+    ErrorCode m_code = CLEAN;
     QString m_what;
     QString m_path;
 };
