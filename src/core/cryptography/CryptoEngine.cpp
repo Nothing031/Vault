@@ -18,8 +18,12 @@
 #define WHITE_PREFIX "<font color='white'>"
 #define END_SUBFIX "</font>"
 
-CryptoEngine::CryptoEngine(QWidget *parent) : QObject(parent){
-
+CryptoEngine::CryptoEngine(std::shared_ptr<QQueue<std::shared_ptr<FileInfo>>> pFiles, QMutex* mutex,const AES256Settings& aes, QWidget *parent)
+    : QObject(parent)
+{
+    this->pFiles = pFiles;
+    this->pMutex = mutex;
+    this->aes = aes;
 }
 
 CryptoEngine::~CryptoEngine()
@@ -131,15 +135,15 @@ void CryptoEngine::AES256DecryptFile(std::shared_ptr<FileInfo> file, const AES25
     return;
 }
 
-void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes)
+void CryptoEngine::AES256EncryptFiles()
 {
     run = true;
     // check
-    if (files.empty()){
+    if (pFiles->empty()){
         emit onEvent(MESSAGE_SINGLE, QVariant("No any file to encrypt"));
         return;
     }
-    if (!mutex->tryLock(1000)){
+    if (!pMutex->tryLock(1000)){
         emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start encryption" END_SUBFIX));
         emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
         return;
@@ -157,9 +161,9 @@ void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
     std::atomic<int>        joinedThread = 0;
 
     // emit messages
-    emit onEvent(PROGRESS_MAX, QVariant(files.size()));
+    emit onEvent(PROGRESS_MAX, QVariant(pFiles->size()));
     emit onEvent(PROGRESS_CURRENT, QVariant(0));
-    QString _startMessage = files.size() == 1 ? "Encrypting file" : "Encrypting " GREEN_PREFIX + QString::number(files.size()) + END_SUBFIX " files";
+    QString _startMessage = pFiles->size() == 1 ? "Encrypting file" : "Encrypting " GREEN_PREFIX + QString::number(pFiles->size()) + END_SUBFIX " files";
     emit onEvent(MESSAGE_SINGLE, QVariant(_startMessage));
     emit onEvent(START, QVariant());
 
@@ -169,8 +173,8 @@ void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
                 std::shared_ptr<FileInfo> file;
                 {   // queue mutex scope
                     QMutexLocker<QMutex> lock(&queueMutex);
-                    if (files.isEmpty() || !run) goto final;
-                    file = files.dequeue();
+                    if (pFiles->isEmpty() || !run) goto final;
+                    file = pFiles->dequeue();
                 }
 
                 // Encrypt
@@ -192,6 +196,7 @@ void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
         connect(thread, &QThread::finished, thread, &QThread::deleteLater);
         thread->start();
     }
+
     // emit events
     bool flag = true;
     while(flag){
@@ -224,18 +229,19 @@ void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
     emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
     emit onEvent(END, QVariant());
     emit onEvent(MESSAGE_LIST, QVariant(finalMessage));
-    mutex->unlock();
+    pMutex->unlock();
+    emit finished();
 }
 
-void CryptoEngine::AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes)
+void CryptoEngine::AES256DecryptFiles()
 {
     run = true;
     // check
-    if (files.empty()){
+    if (pFiles->empty()){
         emit onEvent(MESSAGE_SINGLE, QVariant("No any file to decrypt"));
         return;
     }
-    if (!mutex->tryLock(1000)){
+    if (!pMutex->tryLock(1000)){
         emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start decryption" END_SUBFIX));
         emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
         return;
@@ -253,9 +259,9 @@ void CryptoEngine::AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
     std::atomic<int>        joinedThread = 0;
 
     // emit messages
-    emit onEvent(PROGRESS_MAX, QVariant(files.size()));
+    emit onEvent(PROGRESS_MAX, QVariant(pFiles->size()));
     emit onEvent(PROGRESS_CURRENT, QVariant(0));
-    QString _startMessage = files.size() == 1 ? "Decrypting file" : "Decrypting " GREEN_PREFIX + QString::number(files.size()) + END_SUBFIX " files";
+    QString _startMessage = pFiles->size() == 1 ? "Decrypting file" : "Decrypting " GREEN_PREFIX + QString::number(pFiles->size()) + END_SUBFIX " files";
     emit onEvent(MESSAGE_SINGLE, QVariant(_startMessage));
     emit onEvent(START, QVariant());
 
@@ -266,8 +272,8 @@ void CryptoEngine::AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
                 std::shared_ptr<FileInfo> file;
                 {   // queue mutex scope
                     QMutexLocker<QMutex> lock(&queueMutex);
-                    if (files.isEmpty() || !run) goto final;
-                    file = files.dequeue();
+                    if (pFiles->isEmpty() || !run) goto final;
+                    file = pFiles->dequeue();
                 }
 
                 // Encrypt
@@ -322,7 +328,8 @@ void CryptoEngine::AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, 
     emit onEvent(PROGRESS_CURRENT, QVariant(success + failed));
     emit onEvent(END, QVariant());
     emit onEvent(MESSAGE_LIST, QVariant(finalMessage));
-    mutex->unlock();
+    pMutex->unlock();
+    emit finished();
 }
 
 void CryptoEngine::SuspendProcess()

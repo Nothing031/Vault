@@ -12,7 +12,7 @@
 class CryptoEngine : public QObject{
     Q_OBJECT
 public:
-    explicit CryptoEngine(QWidget *parent = nullptr);
+    explicit CryptoEngine(std::shared_ptr<QQueue<std::shared_ptr<FileInfo>>> pFiles, QMutex* mutex,const AES256Settings& aes, QWidget *parent = nullptr);
     ~CryptoEngine();
     enum Event{
         START,
@@ -24,23 +24,26 @@ public:
         CLEAR_TERMINAL
     };
 
-
 private:
     void AES256EncryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error);
     void AES256DecryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error);
 
-public:
-    void AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes);
-    void AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes);
+public slots:
+    void AES256EncryptFiles();
+    void AES256DecryptFiles();
 
 signals:
     void onEvent(Event event, QVariant param);
+    void finished();
 
 public slots:
     void SuspendProcess();
 
 private:
     bool run = false;
+    QMutex* pMutex;
+    std::shared_ptr<QQueue<std::shared_ptr<FileInfo>>> pFiles;
+    AES256Settings aes;
 };
 
 

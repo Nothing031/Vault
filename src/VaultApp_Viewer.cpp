@@ -212,24 +212,28 @@ QPushButton::pressed{background: rgb(40, 40, 40);}
 void VaultApp_Viewer::Encrypt()
 {
     QVector<std::shared_ptr<FileInfo>> files = ui->fileListView->GetSelectedFiles();
-    CryptoEngine* engine = new CryptoEngine();
-    QThread* thread = QThread::create([engine, files, this](){
-        QQueue<std::shared_ptr<FileInfo>> targets;
-        if (files.size()){
-            for (auto& file : files){
-                if (file->state == FileInfo::PLAIN_GOOD)
-                    targets.append(file);
-            }
-        }else{ // entire vault
-            for (auto& file : vault->files){
-                if (file->state == FileInfo::PLAIN_GOOD)
-                    targets.append(file);
-            }
+    std::shared_ptr<QQueue<std::shared_ptr<FileInfo>>> targets = std::make_shared<QQueue<std::shared_ptr<FileInfo>>>();
+    if (files.size()){
+        for (auto& file : files){
+            if (file->state == FileInfo::PLAIN_GOOD)
+                targets->append(file);
         }
-        engine->AES256EncryptFiles(targets, &vault->mutex, vault->aes);
-    });
-    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+    }else{ // entire vault
+        for (auto& file : vault->files){
+            if (file->state == FileInfo::PLAIN_GOOD)
+                targets->append(file);
+        }
+    }
+
+    CryptoEngine* engine = new CryptoEngine(targets, &vault->mutex, vault->aes, nullptr);
+    QThread* thread = new QThread();
+    engine->moveToThread(thread);
+    // ui
     connect(engine, &CryptoEngine::onEvent, this, &VaultApp_Viewer::ProcessCryptoEngineMessage);
+    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+
+    connect(thread, &QThread::started, engine, &CryptoEngine::AES256EncryptFiles);
+    connect(engine, &CryptoEngine::finished, thread, &QThread::quit);
     connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     thread->start();
@@ -238,24 +242,28 @@ void VaultApp_Viewer::Encrypt()
 void VaultApp_Viewer::Decrypt()
 {
     QVector<std::shared_ptr<FileInfo>> files = ui->fileListView->GetSelectedFiles();
-    CryptoEngine* engine = new CryptoEngine();
-    QThread* thread = QThread::create([engine, files, this](){
-        QQueue<std::shared_ptr<FileInfo>> targets;
-        if (files.size()){
-            for (auto& file : files){
-                if (file->state == FileInfo::CIPHER_GOOD)
-                    targets.append(file);
-            }
-        }else{ // entire vault
-            for (auto& file : vault->files){
-                if (file->state == FileInfo::CIPHER_GOOD)
-                    targets.append(file);
-            }
+    std::shared_ptr<QQueue<std::shared_ptr<FileInfo>>> targets = std::make_shared<QQueue<std::shared_ptr<FileInfo>>>();
+    if (files.size()){
+        for (auto& file : files){
+            if (file->state == FileInfo::CIPHER_GOOD)
+                targets->append(file);
         }
-        engine->AES256DecryptFiles(targets, &vault->mutex, vault->aes);
-    });
-    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+    }else{ // entire vault
+        for (auto& file : vault->files){
+            if (file->state == FileInfo::CIPHER_GOOD)
+                targets->append(file);
+        }
+    }
+
+    CryptoEngine* engine = new CryptoEngine(targets, &vault->mutex, vault->aes, nullptr);
+    QThread* thread = new QThread();
+    engine->moveToThread(thread);
+    // ui
     connect(engine, &CryptoEngine::onEvent, this, &VaultApp_Viewer::ProcessCryptoEngineMessage);
+    connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
+
+    connect(thread, &QThread::started, engine, &CryptoEngine::AES256DecryptFiles);
+    connect(engine, &CryptoEngine::finished, thread, &QThread::quit);
     connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     thread->start();
