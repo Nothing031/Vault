@@ -1,5 +1,6 @@
 #pragma once
 
+// qtl
 #include <QVector>
 #include <QString>
 #include <QFile>
@@ -11,23 +12,28 @@
 #include <QDirListing>
 #include <QMutex>
 #include <QDirIterator>
+
+//stl
+#include <memory>
+
+// mine
 #include "src/core/fileinfo/FileInfo.hpp"
 #include "AES256Settings.hpp"
 #include "ExcludeChecker.hpp"
 #include "src/Manifest.hpp"
 
+
 class Vault
 {
 public:
     void                *owner = nullptr;
-    QString             appVersion = APPVERSION;
-    QString             formatVersion = FORMATVERSION;
+    QString             appVersion = APP_VERSION;
+    QString             saveFormatVersion = SAVE_FORMAT_VERSION;
 
-    QDir                directory;
     QMutex              mutex;
-    QVector<FileInfo*>  files;
+    QDir                directory;
+    QVector<std::shared_ptr<FileInfo>> files;
 
-    ExcludeChecker      excludeChecker;
     AES256Settings      aes;
 
     Vault();
@@ -36,3 +42,4 @@ public:
     void LoadFiles();
 };
 
+Q_DECLARE_METATYPE(std::shared_ptr<Vault>)

@@ -6,6 +6,9 @@
 #include <QJsonDocument>
 #include <QJsonArray>
 
+#include <memory>
+#include <optional>
+
 #include "Vault.hpp"
 
 
@@ -21,19 +24,19 @@ public:
     void SaveData();
 
 public slots:
-    Vault* GetVault(int index);
+    std::shared_ptr<Vault> GetVault(int index);
 
     void CreateVault(const bool& aesEnabled, const QString& dir, const QString& password);
-    void DetachVault(Vault *vault);
+    void DetachVault(std::shared_ptr<Vault> vault);
 
 signals:
-    void onVaultAdded(Vault* pVault);
-    void onVaultRemoved(Vault* vault);
+    void onVaultAdded(std::shared_ptr<Vault> vault);
+    void onVaultRemoved(std::shared_ptr<Vault> vault);
 
 private:
     VaultManager();
 
     static VaultManager instance;
-    QVector<Vault*> vaults;
+    QVector<std::shared_ptr<Vault>> vaults;
 };
 

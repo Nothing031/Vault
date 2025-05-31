@@ -26,12 +26,13 @@ public:
 
 
 private:
-    void AES256EncryptFile(FileInfo* file, const AES256Settings &aes, Error& error);
-    void AES256DecryptFile(FileInfo* file, const AES256Settings &aes, Error& error);
+    void AES256EncryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error);
+    void AES256DecryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error);
 
 public:
-    void AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes);
-    void AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes);
+    void AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes);
+    void AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes);
+
 signals:
     void onEvent(Event event, QVariant param);
 

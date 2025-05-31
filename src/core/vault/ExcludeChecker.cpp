@@ -2,6 +2,8 @@
 
 #include <QJsonArray>
 
+#ifndef NO_EXCLUDE_CHECKER
+
 ExcludeChecker ExcludeChecker::FromJsonObject(const QJsonObject& object)
 {
     auto ParseArray = [](const QJsonArray& array) -> QVector<std::wstring>{
@@ -22,7 +24,6 @@ ExcludeChecker ExcludeChecker::FromJsonObject(const QJsonObject& object)
     checker.endsWith = ParseArray(object["ExcludeEndsWith"].toArray());
     return checker;
 }
-
 QJsonObject ExcludeChecker::ToJsonObject()
 {
     auto StringListToArray = [](const QVector<std::wstring>& list) -> QJsonArray{
@@ -41,7 +42,6 @@ QJsonObject ExcludeChecker::ToJsonObject()
     object["ExcludeEndsWith"] = StringListToArray(endsWith);
     return object;
 }
-
 bool ExcludeChecker::Enabled() const { return enabled; }
 void ExcludeChecker::SetEnabled(bool newEnabled) { enabled = newEnabled; }
 QStringList ExcludeChecker::ExactlySameAs() const {
@@ -105,4 +105,29 @@ void ExcludeChecker::SetEndsWith(const QStringList &newEndsWith) {
         endsWith.append(str.toStdWString());
     }
 }
+bool ExcludeChecker::Checker(const std::filesystem::path &path)
+{
+    // exactlySameAs
+    for (auto& str : std::as_const(exactlySameAs)){
 
+    }
+
+    // includes
+    for (auto& str : std::as_const(includes)){
+
+    }
+    // includes
+    for (auto& str : std::as_const(includes)){
+        startsWith;
+    }
+    // includes
+    for (auto& str : std::as_const(includes)){
+        endsWith;
+    }
+
+
+
+
+}
+
+#endif

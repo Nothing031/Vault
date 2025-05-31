@@ -1,6 +1,5 @@
-#include "VaultViewWindow.hpp"
-
-#include "ui_VaultViewWindow.h"
+#include "VaultApp_Viewer.hpp"
+#include "ui_VaultApp_Viewer.h"
 
 #pragma comment(lib,"dwmapi.lib")
 #include <dwmapi.h>
@@ -22,8 +21,8 @@
 #include "src/core/vault/VaultManager.hpp"
 
 
-VaultViewWindow::VaultViewWindow(Vault *pVault)
-    : ui(new Ui::VaultViewWindow),
+VaultApp_Viewer::VaultApp_Viewer(std::shared_ptr<Vault> pVault)
+    : ui(new Ui::VaultApp_Viewer),
     vault(pVault)
 {
     vault->owner = this;
@@ -56,13 +55,13 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
 
 
     // connect
-    connect(ui->fileListView, &FileListView::onSelectionChange, this, &VaultViewWindow::UpdateButton);
-    connect(ui->titleButton, &QPushButton::clicked, this, &VaultViewWindow::requestShowEntryWindow);
+    connect(ui->fileListView, &FileListView::onSelectionChange, this, &VaultApp_Viewer::UpdateButton);
+    connect(ui->titleButton, &QPushButton::clicked, this, &VaultApp_Viewer::requestShowEntryWindow);
     connect(ui->openPathButton, &QPushButton::clicked, this, [this](){ QDesktopServices::openUrl(QUrl(vault->directory.path())); });
-    connect(ui->settingsButton, &QPushButton::clicked, this, &VaultViewWindow::OpenSettings);
-    connect(ui->unlockButton, &QPushButton::clicked, this, &VaultViewWindow::TryUnlock);
-    connect(ui->encryptButton, &QPushButton::clicked, this, &VaultViewWindow::Encrypt);
-    connect(ui->decryptButton, &QPushButton::clicked, this, &VaultViewWindow::Decrypt);
+    connect(ui->settingsButton, &QPushButton::clicked, this, &VaultApp_Viewer::OpenSettings);
+    connect(ui->unlockButton, &QPushButton::clicked, this, &VaultApp_Viewer::TryUnlock);
+    connect(ui->encryptButton, &QPushButton::clicked, this, &VaultApp_Viewer::Encrypt);
+    connect(ui->decryptButton, &QPushButton::clicked, this, &VaultApp_Viewer::Decrypt);
 
 
     // load files
@@ -78,14 +77,14 @@ VaultViewWindow::VaultViewWindow(Vault *pVault)
     thread->start();
 }
 
-VaultViewWindow::~VaultViewWindow()
+VaultApp_Viewer::~VaultApp_Viewer()
 {
     vault->aes.Lock();
     vault->owner = &VaultManager::GetInstance();
     delete ui;
 }
 
-void VaultViewWindow::UpdateButton(int plains, int ciphers)
+void VaultApp_Viewer::UpdateButton(int plains, int ciphers)
 {
     if (plains == 0 && ciphers == 0){
         ui->encryptButton->setText("Encrypt vault");
@@ -128,12 +127,12 @@ void VaultViewWindow::UpdateButton(int plains, int ciphers)
     // }
 }
 
-void VaultViewWindow::OpenSettings()
+void VaultApp_Viewer::OpenSettings()
 {
 
 }
 
-void VaultViewWindow::TryUnlock()
+void VaultApp_Viewer::TryUnlock()
 {
     QDialog dialog(this);
     HWND hWnd = (HWND)dialog.winId();
@@ -211,12 +210,12 @@ QPushButton::pressed{background: rgb(40, 40, 40);}
     dialog.exec();
 }
 
-void VaultViewWindow::Encrypt()
+void VaultApp_Viewer::Encrypt()
 {
+    QVector<std::shared_ptr<FileInfo>> files = ui->fileListView->GetSelectedFiles();
     CryptoEngine* engine = new CryptoEngine();
-    QVector<FileInfo*> files = ui->fileListView->GetSelectedFiles();
     QThread* thread = QThread::create([engine, files, this](){
-        QQueue<FileInfo*> targets;
+        QQueue<std::shared_ptr<FileInfo>> targets;
         if (files.size()){
             for (auto& file : files){
                 if (file->state == FileInfo::PLAIN_GOOD)
@@ -231,18 +230,18 @@ void VaultViewWindow::Encrypt()
         engine->AES256EncryptFiles(targets, &vault->mutex, vault->aes);
     });
     connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
-    connect(engine, &CryptoEngine::onEvent, this, &VaultViewWindow::ProcessCryptoEngineMessage);
+    connect(engine, &CryptoEngine::onEvent, this, &VaultApp_Viewer::ProcessCryptoEngineMessage);
     connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     thread->start();
 }
 
-void VaultViewWindow::Decrypt()
+void VaultApp_Viewer::Decrypt()
 {
-    QVector<FileInfo*> files = ui->fileListView->GetSelectedFiles();
+    QVector<std::shared_ptr<FileInfo>> files = ui->fileListView->GetSelectedFiles();
     CryptoEngine* engine = new CryptoEngine();
     QThread* thread = QThread::create([engine, files, this](){
-        QQueue<FileInfo*> targets;
+        QQueue<std::shared_ptr<FileInfo>> targets;
         if (files.size()){
             for (auto& file : files){
                 if (file->state == FileInfo::CIPHER_GOOD)
@@ -257,13 +256,13 @@ void VaultViewWindow::Decrypt()
         engine->AES256DecryptFiles(targets, &vault->mutex, vault->aes);
     });
     connect(ui->suspendButton, &QPushButton::clicked, engine, &CryptoEngine::SuspendProcess);
-    connect(engine, &CryptoEngine::onEvent, this, &VaultViewWindow::ProcessCryptoEngineMessage);
+    connect(engine, &CryptoEngine::onEvent, this, &VaultApp_Viewer::ProcessCryptoEngineMessage);
     connect(thread, &QThread::finished, engine, &CryptoEngine::deleteLater);
     connect(thread, &QThread::finished, thread, &QThread::deleteLater);
     thread->start();
 }
 
-void VaultViewWindow::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVariant param)
+void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVariant param)
 {
     using cEvent = CryptoEngine::Event;
     switch (event){
@@ -304,18 +303,15 @@ void VaultViewWindow::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
     }
 }
 
-void VaultViewWindow::mousePressEvent(QMouseEvent *event)
+void VaultApp_Viewer::mousePressEvent(QMouseEvent *event)
 {
     QWidget *clicked = childAt(event->pos());
     if (!ui->fileListView->isAncestorOf(clicked)) {
         ui->fileListView->clearSelection();
         ui->fileListView->clearFocus();
-        ui->encryptButton->setText("Encrypt all");
-        ui->decryptButton->setText("Decrypt all");
+        ui->encryptButton->setText("Encrypt vault");
+        ui->decryptButton->setText("Decrypt vault");
     }
     QMainWindow::mousePressEvent(event);
 }
-
-
-
 

@@ -2,9 +2,6 @@
 
 
 #include <filesystem>
-
-#include "src/core/cryptography/Cryptography.hpp"
-
 namespace fs = std::filesystem;
 
 Vault::Vault()
@@ -14,7 +11,7 @@ Vault::Vault()
 
 Vault::~Vault()
 {
-    for (auto& file : files){ delete file; }
+
 }
 
 void Vault::LoadFiles()
@@ -32,6 +29,7 @@ void Vault::LoadFiles()
         files.clear();
         std::wstring root = directory.path().toStdWString();
         for (auto it = fs::recursive_directory_iterator(root); it != fs::recursive_directory_iterator(); ++it){
+            // ignore reserved folder
             if (it->is_directory() && it->path().filename() == L".vault"){
                 it.disable_recursion_pending();
                 continue;
@@ -39,7 +37,7 @@ void Vault::LoadFiles()
 
             if (it->is_regular_file()){
                 QFileInfo qinfo = QFileInfo(it->path());
-                FileInfo* file = new FileInfo;
+                std::shared_ptr<FileInfo> file = std::make_shared<FileInfo>();
 
                 file->path.absolutepath = qinfo.absoluteFilePath();
                 file->path.displayPath = directory.relativeFilePath(qinfo.absoluteFilePath());
@@ -47,7 +45,7 @@ void Vault::LoadFiles()
                 if (file->state == FileInfo::CIPHER_GOOD){
                     file->path.displayPath = file->path.displayPath.left(file->path.displayPath.size() - 4);
                 }
-                files.push_back(file);
+                files.append(file);
             }
         }
     } catch(fs::filesystem_error& e){
@@ -55,11 +53,11 @@ void Vault::LoadFiles()
         return;
     }
 
-    std::sort(files.begin(), files.end(), [](const FileInfo* a, const FileInfo* b){
+    std::sort(files.begin(), files.end(), [](const std::shared_ptr<FileInfo>& a, const std::shared_ptr<FileInfo>& b){
         return a->path.displayPath < b->path.displayPath;
     });
 
-    qDebug() << "[VAULT] Loading done";
+    qDebug() << "[VAULT] vault loaded";
     qDebug() << "  Elapsed time :" << timer.elapsed() << "ms";
     qDebug() << "  Files        :" << files.size();
 }

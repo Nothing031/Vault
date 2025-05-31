@@ -1,29 +1,27 @@
 #pragma once
-#include "ui_VaultEntryWindow.h"
 
 #include <QMainWindow>
 #include <QVector>
 #include <QPoint>
 #include <QPair>
 
-#include "VaultCreateNew.hpp"
-#include "VaultTitle.hpp"
-
 #include "src/core/vault/Vault.hpp"
+#include "src/widgets/VaultTitle.hpp"
+#include "src/widgets/VaultCreateNew.hpp"
 
 namespace Ui{
-class VaultEntryWindow;
+class VaultApp;
 }
 
-class VaultEntryWindow : public QMainWindow
+class VaultApp : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit VaultEntryWindow(QWidget *parent = nullptr);
-    ~VaultEntryWindow();
+    explicit VaultApp(QWidget *parent = nullptr);
+    ~VaultApp();
 
 private slots:
-    void OpenVault(Vault* vault);
+    void OpenVault(std::shared_ptr<Vault> vault);
     void StartCreateNewVault();
     void OpenFolder();
 
@@ -36,12 +34,12 @@ signals:
 
 
 private:
-    Ui::VaultEntryWindow *ui;
-    VaultTitle *vaultTitle;
-    VaultCreateNew *vaultCreateNew;
+    Ui::VaultApp *ui;
+    VaultTitle *vaultTitleWidget;
+    VaultCreateNew *vaultCreateNewWidget;
 
 
-    QVector<QPair<QMainWindow*, Vault*>> childWindows;
+    QVector<QPair<QMainWindow*, std::shared_ptr<Vault>>> childWindows;
 
     QPoint m_dragStartPos;
 };

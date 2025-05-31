@@ -2,24 +2,21 @@
 
 #include <QObject>
 #include "Vault.hpp"
+#include <memory>
 
 
 class VaultLoader : public QObject{
     Q_OBJECT
 public:
     enum Event{
-        None,
-        LoadSucceeded,
-        LoadFailed,
-        SaveSucceeded,
-        SaveFailed
+        CLEAN,
+        FAILED
     };
-
 
     static VaultLoader& GetInstance();
 
-    void LoadVault(Vault*);
-    void SaveVault(Vault*);
+    void LoadVault(std::shared_ptr<Vault>);
+    void SaveVault(std::shared_ptr<Vault>);
     Event GetLastError();
 
 signals:
@@ -29,5 +26,5 @@ private:
     VaultLoader();
     static VaultLoader instance;
 
-    Event lastError = None;
+    Event lastError = CLEAN;
 };

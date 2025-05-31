@@ -7,16 +7,15 @@
 #include "src/core/cryptography/CryptoEngine.hpp"
 
 namespace Ui{
-class VaultViewWindow;
+class VaultApp_Viewer;
 }
 
-class VaultViewWindow : public QMainWindow
+class VaultApp_Viewer : public QMainWindow
 {
     Q_OBJECT
 public:
-    explicit VaultViewWindow(Vault *vault);
-    ~VaultViewWindow();
-
+    explicit VaultApp_Viewer(std::shared_ptr<Vault>);
+    ~VaultApp_Viewer();
 
 private slots:
     void UpdateButton(int plains, int ciphers);
@@ -33,7 +32,7 @@ signals:
     void requestShowEntryWindow();
 
 private:
-    Ui::VaultViewWindow *ui;
-    Vault* vault;
+    Ui::VaultApp_Viewer *ui;
+    std::shared_ptr<Vault> vault;
 };
 

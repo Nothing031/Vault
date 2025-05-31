@@ -14,26 +14,25 @@
 class VaultButton : public QPushButton {
     Q_OBJECT
 public:
-    explicit VaultButton(Vault* vault, QWidget* parent = nullptr);
+    explicit VaultButton(std::shared_ptr<Vault> vault, QWidget* parent = nullptr);
 
     QSize sizeHint() const override;
 
-    Vault* getVault();
+    std::shared_ptr<Vault> getVault();
 
 public slots:
     void UpdateDirectory();
 
 signals:
     void onSizeHintChange(QSize sizehint, VaultButton* self);
-    void requestOpenVault(Vault* vault);
-    void requestDetachVault(Vault* vault);
-
+    void requestOpenVault(std::shared_ptr<Vault>);
+    void requestDetachVault(std::shared_ptr<Vault>);
 
 private slots:
     void contextMenuEvent(QContextMenuEvent *event) override;
 
 private:
-    Vault* m_vault;
+    std::shared_ptr<Vault> vault;
 
     QLabel* titleLabel;
     QLabel* subtitleLabel;
