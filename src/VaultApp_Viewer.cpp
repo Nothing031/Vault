@@ -20,7 +20,6 @@
 #include "src/widgets/FileListView.hpp"
 #include "src/core/vault/VaultManager.hpp"
 
-
 VaultApp_Viewer::VaultApp_Viewer(std::shared_ptr<Vault> pVault)
     : ui(new Ui::VaultApp_Viewer),
     vault(pVault)

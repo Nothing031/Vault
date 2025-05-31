@@ -26,7 +26,7 @@ QVector<std::shared_ptr<FileInfo>> FileListView::GetSelectedFiles()
     auto items = this->selectedIndexes();
     QVector<std::shared_ptr<FileInfo>> list;
     for (auto& item : items){
-        std::shared_ptr<FileInfo> file = item.data(Qt::UserRole).value<std::shared_ptr<FileInfo>>();
+        auto file = item.data(Qt::UserRole).value<std::shared_ptr<FileInfo>>();
         if (file){
             list.append(file);
         }else{
@@ -53,7 +53,7 @@ bool FileListView::event(QEvent* event){
                 return QListView::event(event);
             }
             FileInfoTooltipWidget* widget = new FileInfoTooltipWidget(f->path.absolutepath, nullptr);
-            widget->move(helpEvent->globalPos() - QPoint(+4, +4));
+            widget->move(helpEvent->globalPos() - QPoint(+6, +6));
             widget->show();
         }
     }
@@ -94,7 +94,8 @@ QPair<int, int> FileListView::getSelectionSizes()
     auto items = this->selectedIndexes();
     int plains = 0, ciphers = 0;
     for (auto& items : std::as_const(items)){
-        auto file = (FileInfo*)items.data(Qt::UserRole).value<void*>();
+        auto file = items.data(Qt::UserRole).value<std::shared_ptr<FileInfo>>();
+        if (!file) return QPair<int, int>(0, 0);
         if (file->state == FileInfo::PLAIN_GOOD)
             plains++;
         else

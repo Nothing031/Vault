@@ -7,11 +7,14 @@
 #include <QVBoxLayout>
 #include <QHBoxLayout>
 
-#include "WrappedLabel.hpp"
-
 #include "src/core/fileinfo/FileInfoLoader.hpp"
 
-// TODO : setdata bug fix
+// this may prints "QWindowsWindow::setGeometry: Unable to set geometry" error
+// you can fix this with set minimumHeight enough
+// but it makes ui horrible
+// let me know when you find a way to fix this shit
+// im just gonna ignore this print shit
+// who cares?
 
 FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
     : QWidget(parent)
@@ -29,36 +32,31 @@ FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
     }
     )");
 
-    QLabel* pathLabel = CreateLeftLabel("path");
-    QLabel* pathDirLabel = CreateRightLabel(path);
-    pathDirLabel->setWordWrap(true);
-
-    QHBoxLayout* pathLayout = new QHBoxLayout();
-    pathLayout->addWidget(pathLabel);
-    pathLayout->addWidget(pathDirLabel);
-
-    baseLayout = new QVBoxLayout();
-    baseLayout->setContentsMargins(10, 5, 10, 5);
-    baseLayout->addLayout(pathLayout);
-
-    QWidget* baseWidget = new QWidget();
-    baseWidget->setContentsMargins(0, 0, 0, 0);
-    baseWidget->setLayout(baseLayout);
-    baseWidget->setMinimumWidth(440);
-    baseWidget->setMaximumWidth(440);
-
+    // base
     QVBoxLayout* bottomLayout = new QVBoxLayout();
-    bottomLayout->addWidget(baseWidget);
     bottomLayout->setContentsMargins(0, 0, 0, 0);
-
     setLayout(bottomLayout);
 
+    baseWidget = new QWidget(this);
+    baseWidget->setContentsMargins(0, 0, 0, 0);
+    baseWidget->setMinimumWidth(440);
+    // baseWidget->setMaximumWidth(440);
+
+    baseWidget->setLayout(new QVBoxLayout());
+    baseWidget->layout()->setContentsMargins(10, 5, 10, 5);
+    layout()->addWidget(baseWidget);
+
+    // path label
+    QHBoxLayout* pathLayout = new QHBoxLayout();
+    QLabel* pathLabel = CreateLeftLabel("path", baseWidget);
+    QLabel* pathDirLabel = CreateRightLabel(path, baseWidget);
+    pathLayout->addWidget(pathLabel);
+    pathLayout->addWidget(pathDirLabel);
+    baseWidget->layout()->addItem(pathLayout);
+
     if (path.endsWith(".enc", Qt::CaseInsensitive)){
-        headerTempLayout = new QHBoxLayout();
-        headerTempLayout->addWidget(CreateLeftLabel("header"));
-        headerTempLayout->addWidget(CreateRightLabel("Loading..."));
-        headerTempLayout->setObjectName("headerLayout");
-        baseLayout->addLayout(headerTempLayout);
+        tempLoadingLabel = CreateRightLabel("Loading header...", baseWidget);
+        baseWidget->layout()->addWidget(tempLoadingLabel);
 
         // load data
         QThread* thread = QThread::create([path, this](){
@@ -73,70 +71,72 @@ FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
 FileInfoTooltipWidget::~FileInfoTooltipWidget()
 {
 
-
 }
 
 void FileInfoTooltipWidget::SetData(FileInfo::State state, FileHeader info, void* caller)
 {
     if (caller == this){
-        if (headerTempLayout){
-            baseLayout->removeItem(headerTempLayout);
+        if (tempLoadingLabel){
+            baseWidget->layout()->removeWidget(tempLoadingLabel);
+            tempLoadingLabel->deleteLater();
+            tempLoadingLabel = nullptr;
         }
+        QVBoxLayout* baseLayout = qobject_cast<QVBoxLayout*>(baseWidget->layout());
         if (state == FileInfo::CIPHER_HEADERNOTMATCH){
             // header does not match. file has been encrypted with different format
-            QLabel* label = new WrappedLabel("Header does not match. file has been encrypted with different password", nullptr);
-            label->setStyleSheet("border: 0px;");
-            label->setWordWrap(true);
+            QLabel* label = CreateRightLabel("Header does not match. file has been encrypted with different password", baseWidget);
             baseLayout->addWidget(label);
         }else if (state == FileInfo::UNKNOWN_SIGNATURENOTMATCH){
             // integrity failure;
-            QLabel * label = new WrappedLabel("file has been corrupted", nullptr);
-            label->setStyleSheet("border: 0px;");
-            label->setWordWrap(true);
+            QLabel* label = CreateRightLabel("file has been corrupted", baseWidget);
             baseLayout->addWidget(label);
         }else{
             // format version
             QHBoxLayout* layout = new QHBoxLayout();
-            layout->addWidget(CreateLeftLabel("version"));
-            layout->addWidget(CreateRightLabel(QString(info.version)));
+            layout->setSpacing(0);
+            layout->addWidget(CreateLeftLabel("version", baseWidget));
+            layout->addWidget(CreateRightLabel(QString(info.version), baseWidget));
             baseLayout->addLayout(layout);
             // salt
             layout = new QHBoxLayout();
-            layout->addWidget(CreateLeftLabel("salt"));
-            layout->addWidget(CreateRightLabel(info.salt.toBase64()));
+            layout->setSpacing(0);
+            layout->addWidget(CreateLeftLabel("salt", baseWidget));
+            layout->addWidget(CreateRightLabel(info.salt.toBase64(), baseWidget));
             baseLayout->addLayout(layout);
             // iteration
             layout = new QHBoxLayout();
-            layout->addWidget(CreateLeftLabel("iteration"));
-            layout->addWidget(CreateRightLabel(QString::number(info.iteration)));
+            layout->setSpacing(0);
+            layout->addWidget(CreateLeftLabel("iteration", baseWidget));
+            layout->addWidget(CreateRightLabel(QString::number(info.iteration), baseWidget));
             baseLayout->addLayout(layout);
             // hmac
             layout = new QHBoxLayout();
-            layout->addWidget(CreateLeftLabel("hmac"));
-            layout->addWidget(CreateRightLabel(info.hmac.toBase64()));
+            layout->setSpacing(0);
+            layout->addWidget(CreateLeftLabel("hmac", baseWidget));
+            layout->addWidget(CreateRightLabel(info.hmac.toBase64(), baseWidget));
             baseLayout->addLayout(layout);
             // iv
             layout = new QHBoxLayout();
-            layout->addWidget(CreateLeftLabel("iv"));
-            layout->addWidget(CreateRightLabel(info.iv.toBase64()));
+            layout->setSpacing(0);
+            layout->addWidget(CreateLeftLabel("iv", baseWidget));
+            layout->addWidget(CreateRightLabel(info.iv.toBase64(), baseWidget));
             baseLayout->addLayout(layout);
         }
     }
-    this->adjustSize();
-    this->show();
 }
 
-QLabel *FileInfoTooltipWidget::CreateLeftLabel(const QString &str)
+QLabel *FileInfoTooltipWidget::CreateLeftLabel(const QString &str, QWidget* parent)
 {
-    QLabel* label = new QLabel(str, nullptr);
+    QLabel* label = new QLabel(str, parent);
     label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     label->setStyleSheet("max-width: 60px; min-width: 60px; border: 0px");
     return label;
 }
 
-QLabel *FileInfoTooltipWidget::CreateRightLabel(const QString &str)
+QLabel *FileInfoTooltipWidget::CreateRightLabel(const QString &str, QWidget* parent)
 {
-    QLabel* label = new QLabel(str, nullptr);
+    QLabel* label = new QLabel(str, parent);
+    //label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
     label->setStyleSheet("border: 0px; color: rgb(220, 220, 220);");
     label->setWordWrap(true);
     return label;

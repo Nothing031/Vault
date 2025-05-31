@@ -17,8 +17,8 @@ private slots:
     void SetData(FileInfo::State state, FileHeader info, void* caller);
 
 private:
-    QLabel* CreateLeftLabel(const QString& str);
-    QLabel* CreateRightLabel(const QString& str);
+    QLabel* CreateLeftLabel(const QString& str, QWidget* parent);
+    QLabel* CreateRightLabel(const QString& str, QWidget* parent);
 
 protected:
     void leaveEvent(QEvent* event) override;
@@ -26,6 +26,6 @@ protected:
 signals:
 
 private:
-    QVBoxLayout *baseLayout = nullptr;
-    QHBoxLayout *headerTempLayout = nullptr;
+    QWidget *baseWidget = nullptr;
+    QLabel *tempLoadingLabel = nullptr;
 };
