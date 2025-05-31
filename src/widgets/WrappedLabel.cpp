@@ -71,3 +71,8 @@ QSize WrappedLabel::sizeHint() const
     return QSize(width(), static_cast<int>(height));
 }
 
+QSize WrappedLabel::minimumSizeHint() const
+{
+    return sizeHint();
+}
+

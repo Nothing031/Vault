@@ -5,6 +5,10 @@
 #include <QVector>
 #include <string>
 
+#include <filesystem>
+
+#define NO_EXCLUDE_CHECKER
+#ifndef NO_EXCLUDE_CHECKER
 class ExcludeChecker{
 public:
     static ExcludeChecker FromJsonObject(const QJsonObject&);
@@ -22,6 +26,8 @@ public:
     QStringList EndsWith() const;
     void SetEndsWith(const QStringList &newEndsWith);
 
+    bool Checker(const std::filesystem::path& path);
+
 private:
     bool enabled;
     QVector<std::wstring> exactlySameAs;
@@ -29,7 +35,7 @@ private:
     QVector<std::wstring> startsWith;
     QVector<std::wstring> endsWith;
 };
-
+#endif
 
 
 

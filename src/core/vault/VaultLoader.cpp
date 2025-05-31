@@ -2,6 +2,7 @@
 
 #include <QFile>
 #include <QJsonObject>
+#include <memory>
 
 VaultLoader VaultLoader::instance;
 
@@ -15,7 +16,7 @@ VaultLoader &VaultLoader::GetInstance()
     return instance;
 }
 
-void VaultLoader::LoadVault(Vault* vault)
+void VaultLoader::LoadVault(std::shared_ptr<Vault> vault)
 {
     QFile file(vault->directory.path() + "/.vault/vault.json");
 
@@ -28,21 +29,20 @@ void VaultLoader::LoadVault(Vault* vault)
         QJsonObject excludeObj = jObj["ExcludeSettings"].toObject();
         QJsonObject aesObj = jObj["EncryptionSettings"].toObject();
         vault->appVersion = jObj["AppVersion"].toString("UNKNOWN");
-        vault->formatVersion = jObj["FormatVersion"].toString("UNKNOWN");
+        vault->saveFormatVersion = jObj["FormatVersion"].toString("UNKNOWN");
         vault->aes = AES256Settings::FromJsonObject(aesObj);
-        vault->excludeChecker = ExcludeChecker::FromJsonObject(excludeObj);
 
-        lastError = LoadSucceeded;
-        emit onEvent(LoadSucceeded);
+        lastError = CLEAN;
+        emit onEvent(CLEAN);
         qDebug() << "Load Succeeded";
     }else{
-        lastError = LoadFailed;
-        emit onEvent(LoadFailed);
+        lastError = FAILED;
+        emit onEvent(FAILED);
         qDebug() << "Load Failed";
     }
 }
 
-void VaultLoader::SaveVault(Vault* vault)
+void VaultLoader::SaveVault(std::shared_ptr<Vault> vault)
 {
     if (QDir().exists(vault->directory.path() + "/.vault"))
         QDir().mkpath(vault->directory.path() + "/.vault");
@@ -52,19 +52,18 @@ void VaultLoader::SaveVault(Vault* vault)
     if (file.open(QFile::WriteOnly | QFile::Truncate)){
         QJsonObject jObj;
         jObj["AppVersion"] = vault->appVersion;
-        jObj["FormatVersion"] = vault->formatVersion;
+        jObj["FormatVersion"] = vault->saveFormatVersion;
         jObj["EncryptionSettings"] = vault->aes.ToJsonObject();
-        jObj["ExcludeSettings"] = vault->excludeChecker.ToJsonObject();
 
         QJsonDocument jDoc(jObj);
         file.write(jDoc.toJson());
         file.close();
-        lastError = SaveSucceeded;
-        emit onEvent(SaveSucceeded);
+        lastError = CLEAN;
+        emit onEvent(CLEAN);
         qDebug() << "Save Succeeded";
     }else{
-        lastError = SaveFailed;
-        emit onEvent(SaveFailed);
+        lastError = FAILED;
+        emit onEvent(FAILED);
         qDebug() << "Save Failed";
     }
 }

@@ -27,7 +27,7 @@ CryptoEngine::~CryptoEngine()
 
 }
 
-void CryptoEngine::AES256EncryptFile(FileInfo* file, const AES256Settings &aes, Error& error){
+void CryptoEngine::AES256EncryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -77,7 +77,7 @@ void CryptoEngine::AES256EncryptFile(FileInfo* file, const AES256Settings &aes, 
     return;
 }
 
-void CryptoEngine::AES256DecryptFile(FileInfo* file, const AES256Settings &aes, Error& error){
+void CryptoEngine::AES256DecryptFile(std::shared_ptr<FileInfo> file, const AES256Settings &aes, Error& error){
     // read
     QFile f(file->path.absolutepath);
     if (!f.exists()){
@@ -131,7 +131,7 @@ void CryptoEngine::AES256DecryptFile(FileInfo* file, const AES256Settings &aes, 
     return;
 }
 
-void CryptoEngine::AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes)
+void CryptoEngine::AES256EncryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes)
 {
     run = true;
     // check
@@ -139,7 +139,7 @@ void CryptoEngine::AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, c
         emit onEvent(MESSAGE_SINGLE, QVariant("No any file to encrypt"));
         return;
     }
-    if (!mutex->tryLock()){
+    if (!mutex->tryLock(1000)){
         emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start encryption" END_SUBFIX));
         emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
         return;
@@ -166,7 +166,7 @@ void CryptoEngine::AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, c
     for (int i = 0; i < threadCount; i++){
         QThread* thread = QThread::create([&](){
             while(true){
-                FileInfo* file;
+                std::shared_ptr<FileInfo> file;
                 {   // queue mutex scope
                     QMutexLocker<QMutex> lock(&queueMutex);
                     if (files.isEmpty() || !run) goto final;
@@ -227,7 +227,7 @@ void CryptoEngine::AES256EncryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, c
     mutex->unlock();
 }
 
-void CryptoEngine::AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, const AES256Settings aes)
+void CryptoEngine::AES256DecryptFiles(QQueue<std::shared_ptr<FileInfo>> &files, QMutex* mutex, const AES256Settings aes)
 {
     run = true;
     // check
@@ -235,7 +235,7 @@ void CryptoEngine::AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, c
         emit onEvent(MESSAGE_SINGLE, QVariant("No any file to decrypt"));
         return;
     }
-    if (!mutex->tryLock()){
+    if (!mutex->tryLock(1000)){
         emit onEvent(MESSAGE_SINGLE, QVariant(RED_PREFIX "Error failed to start decryption" END_SUBFIX));
         emit onEvent(MESSAGE_SINGLE, QVariant("The vault is already on progress"));
         return;
@@ -263,7 +263,7 @@ void CryptoEngine::AES256DecryptFiles(QQueue<FileInfo*> &files, QMutex* mutex, c
     for (int i = 0; i < threadCount; i++){
         QThread* thread = QThread::create([&](){
             while(true){
-                FileInfo* file;
+                std::shared_ptr<FileInfo> file;
                 {   // queue mutex scope
                     QMutexLocker<QMutex> lock(&queueMutex);
                     if (files.isEmpty() || !run) goto final;

@@ -12,16 +12,16 @@ class FileListView : public QListView
 public:
     explicit FileListView(QWidget* parent = nullptr);
 
-signals:
-    void onSelectionChange(int plains, int ciphers);
 
-public:
     //QVector<FileInfo*> SelectedFiles();
-    void SetModelVault(Vault* vault);
-    QVector<FileInfo*> GetSelectedFiles();
+    void SetModelVault(std::shared_ptr<Vault> vault);
+    QVector<std::shared_ptr<FileInfo>> GetSelectedFiles();
 
 private:
-    //void setModel(QAbstractListModel* model);
+    void setModel(QAbstractListModel* model) = delete;
+
+signals:
+    void onSelectionChange(int plains, int ciphers);
 
 protected:
     bool event(QEvent* event) override;
@@ -31,6 +31,5 @@ protected:
 private:
     FileListModel* model;
     QPair<int, int> getSelectionSizes();
-
 };
 

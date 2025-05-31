@@ -4,6 +4,7 @@
 #include <QHBoxLayout>
 
 #include "src/core/fileinfo/FileHeader.hpp"
+#include "WrappedLabel.hpp"
 
 class FileInfoTooltipWidget : public QWidget
 {
@@ -12,10 +13,12 @@ public:
     explicit FileInfoTooltipWidget(QString path ,QWidget *parent = nullptr);
     ~FileInfoTooltipWidget();
 
-
 private slots:
     void SetData(FileInfo::State state, FileHeader info, void* caller);
 
+private:
+    QLabel* CreateLeftLabel(const QString& str);
+    QLabel* CreateRightLabel(const QString& str);
 
 protected:
     void leaveEvent(QEvent* event) override;

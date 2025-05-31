@@ -15,7 +15,7 @@ class FileListModel : public QAbstractListModel {
     Q_OBJECT
 
 private:
-    Vault* pVault = nullptr;
+    std::shared_ptr<Vault> vault = nullptr;
 
     inline static const QBrush m_brushDarkRed = QBrush(QColor(150, 0, 0));
     inline static const QBrush m_brushRed = QBrush(QColor(255, 55, 55));
@@ -25,7 +25,7 @@ private:
 public slots:
     void reset(){
         beginResetModel();
-        this->pVault = nullptr;
+        vault = nullptr;
         endResetModel();
     }
 
@@ -39,27 +39,26 @@ public:
         endResetModel();
     }
 
-    void setVault(Vault* pVault){
+    void setVault(std::shared_ptr<Vault> vault){
         beginResetModel();
-        this->pVault = pVault;
+        this->vault = vault;
         endResetModel();
     }
 
     int rowCount(const QModelIndex &parent = QModelIndex()) const override {
         Q_UNUSED(parent);
-        return pVault ? pVault->files.size() : 0;
+        return vault ? vault->files.size() : 0;
     }
 
     QVariant data(const QModelIndex &index, int role = Qt::DisplayRole) const override {
-        if (!index.isValid() || index.row() >= pVault->files.size() || !pVault)
+        if (!index.isValid() || index.row() >= vault->files.size() || !vault)
             return QVariant();
 
-        if (role == Qt::DisplayRole) {
-            return pVault->files.at(index.row())->path.displayPath;
-        }
+        if (role == Qt::DisplayRole)
+            return vault->files.at(index.row())->path.displayPath;
 
         if (role == Qt::ForegroundRole){
-            const FileInfo* file = pVault->files.at(index.row());
+            const auto& file = vault->files.at(index.row());
             if (!file)                                                  return QVariant();
             if (file->state == FileInfo::UNKNOWN_SIGNATURENOTMATCH)     return m_brushDarkRed;
             if (file->state == FileInfo::CIPHER_HEADERNOTMATCH)         return m_brushRed;
@@ -68,11 +67,9 @@ public:
         }
 
         if (role == Qt::UserRole){
-            const FileInfo* file = pVault->files.at(index.row());
-            return QVariant::fromValue((void*)file);
+            return QVariant::fromValue(vault->files.at(index.row()));
         }
 
         return QVariant();
     }
 };
-

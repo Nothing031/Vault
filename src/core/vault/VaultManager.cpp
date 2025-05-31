@@ -16,7 +16,6 @@ VaultManager::VaultManager()
 VaultManager::~VaultManager()
 {
     SaveData();
-    for (auto& vault : vaults) { delete vault; }
 }
 
 VaultManager& VaultManager::GetInstance()
@@ -24,7 +23,7 @@ VaultManager& VaultManager::GetInstance()
     return instance;
 }
 
-Vault* VaultManager::GetVault(int index)
+std::shared_ptr<Vault> VaultManager::GetVault(int index)
 {
     if (0 > index || index >= vaults.size())
         return vaults[index];
@@ -32,27 +31,12 @@ Vault* VaultManager::GetVault(int index)
         return nullptr;
 }
 
-
-void VaultManager::DetachVault(Vault* vault)
-{
-    if (vault->owner != this){
-        qDebug() << "owner has been changed Failed to delete";
-        return;
-    }
-
-    for (int i = 0; i < vaults.size(); i++){
-        if (vaults[i] == vault){
-            vaults.remove(i, 1);
-            delete vault;
-            emit onVaultRemoved(vault);
-        }
-    }
-}
-
 void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const QString &password)
 {
-    Vault* vault = new Vault;
+    std::shared_ptr<Vault> vault = std::make_shared<Vault>();
     vault->owner = this;
+    vault->directory = QDir(dir);
+
     if (aesEnabled){
         vault->aes.SetEnabled(true);
         QByteArray salt(FileHeader::Sizes::salt, 0);
@@ -74,12 +58,27 @@ void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const
     VaultLoader& loader = VaultLoader::GetInstance();
     loader.SaveVault(vault);
     VaultLoader::Event error = loader.GetLastError();
-    if (error == VaultLoader::SaveFailed){
+    if (error == VaultLoader::FAILED){
         throw std::exception("Failed to create vault");
     }
 
     vaults.append(vault);
     emit onVaultAdded(vault);
+}
+
+void VaultManager::DetachVault(std::shared_ptr<Vault> vault)
+{
+    if (vault->owner != this){
+        qDebug() << "owner has been changed Failed to delete";
+        return;
+    }
+
+    for (int i = 0; i < vaults.size(); i++){
+        if (vaults[i] == vault){
+            vaults.remove(i, 1);
+            emit onVaultRemoved(vault);
+        }
+    }
 }
 
 void VaultManager::LoadData()
@@ -98,12 +97,12 @@ void VaultManager::LoadData()
         auto vaultObj = vaultVal.toObject();
         QString vaultDir = vaultObj["directory"].toString("");
 
-        Vault* vault = new Vault;
+        std::shared_ptr<Vault> vault = std::make_shared<Vault>();
         vault->owner = this;
         vault->directory = vaultDir;
         loader.LoadVault(vault);
         VaultLoader::Event error = loader.GetLastError();
-        if (error == VaultLoader::LoadFailed){
+        if (error == VaultLoader::FAILED){
             qDebug() << "Failed to laod vault : " << vault->directory;
         }
         else{

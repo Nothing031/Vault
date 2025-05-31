@@ -18,13 +18,13 @@ public:
 private:
 
 
-private slots:
-    void addVaultButton(Vault* button);
-    void removeVaultButton(Vault* vault);
-
+public slots:
+    void addVaultButton(std::shared_ptr<Vault> vault);
+    void removeVaultButton(std::shared_ptr<Vault> vault);
 
 signals:
-    void requestOpenVault(Vault* vault);
+    void requestOpenVault(std::shared_ptr<Vault> vault);
+    void requestDetachVault(std::shared_ptr<Vault> vault);
 
 private:
 

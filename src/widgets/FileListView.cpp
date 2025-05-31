@@ -16,18 +16,22 @@ FileListView::FileListView(QWidget* parent):
     QListView::setModel(model);
 }
 
-void FileListView::SetModelVault(Vault *vault)
+void FileListView::SetModelVault(std::shared_ptr<Vault> vault)
 {
     model->setVault(vault);
 }
 
-QVector<FileInfo*> FileListView::GetSelectedFiles()
+QVector<std::shared_ptr<FileInfo>> FileListView::GetSelectedFiles()
 {
     auto items = this->selectedIndexes();
-    QVector<FileInfo*> list;
+    QVector<std::shared_ptr<FileInfo>> list;
     for (auto& item : items){
-        FileInfo* file = (FileInfo*)item.data(Qt::UserRole).value<void*>();
-        list.append(file);
+        std::shared_ptr<FileInfo> file = item.data(Qt::UserRole).value<std::shared_ptr<FileInfo>>();
+        if (file){
+            list.append(file);
+        }else{
+            qDebug() << "GetSelectedFiles() variant conversion error, got nullptr";
+        }
     }
     return list;
 }
@@ -43,7 +47,11 @@ bool FileListView::event(QEvent* event){
         auto* helpEvent = static_cast<QHelpEvent*>(event);
         auto item = indexAt(helpEvent->pos());
         if (item.isValid()){
-            FileInfo* f = (FileInfo*)item.data(Qt::UserRole).value<void*>();
+            auto f = item.data(Qt::UserRole).value<std::shared_ptr<FileInfo>>();
+            if (!f){
+                qDebug() << "error got nullptr from QVariant to std::shared_ptr<FileInfo> conversion";
+                return QListView::event(event);
+            }
             FileInfoTooltipWidget* widget = new FileInfoTooltipWidget(f->path.absolutepath, nullptr);
             widget->move(helpEvent->globalPos() - QPoint(+4, +4));
             widget->show();

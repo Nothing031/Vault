@@ -1,6 +1,8 @@
 #pragma once
 
 #include <QString>
+#include <QMetaType>
+#include <memory>
 
 struct FileInfo{
     enum State{
@@ -18,3 +20,5 @@ struct FileInfo{
     State state = UNKNOWN_NONE;
     FilePath path;
 };
+
+Q_DECLARE_METATYPE(std::shared_ptr<FileInfo>)

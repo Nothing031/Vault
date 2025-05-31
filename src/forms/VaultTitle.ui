@@ -101,7 +101,7 @@ QLabel{
    <item row="0" column="0">
     <widget class="QLabel" name="MainLabel">
      <property name="sizePolicy">
-      <sizepolicy hsizetype="Expanding" vsizetype="Fixed">
+      <sizepolicy hsizetype="Expanding" vsizetype="Preferred">
        <horstretch>0</horstretch>
        <verstretch>0</verstretch>
       </sizepolicy>
@@ -109,13 +109,13 @@ QLabel{
      <property name="minimumSize">
       <size>
        <width>0</width>
-       <height>100</height>
+       <height>140</height>
       </size>
      </property>
      <property name="maximumSize">
       <size>
        <width>16777215</width>
-       <height>100</height>
+       <height>16777215</height>
       </size>
      </property>
      <property name="font">
@@ -198,6 +198,9 @@ QLabel{
     <spacer name="verticalSpacer">
      <property name="orientation">
       <enum>Qt::Orientation::Vertical</enum>
+     </property>
+     <property name="sizeType">
+      <enum>QSizePolicy::Policy::Expanding</enum>
      </property>
      <property name="sizeHint" stdset="0">
       <size>

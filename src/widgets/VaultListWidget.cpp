@@ -7,16 +7,12 @@
 VaultListWidget::VaultListWidget(QWidget* parent)
     :QListWidget(parent)
 {
-    VaultManager* manager = &VaultManager::GetInstance();
-    connect(manager, &VaultManager::onVaultAdded, this, &VaultListWidget::addVaultButton);
-    connect(manager, &VaultManager::onVaultRemoved, this, &VaultListWidget::removeVaultButton);
-
     setVerticalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setHorizontalScrollBarPolicy(Qt::ScrollBarAlwaysOff);
     setVerticalScrollMode(ScrollMode::ScrollPerPixel);
 }
 
-void VaultListWidget::addVaultButton(Vault *vault)
+void VaultListWidget::addVaultButton(std::shared_ptr<Vault> vault)
 {
     VaultButton* button = new VaultButton(vault, this);
     QListWidgetItem* item = new QListWidgetItem(this);
@@ -35,7 +31,7 @@ void VaultListWidget::addVaultButton(Vault *vault)
     });
 }
 
-void VaultListWidget::removeVaultButton(Vault *vault)
+void VaultListWidget::removeVaultButton(std::shared_ptr<Vault> vault)
 {
     for (int i = 0; i < count(); ++i) {
         if (qobject_cast<VaultButton* >(itemWidget(item(i)))->getVault() == vault) {

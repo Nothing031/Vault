@@ -29,11 +29,8 @@ FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
     }
     )");
 
-    QLabel* pathLabel = new QLabel("path");
-    pathLabel->setStyleSheet("max-width: 60px; min-width: 60px; border: 0px");
-    pathLabel->setAlignment(Qt::AlignTop);
-    QLabel* pathDirLabel = new QLabel(path);
-    pathDirLabel->setStyleSheet("border: 0px;");
+    QLabel* pathLabel = CreateLeftLabel("path");
+    QLabel* pathDirLabel = CreateRightLabel(path);
     pathDirLabel->setWordWrap(true);
 
     QHBoxLayout* pathLayout = new QHBoxLayout();
@@ -47,8 +44,8 @@ FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
     QWidget* baseWidget = new QWidget();
     baseWidget->setContentsMargins(0, 0, 0, 0);
     baseWidget->setLayout(baseLayout);
-    baseWidget->setMinimumWidth(300);
-    baseWidget->setMaximumWidth(300);
+    baseWidget->setMinimumWidth(440);
+    baseWidget->setMaximumWidth(440);
 
     QVBoxLayout* bottomLayout = new QVBoxLayout();
     bottomLayout->addWidget(baseWidget);
@@ -57,14 +54,9 @@ FileInfoTooltipWidget::FileInfoTooltipWidget(QString path, QWidget *parent)
     setLayout(bottomLayout);
 
     if (path.endsWith(".enc", Qt::CaseInsensitive)){
-        QLabel* headerLabel = new QLabel("header");
-        headerLabel->setStyleSheet("max-width: 60px; min-width: 60px; border: 0px");
-        headerLabel->setAlignment(Qt::AlignTop);
-        QLabel* loadingLabel = new QLabel("Loading...");
-        loadingLabel->setStyleSheet("border: 0px;");
         headerTempLayout = new QHBoxLayout();
-        headerTempLayout->addWidget(headerLabel);
-        headerTempLayout->addWidget(loadingLabel);
+        headerTempLayout->addWidget(CreateLeftLabel("header"));
+        headerTempLayout->addWidget(CreateRightLabel("Loading..."));
         headerTempLayout->setObjectName("headerLayout");
         baseLayout->addLayout(headerTempLayout);
 
@@ -88,69 +80,71 @@ void FileInfoTooltipWidget::SetData(FileInfo::State state, FileHeader info, void
 {
     if (caller == this){
         if (headerTempLayout){
-            qDebug() << "deleting layout";
-            delete headerTempLayout;
+            baseLayout->removeItem(headerTempLayout);
         }
         if (state == FileInfo::CIPHER_HEADERNOTMATCH){
             // header does not match. file has been encrypted with different format
-            QLabel* label = new WrappedLabel("Header does not match. file has been encrypted with different password");
+            QLabel* label = new WrappedLabel("Header does not match. file has been encrypted with different password", nullptr);
             label->setStyleSheet("border: 0px;");
             label->setWordWrap(true);
             baseLayout->addWidget(label);
         }else if (state == FileInfo::UNKNOWN_SIGNATURENOTMATCH){
             // integrity failure;
-            QLabel * label = new WrappedLabel("file has been corrupted");
+            QLabel * label = new WrappedLabel("file has been corrupted", nullptr);
             label->setStyleSheet("border: 0px;");
             label->setWordWrap(true);
             baseLayout->addWidget(label);
         }else{
-            QLabel* label = new QLabel("version");
-            QLabel* infoLabel = new QLabel(QString(info.version));
-            QHBoxLayout* layout = new QHBoxLayout();
             // format version
-            label->setStyleSheet("border: 0px");
-            infoLabel->setStyleSheet("border: 0px");
-            layout->addWidget(label);
-            layout->addWidget(infoLabel);
+            QHBoxLayout* layout = new QHBoxLayout();
+            layout->addWidget(CreateLeftLabel("version"));
+            layout->addWidget(CreateRightLabel(QString(info.version)));
             baseLayout->addLayout(layout);
             // salt
-            label = new QLabel("salt");
-            infoLabel = new QLabel(info.salt.toBase64());
-            label->setStyleSheet("border: 0px");
-            infoLabel->setStyleSheet("border: 0px");
-            layout->addWidget(label);
-            layout->addWidget(infoLabel);
+            layout = new QHBoxLayout();
+            layout->addWidget(CreateLeftLabel("salt"));
+            layout->addWidget(CreateRightLabel(info.salt.toBase64()));
             baseLayout->addLayout(layout);
             // iteration
-            label = new QLabel("iterations");
-            infoLabel = new QLabel(QString::number(info.iteration));
-            label->setStyleSheet("border: 0px");
-            infoLabel->setStyleSheet("border: 0px");
-            layout->addWidget(label);
-            layout->addWidget(infoLabel);
+            layout = new QHBoxLayout();
+            layout->addWidget(CreateLeftLabel("iteration"));
+            layout->addWidget(CreateRightLabel(QString::number(info.iteration)));
             baseLayout->addLayout(layout);
             // hmac
-            label = new QLabel("hmac");
-            infoLabel = new QLabel(info.hmac.toBase64());
-            label->setStyleSheet("border: 0px");
-            infoLabel->setStyleSheet("border: 0px");
-            layout->addWidget(label);
-            layout->addWidget(infoLabel);
+            layout = new QHBoxLayout();
+            layout->addWidget(CreateLeftLabel("hmac"));
+            layout->addWidget(CreateRightLabel(info.hmac.toBase64()));
             baseLayout->addLayout(layout);
             // iv
-            label = new QLabel("iv");
-            infoLabel = new QLabel(info.iv.toBase64());
-            label->setStyleSheet("border: 0px");
-            infoLabel->setStyleSheet("border: 0px");
-            layout->addWidget(label);
-            layout->addWidget(infoLabel);
+            layout = new QHBoxLayout();
+            layout->addWidget(CreateLeftLabel("iv"));
+            layout->addWidget(CreateRightLabel(info.iv.toBase64()));
             baseLayout->addLayout(layout);
         }
     }
+    this->adjustSize();
+    this->show();
+}
+
+QLabel *FileInfoTooltipWidget::CreateLeftLabel(const QString &str)
+{
+    QLabel* label = new QLabel(str, nullptr);
+    label->setAlignment(Qt::AlignLeft | Qt::AlignTop);
+    label->setStyleSheet("max-width: 60px; min-width: 60px; border: 0px");
+    return label;
+}
+
+QLabel *FileInfoTooltipWidget::CreateRightLabel(const QString &str)
+{
+    QLabel* label = new QLabel(str, nullptr);
+    label->setStyleSheet("border: 0px; color: rgb(220, 220, 220);");
+    label->setWordWrap(true);
+    return label;
 }
 
 void FileInfoTooltipWidget::leaveEvent(QEvent *event)
 {
+    Q_UNUSED(event);
     close();
 }
 

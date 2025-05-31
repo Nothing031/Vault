@@ -28,6 +28,7 @@ void FileInfoLoader::LoadInfoSingle(QString path, void* caller)
             FileHeader header;
             auto state = header.Deserialize(data);
             emit onSingleInfoLoaded(state, header, caller);
+            return;
         }
     }
     FileHeader header;

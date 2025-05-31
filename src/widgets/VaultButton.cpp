@@ -14,12 +14,10 @@
 #include "WrappedLabel.hpp"
 #include "Menu.hpp"
 
-VaultButton::VaultButton(Vault* vault, QWidget* parent)
+VaultButton::VaultButton(std::shared_ptr<Vault> s_vault, QWidget* parent)
     : QPushButton(parent),
-    m_vault(nullptr)
+    vault(s_vault)
 {
-    this->m_vault = vault;
-
     this->setMaximumWidth(300);
     this->setMinimumWidth(300);
     this->setStyleSheet(R"(
@@ -74,15 +72,15 @@ QSize VaultButton::sizeHint() const
     return QSize(300 , titleLabel->sizeHint().height() + subtitleLabel->sizeHint().height() + 20 + 20 + 5);
 }
 
-Vault *VaultButton::getVault()
+std::shared_ptr<Vault> VaultButton::getVault()
 {
-    return m_vault;
+    return vault;
 }
 
 void VaultButton::UpdateDirectory()
 {
-    titleLabel->setText(QUrl(m_vault->directory.path()).fileName());
-    subtitleLabel->setText(m_vault->directory.path());
+    titleLabel->setText(QUrl(vault->directory.path()).fileName());
+    subtitleLabel->setText(vault->directory.path());
     int margin = 20;
     int spacing = 5;
     QSize size(this->sizeHint().width(),
@@ -94,21 +92,21 @@ void VaultButton::contextMenuEvent(QContextMenuEvent *event)
 {
     Menu menu;
     QAction* openAction = new QAction("open", &menu);
-    QAction* deleteAction = new QAction("delete", &menu);
+    QAction* detachAction = new QAction("detach", &menu);
     QAction* openPathAction = new QAction("open path", &menu);
     menu.addAction(openAction);
     menu.addAction(openPathAction);
     menu.addSeparator();
-    menu.addAction(deleteAction);
+    menu.addAction(detachAction);
 
     connect(openAction, &QAction::triggered, this, [this](){
-        emit requestOpenVault(m_vault);
+        emit requestOpenVault(vault);
     });
     connect(openPathAction, &QAction::triggered, this, [this](){
-        QDesktopServices::openUrl(QUrl(m_vault->directory.path()));
+        QDesktopServices::openUrl(QUrl(vault->directory.path()));
     });
-    connect(deleteAction, &QAction::triggered, this, [this](){
-        emit requestDetachVault(m_vault);
+    connect(detachAction, &QAction::triggered, this, [this](){
+        emit requestDetachVault(vault);
     });
 
     menu.exec(event->globalPos());
