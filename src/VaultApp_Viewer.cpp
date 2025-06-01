@@ -54,6 +54,7 @@ VaultApp_Viewer::VaultApp_Viewer(std::shared_ptr<Vault> pVault)
 
 
     // connect
+    connect(ui->refreshButton, &QPushButton::clicked, this, &VaultApp_Viewer::RefreshVaultFiles);
     connect(ui->fileListView, &FileListView::onSelectionChange, this, &VaultApp_Viewer::UpdateButton);
     connect(ui->titleButton, &QPushButton::clicked, this, &VaultApp_Viewer::requestShowEntryWindow);
     connect(ui->openPathButton, &QPushButton::clicked, this, [this](){ QDesktopServices::openUrl(QUrl(vault->directory.path())); });
@@ -252,6 +253,7 @@ void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
     case cEvent::START:
         // set ui
         ui->suspendButton->setEnabled(true);
+        ui->refreshButton->setEnabled(false);
         ui->encryptButton->setEnabled(false);
         ui->decryptButton->setEnabled(false);
         ui->settingsButton->setEnabled(false);
@@ -262,6 +264,7 @@ void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
     case cEvent::END:
         // set ui
         ui->suspendButton->setEnabled(false);
+        ui->refreshButton->setEnabled(true);
         ui->settingsButton->setEnabled(true);
         ui->encryptButton->setEnabled(true);
         ui->decryptButton->setEnabled(true);
@@ -289,6 +292,23 @@ void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
         ui->terminalTextBrowser->clear();
         break;
     }
+}
+
+void VaultApp_Viewer::RefreshVaultFiles()
+{
+    QThread* thread = QThread::create([this](){
+        vault->LoadFiles();
+    });
+    connect(thread, &QThread::finished, this, [this](){
+        ui->fileListView->SetModelVault(vault);
+        ui->refreshButton->setEnabled(true);
+        ui->terminalTextBrowser->clear();
+    });
+    connect(thread, &QThread::finished, thread, &QThread::deleteLater);
+    ui->refreshButton->setEnabled(false);
+    ui->fileListView->SetModelVault(nullptr);
+    ui->terminalTextBrowser->append("Loading files...");
+    thread->start();
 }
 
 void VaultApp_Viewer::mousePressEvent(QMouseEvent *event)

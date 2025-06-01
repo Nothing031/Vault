@@ -1,15 +1,11 @@
 #include "AnimatedProgressBar.hpp"
 
-
-
 AnimatedProgressBar::AnimatedProgressBar(QWidget *parent) :
     QProgressBar(parent),
     animation(new QPropertyAnimation(this, "chunkColor", this))
 {
 
 }
-
-
 
 void AnimatedProgressBar::setAnimationProperty(const QColor &base, const QColor &start, const QColor &end, const int &duration)
 {
@@ -32,14 +28,10 @@ void AnimatedProgressBar::stopAnimation()
     updateStyleSheet();
 }
 
-
-
 QColor AnimatedProgressBar::_chunkColor() const
 {
     return m_chunkColor;
 }
-
-
 
 void AnimatedProgressBar::_setChunkColor(const QColor &color)
 {
@@ -57,4 +49,3 @@ void AnimatedProgressBar::updateStyleSheet()
                         .arg(m_chunkColor.alpha());
     this->setStyleSheet(style);
 }
-

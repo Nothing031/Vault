@@ -36,8 +36,6 @@ HEADERS += \
     src/Manifest.hpp \
     src/VaultApp.hpp \
     src/VaultApp_Viewer.hpp \
-    src/core/Settings.hpp \
-    src/core/Utils.hpp \
     src/core/cryptography/CryptoEngine.hpp \
     src/core/cryptography/Cryptography.hpp \
     src/core/cryptography/Error.hpp \
@@ -64,6 +62,7 @@ HEADERS += \
 FORMS += \
     src/forms/PasswordInputDialog.ui \
     src/forms/Settings.ui \
+    src/forms/SettingsDialog.ui \
     src/forms/VaultApp.ui \
     src/forms/VaultApp_Viewer.ui \
     src/forms/VaultCreateNew.ui \

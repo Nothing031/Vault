@@ -6,11 +6,13 @@
 #include <QString>
 #include <QStringList>
 #include <atomic>
+#include <thread>
 #include <QThread>
+#include <QObject>
+#include <QWidget>
 
 #include "src/core/fileinfo/FileInfo.hpp"
 #include "src/core/fileinfo/FileHeader.hpp"
-#include "src/core/Settings.hpp"
 #include "Cryptography.hpp"
 
 #define RED_PREFIX "<font color='red'>"
@@ -155,7 +157,7 @@ void CryptoEngine::AES256EncryptFiles()
     QStringList             finalMessage;
     QMutex                  messageMutex;
 
-    int                     threadCount = Settings::GetInstance().GetThreadCount();
+    int                     threadCount = std::thread::hardware_concurrency();
     std::atomic<int>        failed = 0;
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;
@@ -253,7 +255,7 @@ void CryptoEngine::AES256DecryptFiles()
     QStringList             finalMessage;
     QMutex                  messageMutex;
 
-    int                     threadCount = Settings::GetInstance().GetThreadCount();
+    int                     threadCount = std::thread::hardware_concurrency();
     std::atomic<int>        failed = 0;
     std::atomic<int>        success = 0;
     std::atomic<int>        joinedThread = 0;

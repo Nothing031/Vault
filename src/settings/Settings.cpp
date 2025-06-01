@@ -13,6 +13,8 @@ Settings::Settings(std::shared_ptr<Vault> sp_vault, QWidget *parent)
 
 
 
+
+
 }
 
 Settings::~Settings()
@@ -24,7 +26,7 @@ void Settings::BrowseFolder()
 {
     QString dir = QFileDialog::getExistingDirectory(this, "Select Folder", QDir::rootPath(), QFileDialog::ShowDirsOnly);
     if (!dir.isEmpty() || QDir(dir).exists()){
-        ui->folderPathLabel->setText(dir);
+        //ui->folderPathLabel->setText(dir);
     }
 
 

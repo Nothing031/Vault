@@ -1,5 +1,4 @@
-#ifndef ANIMATEDPROGRESSBAR_HPP
-#define ANIMATEDPROGRESSBAR_HPP
+#pragma once
 
 #include <QObject>
 #include <QProgressBar>
@@ -27,5 +26,3 @@ private:
     QColor m_baseChunkColor;
     QColor m_chunkColor;
 };
-
-#endif // ANIMATEDPROGRESSBAR_HPP

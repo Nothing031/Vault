@@ -24,6 +24,7 @@ private slots:
     void Encrypt();
     void Decrypt();
     void ProcessCryptoEngineMessage(CryptoEngine::Event event, QVariant param);
+    void RefreshVaultFiles();
 
 protected:
     void mousePressEvent(QMouseEvent *event) override;

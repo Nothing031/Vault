@@ -19,7 +19,6 @@
 // mine
 #include "src/core/fileinfo/FileInfo.hpp"
 #include "AES256Settings.hpp"
-#include "ExcludeChecker.hpp"
 #include "src/Manifest.hpp"
 
 
