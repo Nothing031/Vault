@@ -21,10 +21,11 @@ SOURCES += \
     src/core/vault/VaultLoader.cpp \
     src/core/vault/VaultManager.cpp \
     src/main.cpp \
+    src/settings/Settings.cpp \
+    src/widgets/AnimatedProgressBar.cpp \
     src/widgets/FileInfoTooltipWidget.cpp \
     src/widgets/FileListView.cpp \
     src/widgets/Menu.cpp \
-    src/widgets/SettingsWindow.cpp \
     src/widgets/VaultButton.cpp \
     src/widgets/VaultCreateNew.cpp \
     src/widgets/VaultListWidget.cpp \
@@ -49,10 +50,11 @@ HEADERS += \
     src/core/vault/VaultLoader.hpp \
     src/core/vault/VaultManager.hpp \
     src/models/FileListModel.hpp \
+    src/settings/Settings.hpp \
+    src/widgets/AnimatedProgressBar.hpp \
     src/widgets/FileInfoTooltipWidget.hpp \
     src/widgets/FileListView.hpp \
     src/widgets/Menu.hpp \
-    src/widgets/SettingsWindow.hpp \
     src/widgets/VaultButton.hpp \
     src/widgets/VaultCreateNew.hpp \
     src/widgets/VaultListWidget.hpp \
@@ -61,7 +63,7 @@ HEADERS += \
 
 FORMS += \
     src/forms/PasswordInputDialog.ui \
-    src/forms/SettingsWindow.ui \
+    src/forms/Settings.ui \
     src/forms/VaultApp.ui \
     src/forms/VaultApp_Viewer.ui \
     src/forms/VaultCreateNew.ui \

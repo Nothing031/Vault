@@ -15,8 +15,7 @@
 #include <QHBoxLayout>
 #include <QQueue>
 
-#include <src/core/vault/Vault.hpp>
-#include <src/models/FileListModel.hpp>
+#include "src/core/vault/Vault.hpp"
 #include "src/widgets/FileListView.hpp"
 #include "src/core/vault/VaultManager.hpp"
 
@@ -44,6 +43,7 @@ VaultApp_Viewer::VaultApp_Viewer(std::shared_ptr<Vault> pVault)
     ui->titleButton->setText(QUrl(vault->directory.path()).fileName());
     ui->subtitleLabel->setText(vault->directory.path());
     ui->terminalTextBrowser->clear();
+    ui->progressBar->setAnimationProperty(QColor(44, 222, 133, 255), QColor(44, 222, 133, 255), QColor(44, 222, 133, 0), 1500);
 
     vault->aes.Lock();
     ui->unlockButton->setEnabled(vault->aes.IsEnabled());
@@ -94,36 +94,12 @@ void VaultApp_Viewer::UpdateButton(int plains, int ciphers)
     }
 
     if (plains + ciphers == 1){
-        ui->encryptButton->setText("Encrypt file");
-        ui->decryptButton->setText("Decrypt file");
+        ui->encryptButton->setText("Encrypt selected file");
+        ui->decryptButton->setText("Decrypt selected file");
     }else{
-        QString numStr = QString::number(plains + ciphers);
         ui->encryptButton->setText("Encrypt selected files");
         ui->decryptButton->setText("Decrypt selected files");
     }
-
-
-    // if (plains){
-    //     ui->encryptButton->setEnabled(true);
-    //     if (plains == 1)
-    //         ui->encryptButton->setText("Encrypt file");
-    //     else
-    //         ui->encryptButton->setText("Encrypt " + QString::number(plains) + " files");
-    // }else{
-    //     ui->encryptButton->setEnabled(false);
-    //     ui->encryptButton->setText("Encrypt");
-    // }
-
-    // if (ciphers){
-    //     ui->decryptButton->setEnabled(true);
-    //     if (ciphers == 1)
-    //         ui->decryptButton->setText("Decrypt file");
-    //     else
-    //         ui->decryptButton->setText("Decrypt " + QString::number(ciphers) + " files");
-    // }else{
-    //     ui->decryptButton->setEnabled(false);
-    //     ui->decryptButton->setText("Decrypt");
-    // }
 }
 
 void VaultApp_Viewer::OpenSettings()
@@ -280,6 +256,8 @@ void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
         ui->decryptButton->setEnabled(false);
         ui->settingsButton->setEnabled(false);
         ui->fileListView->setEnabled(false);
+        ui->progressBar->setValue(0);
+        ui->progressBar->stopAnimation();
         break;
     case cEvent::END:
         // set ui
@@ -289,6 +267,9 @@ void VaultApp_Viewer::ProcessCryptoEngineMessage(CryptoEngine::Event event, QVar
         ui->decryptButton->setEnabled(true);
         ui->fileListView->setEnabled(true);
         ui->fileListView->update();
+        ui->progressBar->setMaximum(100);
+        ui->progressBar->setValue(100);
+        ui->progressBar->startAnimation();
         break;
     case cEvent::PROGRESS_CURRENT:
         ui->progressBar->setValue(param.toInt());

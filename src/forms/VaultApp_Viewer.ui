@@ -375,7 +375,7 @@ QProgressBar{
         </widget>
        </item>
        <item>
-        <widget class="QProgressBar" name="progressBar">
+        <widget class="AnimatedProgressBar" name="progressBar">
          <property name="value">
           <number>24</number>
          </property>
@@ -501,6 +501,11 @@ li.checked::marker { content: &quot;\2612&quot;; }
    <class>FileListView</class>
    <extends>QListView</extends>
    <header>src/widgets/FileListView.hpp</header>
+  </customwidget>
+  <customwidget>
+   <class>AnimatedProgressBar</class>
+   <extends>QProgressBar</extends>
+   <header>src/widgets/AnimatedProgressBar.hpp</header>
   </customwidget>
  </customwidgets>
  <resources/>
