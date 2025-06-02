@@ -1,24 +1,21 @@
 #pragma once
 
-// qtl
+#include <QDir>
+#include <QFile>
+#include <QMutex>
 #include <QVector>
 #include <QString>
-#include <QFile>
 #include <QFileInfo>
-#include <QDir>
 #include <QException>
-#include <QElapsedTimer>
-#include <QApplication>
 #include <QDirListing>
-#include <QMutex>
+#include <QApplication>
 #include <QDirIterator>
+#include <QElapsedTimer>
 
-//stl
 #include <memory>
 
-// mine
 #include "src/core/fileinfo/FileInfo.hpp"
-#include "AES256Settings.hpp"
+#include "src/core/cryptography/AES256Settings.hpp"
 #include "src/Manifest.hpp"
 
 

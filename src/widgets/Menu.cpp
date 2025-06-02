@@ -1,11 +1,10 @@
 #include "Menu.hpp"
 
 #include <QEvent>
-#include <QPaintEvent>
-#include <QGraphicsDropShadowEffect>
 #include <QPainter>
+#include <QPaintEvent>
 #include <QPainterPath>
-
+#include <QGraphicsDropShadowEffect>
 
 Menu::Menu(QWidget *parent) :
     QMenu(parent)

@@ -1,9 +1,9 @@
 #pragma once
 
-#include <QMainWindow>
-#include <QVector>
-#include <QPoint>
 #include <QPair>
+#include <QPoint>
+#include <QVector>
+#include <QMainWindow>
 
 #include "src/core/vault/Vault.hpp"
 #include "src/widgets/VaultTitle.hpp"

@@ -1,8 +1,10 @@
 #pragma once
 
 #include <QObject>
-#include "Vault.hpp"
+
 #include <memory>
+
+#include "Vault.hpp"
 
 
 class VaultLoader : public QObject{

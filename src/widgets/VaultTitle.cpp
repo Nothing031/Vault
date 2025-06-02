@@ -1,4 +1,5 @@
 #include "VaultTitle.hpp"
+#include "ui_VaultTitle.h"
 
 VaultTitle::VaultTitle(QWidget *parent)
     : QWidget(parent),

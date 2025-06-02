@@ -1,9 +1,8 @@
 #pragma once
+
 #include <QMainWindow>
 
-
-#include <src/core/vault/Vault.hpp>
-#include <src/models/FileListModel.hpp>
+#include "src/core/vault/Vault.hpp"
 #include "src/core/cryptography/CryptoEngine.hpp"
 
 namespace Ui{

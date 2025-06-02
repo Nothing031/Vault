@@ -1,19 +1,18 @@
 #include "VaultApp_Viewer.hpp"
 #include "ui_VaultApp_Viewer.h"
 
-#pragma comment(lib,"dwmapi.lib")
 #include <dwmapi.h>
 #include <Windows.h>
 
-#include <QIcon>
 #include <QUrl>
+#include <QIcon>
+#include <QQueue>
 #include <QThread>
-#include <QMouseEvent>
-#include <QDesktopServices>
 #include <QDialog>
 #include <QLineEdit>
 #include <QHBoxLayout>
-#include <QQueue>
+#include <QMouseEvent>
+#include <QDesktopServices>
 
 #include "src/core/vault/Vault.hpp"
 #include "src/widgets/FileListView.hpp"

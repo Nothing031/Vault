@@ -1,14 +1,15 @@
 #pragma once
 
+#include <QLabel>
+#include <QLabel>
 #include <QObject>
 #include <QWidget>
-#include <QLabel>
-#include <QLabel>
+#include <QString>
+#include <QVector>
 #include <QTextEdit>
 #include <QVBoxLayout>
 #include <QPushButton>
-#include <QString>
-#include <QVector>
+
 #include "src/core/vault/Vault.hpp"
 
 class VaultButton : public QPushButton {

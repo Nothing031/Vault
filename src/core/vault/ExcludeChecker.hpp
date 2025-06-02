@@ -1,9 +1,9 @@
 #pragma once
 
+#include <string>
+#include <QVector>
 #include <QStringList>
 #include <QJsonObject>
-#include <QVector>
-#include <string>
 
 #include <filesystem>
 

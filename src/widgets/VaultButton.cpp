@@ -1,17 +1,16 @@
 #include "VaultButton.hpp"
 
-#include <QContextMenuEvent>
-#include <QGraphicsDropShadowEffect>
 #include <QMenu>
-#include <QPainter>
 #include <QFont>
 #include <QRect>
+#include <QTimer>
+#include <QPainter>
 #include <QSpacerItem>
 #include <QVBoxLayout>
-#include <QTimer>
 #include <QDesktopServices>
+#include <QContextMenuEvent>
+#include <QGraphicsDropShadowEffect>
 
-#include "WrappedLabel.hpp"
 #include "Menu.hpp"
 
 VaultButton::VaultButton(std::shared_ptr<Vault> s_vault, QWidget* parent)

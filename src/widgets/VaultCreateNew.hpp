@@ -2,8 +2,6 @@
 
 #include <QWidget>
 
-#include "ui_VaultCreateNew.h"
-
 namespace Ui{
 class VaultCreateNew;
 }
@@ -14,9 +12,8 @@ class VaultCreateNew : public QWidget
 public:
     enum UiOption{
         Path = 0x01,
-        Password = 0x02,
-        EncryptionOption = 0x04,
-        Init = 0x08
+        EncryptionOption = 0x02,
+        Init = 0x04
     };
 
     enum VaultCreationMode{
@@ -34,8 +31,6 @@ private slots:
     void EnableEncryptionSetting(Qt::CheckState);
 
     void UpdatePathCondition(const QString &arg1);
-
-    void UpdatePasswordCondition();
 
     void BrowseFolder();
 

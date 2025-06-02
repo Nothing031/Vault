@@ -1,23 +1,22 @@
 #include <QApplication>
-#include <QWidget>
-#include <QDebug>
 #include <QMetaType>
 
 #include <Windows.h>
+#include <memory>
+
+#include "src/core/vault/Vault.hpp"
 #include "src/VaultApp.hpp"
 
-#include <memory>
-#include <src/core/vault/Vault.hpp>
-
-#ifdef QT_DEBUG // memory leak check
+// Memory leak check
+#ifdef QT_DEBUG
 #define _CRTDBG_MAP_ALLOC
 #include <crtdbg.h>
-// #define new new(_NORMAL_BLOCK, __FILE__, __LINE__)
 #endif
 
 int main(int argc, char *argv[])
 {
-#ifdef QT_DEBUG // memory leak check
+// memory leak check
+#ifdef QT_DEBUG
     _CrtSetDbgFlag ( _CRTDBG_ALLOC_MEM_DF | _CRTDBG_LEAK_CHECK_DF );
 #endif
 

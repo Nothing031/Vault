@@ -25,8 +25,6 @@ void VaultLoader::LoadVault(std::shared_ptr<Vault> vault)
         file.close();
         QJsonDocument jDoc = QJsonDocument::fromJson(data);
         QJsonObject jObj = jDoc.object();
-
-        QJsonObject excludeObj = jObj["ExcludeSettings"].toObject();
         QJsonObject aesObj = jObj["EncryptionSettings"].toObject();
         vault->appVersion = jObj["AppVersion"].toString("UNKNOWN");
         vault->saveFormatVersion = jObj["FormatVersion"].toString("UNKNOWN");

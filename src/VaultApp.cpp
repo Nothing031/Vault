@@ -1,21 +1,18 @@
 #include "VaultApp.hpp"
 #include "ui_VaultApp.h"
 
-#include <QCloseEvent>
+#include <QTimer>
 #include <QObject>
 #include <QVector>
-#include <QListWidgetItem>
 #include <QAction>
+#include <QCloseEvent>
 #include <QFileDialog>
-#include <QTimer>
+#include <QListWidgetItem>
 
-#pragma comment(lib,"dwmapi.lib")
-#pragma comment(lib, "user32.lib")
 #include <dwmapi.h>
 #include <Windows.h>
 
 #include "src/VaultApp_Viewer.hpp"
-
 #include "src/core/vault/VaultManager.hpp"
 #include "src/widgets/VaultTitle.hpp"
 #include "src/widgets/VaultCreateNew.hpp"
@@ -27,7 +24,7 @@ VaultApp::VaultApp(QWidget *parent)
     vaultCreateNewWidget(new VaultCreateNew(this))
 {
     ui->setupUi(this);
-    resize(900, 550);
+    resize(900, 600);
     setWindowTitle("Vault");
 
     HWND hWnd = (HWND)winId();

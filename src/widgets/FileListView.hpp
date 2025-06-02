@@ -1,10 +1,10 @@
 #pragma once
 
-#include <QListView>
 #include <QPair>
+#include <QListView>
+
 #include "src/core/vault/Vault.hpp"
 #include "src/models/FileListModel.hpp"
-
 
 class FileListView : public QListView
 {

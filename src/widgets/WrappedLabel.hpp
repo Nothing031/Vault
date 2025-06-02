@@ -1,9 +1,12 @@
 #pragma once
 
 #include <QLabel>
+#include <QPainter>
 #include <QTextBlock>
 #include <QTextLayout>
-#include <QPainter>
+
+#define NO_WRAPPEDLABEL
+#ifndef NO_WRAPPEDLABEL
 
 class WrappedLabel : public QLabel {
 public:
@@ -19,3 +22,5 @@ public:
 private:
 
 };
+
+#endif

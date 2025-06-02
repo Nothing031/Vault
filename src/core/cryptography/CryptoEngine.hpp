@@ -1,13 +1,14 @@
 #pragma once
 
+#include <QMutex>
 #include <QObject>
 #include <QString>
 #include <QVector>
 #include <QStringList>
 
-#include "src/core/vault/Vault.hpp"
 #include "Error.hpp"
-#include "src/core/vault/AES256Settings.hpp"
+#include "src/core/fileinfo/FileInfo.hpp"
+#include "src/core/cryptography/AES256Settings.hpp"
 
 class CryptoEngine : public QObject{
     Q_OBJECT

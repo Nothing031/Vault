@@ -1,10 +1,11 @@
 #include "VaultManager.hpp"
 
+#include <openssl/rand.h>
+
 #include "src/core/cryptography/Cryptography.hpp"
 #include "VaultLoader.hpp"
 #include "src/core/fileinfo/FileHeader.hpp"
 
-#include <openssl/rand.h>
 
 VaultManager VaultManager::instance;
 
@@ -29,6 +30,12 @@ std::shared_ptr<Vault> VaultManager::GetVault(int index)
         return vaults[index];
     else
         return nullptr;
+}
+
+void VaultManager::ChangeVaultPath(std::shared_ptr<Vault> vault, const QString &path)
+{
+    qDebug() << "yup";
+
 }
 
 void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const QString &password)
@@ -59,7 +66,7 @@ void VaultManager::CreateVault(const bool& aesEnabled, const QString &dir, const
     loader.SaveVault(vault);
     VaultLoader::Event error = loader.GetLastError();
     if (error == VaultLoader::FAILED){
-        throw std::exception("Failed to create vault");
+        throw std::runtime_error("Failed to create vault");
     }
 
     vaults.append(vault);

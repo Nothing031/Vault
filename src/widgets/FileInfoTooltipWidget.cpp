@@ -9,7 +9,7 @@
 
 #include "src/core/fileinfo/FileInfoLoader.hpp"
 
-// this may prints "QWindowsWindow::setGeometry: Unable to set geometry" error
+// this may prints "QWindowsWindow::setGeometry: Unable to set geometry" warning
 // you can fix this with set minimumHeight enough
 // but it makes ui horrible
 // let me know when you find a way to fix this shit

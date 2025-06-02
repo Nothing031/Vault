@@ -1,10 +1,11 @@
-#include "FilelistView.hpp"
+#include "FileListView.hpp"
 
-#include <QListView>
 #include <QEvent>
-#include <QMouseEvent>
 #include <QToolTip>
+#include <QListView>
+#include <QMouseEvent>
 #include <QDesktopServices>
+
 #include "src/core/fileinfo/FileInfo.hpp"
 #include "src/widgets/FileInfoTooltipWidget.hpp"
 #include "Menu.hpp"

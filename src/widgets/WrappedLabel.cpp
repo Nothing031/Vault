@@ -7,6 +7,8 @@
 #include <QPainter>
 #include <QStyle>
 
+#ifndef NO_WRAPPEDLABEL
+
 void WrappedLabel::paintEvent(QPaintEvent *event)
 {
     QPainter painter(this);
@@ -76,3 +78,4 @@ QSize WrappedLabel::minimumSizeHint() const
     return sizeHint();
 }
 
+#endif

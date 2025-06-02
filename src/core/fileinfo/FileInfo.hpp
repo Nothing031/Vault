@@ -2,6 +2,7 @@
 
 #include <QString>
 #include <QMetaType>
+
 #include <memory>
 
 struct FileInfo{

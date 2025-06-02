@@ -1,8 +1,7 @@
 #pragma once
 
-#include <QListWidget>
 #include <QObject>
-
+#include <QListWidget>
 
 #include "src/core/vault/Vault.hpp"
 #include "src/core/vault/VaultManager.hpp"

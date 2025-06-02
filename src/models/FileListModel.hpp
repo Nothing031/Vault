@@ -1,12 +1,12 @@
 #pragma once
 
-#include <QObject>
-#include <QAbstractListModel>
-#include <QVector>
+#include <QFile>
 #include <QBrush>
 #include <QColor>
-#include <QFile>
+#include <QObject>
+#include <QVector>
 #include <QFileInfo>
+#include <QAbstractListModel>
 
 #include "src/core/vault/Vault.hpp"
 #include "src/core/fileinfo/FileInfo.hpp"

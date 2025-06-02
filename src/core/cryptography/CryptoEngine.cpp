@@ -1,15 +1,16 @@
 #include "src/core/cryptography/CryptoEngine.hpp"
 
-#include <QVariant>
 #include <QMutex>
 #include <QQueue>
 #include <QString>
-#include <QStringList>
-#include <atomic>
-#include <thread>
 #include <QThread>
 #include <QObject>
 #include <QWidget>
+#include <QVariant>
+#include <QStringList>
+
+#include <atomic>
+#include <thread>
 
 #include "src/core/fileinfo/FileInfo.hpp"
 #include "src/core/fileinfo/FileHeader.hpp"

@@ -1,16 +1,18 @@
 #pragma once
 
-#include <QObject>
-#include <QCryptographicHash>
-#include <QElapsedTimer>
-#include <QMutex>
-#include <QFile>
 #include <QDir>
+#include <QFile>
+#include <QQueue>
+#include <QMutex>
+#include <QObject>
 #include <QThread>
 #include <QByteArray>
-#include <QQueue>
+#include <QElapsedTimer>
+#include <QCryptographicHash>
+
 #include <openssl/evp.h>
 #include <openssl/aes.h>
+
 #include "Error.hpp"
 
 namespace Cryptography

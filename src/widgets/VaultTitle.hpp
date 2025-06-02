@@ -2,8 +2,6 @@
 
 #include <QWidget>
 
-#include "ui_VaultTitle.h"
-
 namespace Ui{
 class VaultTitle;
 }

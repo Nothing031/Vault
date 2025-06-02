@@ -9,7 +9,7 @@
 #define EXTENSION ".enc"
 
 #include "FileInfo.hpp"
-#include "src/core/vault/AES256Settings.hpp"
+#include "src/core/cryptography/AES256Settings.hpp"
 
 struct FileHeader{
     struct Sizes{
@@ -46,6 +46,3 @@ public:
     QByteArray Serialize() const;
     void SetData(const AES256Settings& aes);
 };
-
-
-

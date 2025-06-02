@@ -1,10 +1,10 @@
 #pragma once
 
+#include <QLabel>
 #include <QWidget>
 #include <QHBoxLayout>
 
 #include "src/core/fileinfo/FileHeader.hpp"
-#include "WrappedLabel.hpp"
 
 class FileInfoTooltipWidget : public QWidget
 {

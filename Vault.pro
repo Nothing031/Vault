@@ -1,4 +1,5 @@
 QT       += core gui
+QT      += statemachine
 
 greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 
@@ -11,21 +12,22 @@ CONFIG += c++17
 SOURCES += \
     src/VaultApp.cpp \
     src/VaultApp_Viewer.cpp \
+    src/core/cryptography/AES256Settings.cpp \
     src/core/cryptography/CryptoEngine.cpp \
     src/core/cryptography/Error.cpp \
     src/core/fileinfo/FileHeader.cpp \
     src/core/fileinfo/FileInfoLoader.cpp \
-    src/core/vault/AES256Settings.cpp \
     src/core/vault/ExcludeChecker.cpp \
     src/core/vault/Vault.cpp \
     src/core/vault/VaultLoader.cpp \
     src/core/vault/VaultManager.cpp \
     src/main.cpp \
-    src/settings/Settings.cpp \
     src/widgets/AnimatedProgressBar.cpp \
     src/widgets/FileInfoTooltipWidget.cpp \
     src/widgets/FileListView.cpp \
     src/widgets/Menu.cpp \
+    src/widgets/PasswordWidget.cpp \
+    src/widgets/SettingsDialog.cpp \
     src/widgets/VaultButton.cpp \
     src/widgets/VaultCreateNew.cpp \
     src/widgets/VaultListWidget.cpp \
@@ -36,23 +38,24 @@ HEADERS += \
     src/Manifest.hpp \
     src/VaultApp.hpp \
     src/VaultApp_Viewer.hpp \
+    src/core/cryptography/AES256Settings.hpp \
     src/core/cryptography/CryptoEngine.hpp \
     src/core/cryptography/Cryptography.hpp \
     src/core/cryptography/Error.hpp \
     src/core/fileinfo/FileHeader.hpp \
     src/core/fileinfo/FileInfo.hpp \
     src/core/fileinfo/FileInfoLoader.hpp \
-    src/core/vault/AES256Settings.hpp \
     src/core/vault/ExcludeChecker.hpp \
     src/core/vault/Vault.hpp \
     src/core/vault/VaultLoader.hpp \
     src/core/vault/VaultManager.hpp \
     src/models/FileListModel.hpp \
-    src/settings/Settings.hpp \
     src/widgets/AnimatedProgressBar.hpp \
     src/widgets/FileInfoTooltipWidget.hpp \
     src/widgets/FileListView.hpp \
     src/widgets/Menu.hpp \
+    src/widgets/PasswordWidget.hpp \
+    src/widgets/SettingsDialog.hpp \
     src/widgets/VaultButton.hpp \
     src/widgets/VaultCreateNew.hpp \
     src/widgets/VaultListWidget.hpp \
@@ -61,7 +64,7 @@ HEADERS += \
 
 FORMS += \
     src/forms/PasswordInputDialog.ui \
-    src/forms/Settings.ui \
+    src/forms/PasswordWidget.ui \
     src/forms/SettingsDialog.ui \
     src/forms/VaultApp.ui \
     src/forms/VaultApp_Viewer.ui \
@@ -70,6 +73,9 @@ FORMS += \
 
 win32:CONFIG(release, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MT/ -llibcrypto -llibssl
 else:win32:CONFIG(debug, debug|release): LIBS += -LC:/Library/openssl/3.4.1/lib/VC/x64/MTd/ -llibcrypto -llibssl
+
+LIBS += -luser32 \
+        -ldwmapi
 
 INCLUDEPATH += C:/Library/openssl/3.4.1/include
 DEPENDPATH += C:/Library/openssl/3.4.1/include
