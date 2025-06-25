@@ -1,3 +1,5 @@
+# Warning
+This version is not finished and deprecated. please check next version
 # Vault
 File based AES-256 encryption gui program
 
